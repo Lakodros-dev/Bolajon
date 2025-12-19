@@ -63,24 +63,24 @@ async function seed() {
         await Reward.deleteMany({});
 
         // Create admin user
-        const adminPassword = await bcrypt.hash('admin123', 10);
+        const adminPassword = await bcrypt.hash('Lakodros01', 10);
         await User.create({
             name: 'Admin',
             phone: '+998900000000',
             password: adminPassword,
             role: 'admin'
         });
-        console.log('✅ Admin: +998900000000 / admin123');
+        console.log('✅ Admin: +998900000000 / Lakodros01');
 
         // Create sample teacher
-        const teacherPassword = await bcrypt.hash('teacher123', 10);
+        const teacherPassword = await bcrypt.hash('Lakodros01', 10);
         await User.create({
             name: 'Aziza Karimova',
             phone: '+998901234567',
             password: teacherPassword,
             role: 'teacher'
         });
-        console.log('✅ Teacher: +998901234567 / teacher123');
+        console.log('✅ Teacher: +998901234567 / Lakodros01');
 
         // Create sample lessons
         const lessons = [
@@ -110,8 +110,8 @@ async function seed() {
 
         console.log('\n🎉 Seed completed successfully!');
         console.log('\nLogin credentials:');
-        console.log('  Admin: +998900000000 / admin123');
-        console.log('  Teacher: +998901234567 / teacher123');
+        console.log('  Admin: +998900000000 / Lakodros01');
+        console.log('  Teacher: +998901234567 / Lakodros01');
 
         process.exit(0);
     } catch (error) {
