@@ -1,5 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+    // Allow large file uploads (500MB for videos)
+    experimental: {
+        serverActions: {
+            bodySizeLimit: '500mb',
+        },
+    },
+
     // Image optimization
     images: {
         remotePatterns: [
@@ -20,10 +27,7 @@ const nextConfig = {
         removeConsole: process.env.NODE_ENV === 'production',
     },
 
-    // Experimental features for faster builds
-    experimental: {
-        optimizePackageImports: ['@/components', '@/lib'],
-    },
+
 
     // Enable React strict mode for better performance
     reactStrictMode: false,
