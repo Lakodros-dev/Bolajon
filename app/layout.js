@@ -14,6 +14,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="uz">
       <head>
+        <meta name="google-site-verification" content="PqwMp9OW5NIa0nK4by80Gw62Tg2LIAKKqVLsrfQqrWQ" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="preload" href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap" as="style" />
