@@ -1,0 +1,22 @@
+{
+  "name": "bolajon-uz",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "bootstrap": "^5.3.8",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.0.1",
+    "next": "14.2.35",
+    "nprogress": "^0.2.0",
+    "react": "^18",
+    "react-bootstrap": "^2.10.10",
+    "react-dom": "^18"
+  }
+}

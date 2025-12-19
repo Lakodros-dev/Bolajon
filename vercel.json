@@ -1,0 +1,12 @@
+{
+    "buildCommand": "npm run build",
+    "outputDirectory": ".next",
+    "framework": "nextjs",
+    "regions": [
+        "fra1"
+    ],
+    "env": {
+        "MONGODB_URI": "@mongodb_uri",
+        "JWT_SECRET": "@jwt_secret"
+    }
+}

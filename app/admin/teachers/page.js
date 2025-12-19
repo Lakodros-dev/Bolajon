@@ -1,0 +1,202 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useAuth } from '@/context/AuthContext';
+import Link from 'next/link';
+import ConfirmModal from '@/components/ConfirmModal';
+
+export default function TeachersPage() {
+    const { getAuthHeader } = useAuth();
+    const [teachers, setTeachers] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [deleteModal, setDeleteModal] = useState({ show: false, teacher: null });
+    const [deleting, setDeleting] = useState(false);
+
+    useEffect(() => {
+        fetchTeachers();
+    }, []);
+
+    const fetchTeachers = async () => {
+        try {
+            const res = await fetch('/api/teachers', { headers: getAuthHeader() });
+            const data = await res.json();
+            if (data.success) {
+                setTeachers(data.teachers || []);
+            }
+        } catch (error) {
+            console.error('Failed to fetch teachers:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleToggleStatus = async (teacher) => {
+        try {
+            const res = await fetch(`/api/teachers/${teacher._id}`, {
+                method: 'PUT',
+                headers: getAuthHeader(),
+                body: JSON.stringify({ isActive: !teacher.isActive })
+            });
+            const data = await res.json();
+            if (data.success) {
+                setTeachers(teachers.map(t =>
+                    t._id === teacher._id ? { ...t, isActive: !t.isActive } : t
+                ));
+            }
+        } catch (error) {
+            console.error('Failed to update teacher:', error);
+        }
+    };
+
+    const handleDelete = async () => {
+        const teacher = deleteModal.teacher;
+        if (!teacher) return;
+
+        setDeleting(true);
+        try {
+            const res = await fetch(`/api/teachers/${teacher._id}`, {
+                method: 'DELETE',
+                headers: getAuthHeader()
+            });
+            const data = await res.json();
+            if (data.success) {
+                setTeachers(teachers.filter(t => t._id !== teacher._id));
+            }
+        } catch (error) {
+            console.error('Failed to delete teacher:', error);
+        } finally {
+            setDeleting(false);
+            setDeleteModal({ show: false, teacher: null });
+        }
+    };
+
+    const filteredTeachers = teachers.filter(t =>
+        t.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (t.phone || '').includes(searchQuery)
+    );
+
+    return (
+        <div>
+            <div className="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 className="h3 fw-bold mb-1">O'qituvchilar</h1>
+                    <p className="text-muted mb-0">{teachers.length} ta o'qituvchi</p>
+                </div>
+            </div>
+
+            {/* Search */}
+            <div className="card border-0 rounded-4 shadow-sm mb-4">
+                <div className="card-body p-3">
+                    <div className="position-relative">
+                        <span className="material-symbols-outlined position-absolute top-50 start-0 translate-middle-y ms-3 text-muted">search</span>
+                        <input
+                            type="text"
+                            className="form-control rounded-3 ps-5 border-0 bg-light"
+                            placeholder="O'qituvchi qidirish..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                    </div>
+                </div>
+            </div>
+
+            {/* Teachers Table */}
+            <div className="card border-0 rounded-4 shadow-sm">
+                <div className="card-body p-0">
+                    {loading ? (
+                        <div className="text-center py-5">
+                            <div className="spinner-border text-primary"></div>
+                        </div>
+                    ) : filteredTeachers.length === 0 ? (
+                        <div className="text-center py-5 text-muted">
+                            <span className="material-symbols-outlined mb-2" style={{ fontSize: '48px' }}>person_off</span>
+                            <p>O'qituvchi topilmadi</p>
+                        </div>
+                    ) : (
+                        <div className="table-responsive">
+                            <table className="table table-hover mb-0">
+                                <thead className="bg-light">
+                                    <tr>
+                                        <th className="border-0 ps-4 py-3">O'qituvchi</th>
+                                        <th className="border-0 py-3">Telefon</th>
+                                        <th className="border-0 py-3">O'quvchilar</th>
+                                        <th className="border-0 py-3">Holat</th>
+                                        <th className="border-0 py-3">Ro'yxatdan</th>
+                                        <th className="border-0 pe-4 py-3 text-end">Amallar</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {filteredTeachers.map((teacher) => (
+                                        <tr key={teacher._id}>
+                                            <td className="ps-4 py-3">
+                                                <div className="d-flex align-items-center gap-3">
+                                                    <div
+                                                        className="rounded-circle"
+                                                        style={{
+                                                            width: '40px',
+                                                            height: '40px',
+                                                            backgroundImage: `url('https://ui-avatars.com/api/?name=${encodeURIComponent(teacher.name)}&background=2b8cee&color=fff')`,
+                                                            backgroundSize: 'cover'
+                                                        }}
+                                                    />
+                                                    <div>
+                                                        <p className="fw-semibold mb-0">{teacher.name}</p>
+                                                        <p className="small text-muted mb-0">{teacher.phone || '—'}</p>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="py-3">{teacher.phone}</td>
+                                            <td className="py-3">
+                                                <span className="badge bg-primary rounded-pill">{teacher.studentCount || 0}</span>
+                                            </td>
+                                            <td className="py-3">
+                                                <span className={`badge rounded-pill ${teacher.isActive ? 'bg-success' : 'bg-secondary'}`}>
+                                                    {teacher.isActive ? 'Faol' : 'Nofaol'}
+                                                </span>
+                                            </td>
+                                            <td className="py-3 text-muted small">
+                                                {new Date(teacher.createdAt).toLocaleDateString('uz-UZ')}
+                                            </td>
+                                            <td className="pe-4 py-3 text-end">
+                                                <div className="d-flex gap-2 justify-content-end">
+                                                    <button
+                                                        onClick={() => handleToggleStatus(teacher)}
+                                                        className={`btn btn-sm rounded-2 ${teacher.isActive ? 'btn-outline-warning' : 'btn-outline-success'}`}
+                                                        title={teacher.isActive ? 'Bloklash' : 'Faollashtirish'}
+                                                    >
+                                                        <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
+                                                            {teacher.isActive ? 'block' : 'check_circle'}
+                                                        </span>
+                                                    </button>
+                                                    <button
+                                                        onClick={() => setDeleteModal({ show: true, teacher })}
+                                                        className="btn btn-sm btn-outline-danger rounded-2"
+                                                        title="O'chirish"
+                                                    >
+                                                        <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>delete</span>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            <ConfirmModal
+                show={deleteModal.show}
+                onClose={() => setDeleteModal({ show: false, teacher: null })}
+                onConfirm={handleDelete}
+                title="O'qituvchini o'chirish"
+                message={`${deleteModal.teacher?.name} ni o'chirmoqchimisiz? Bu barcha o'quvchilarini ham o'chiradi.`}
+                confirmText="O'chirish"
+                type="danger"
+                loading={deleting}
+            />
+        </div>
+    );
+}
