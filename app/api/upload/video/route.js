@@ -5,7 +5,7 @@
 import { writeFile, mkdir } from 'fs/promises';
 import { existsSync } from 'fs';
 import path from 'path';
-import { verifyAuth } from '@/middleware/authMiddleware';
+import { authorize } from '@/middleware/authMiddleware';
 import { successResponse, errorResponse, serverError } from '@/lib/apiResponse';
 
 // Video upload directory
@@ -18,7 +18,7 @@ const MAX_SIZE = 500 * 1024 * 1024; // 500MB
 export async function POST(request) {
     try {
         // Auth check - only admin can upload
-        const auth = await verifyAuth(request, ['admin']);
+        const auth = await authorize(request, ['admin']);
         if (!auth.success) {
             return errorResponse(auth.error, 401);
         }
