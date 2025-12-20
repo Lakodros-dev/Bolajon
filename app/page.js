@@ -69,61 +69,86 @@ export default function HomePage() {
           <div className="row align-items-center g-4 g-lg-5">
             {/* Content */}
             <div className="col-12 col-lg-6 text-center text-lg-start">
-              <div className="d-inline-flex align-items-center gap-1 px-3 py-1 rounded-pill mb-3" style={{ backgroundColor: 'rgba(43, 140, 238, 0.1)' }}>
-                <span className="material-symbols-outlined text-primary" style={{ fontSize: '18px' }}>school</span>
-                <span className="small fw-semibold text-primary">#1 Ta'lim Platformasi</span>
+              <div className="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-pill mb-3" style={{ backgroundColor: 'rgba(43, 140, 238, 0.1)' }}>
+                <span className="material-symbols-outlined text-primary" style={{ fontSize: '20px' }}>waving_hand</span>
+                <span className="fw-semibold text-primary">Xush kelibsiz!</span>
               </div>
 
-              <h1 className="display-5 display-lg-4 fw-bold mb-3">
-                Bolalar uchun ingliz tili{' '}
-                <span className="text-primary">Endi qiziqarli!</span>
+              <h1 className="display-5 fw-bold mb-3" style={{ lineHeight: 1.2 }}>
+                Bolalar uchun <br className="d-none d-lg-block" />
+                <span style={{
+                  background: 'linear-gradient(135deg, #2b8cee 0%, #7c3aed 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent'
+                }}>Ingliz tili platformasi</span>
               </h1>
 
               <p className="text-muted mb-4 fs-5">
-                5-9 yoshli bolalarga ingliz tilini o'yinlar va interaktiv hikoyalar orqali o'rgatish uchun eng qiziqarli platforma.
+                5-9 yoshli bolalarga ingliz tilini o'yinlar, qo'shiqlar va interaktiv video darslar orqali o'rgatamiz. Bolangiz o'ynab-kulgi o'rganadi!
               </p>
 
               {/* CTA Buttons */}
               <div className="d-flex flex-column flex-sm-row gap-3 justify-content-center justify-content-lg-start">
                 <Link href="/register" className="btn btn-primary btn-lg rounded-4 py-3 px-4 fw-bold d-flex align-items-center justify-content-center gap-2 shadow">
-                  <span className="material-symbols-outlined">person_add</span>
-                  Ro'yxatdan o'tish
+                  <span className="material-symbols-outlined">rocket_launch</span>
+                  Bepul boshlash
                 </Link>
                 <Link href="/login" className="btn btn-light btn-lg rounded-4 py-3 px-4 fw-bold d-flex align-items-center justify-content-center gap-2 border">
-                  <span className="material-symbols-outlined text-primary">play_circle</span>
+                  <span className="material-symbols-outlined text-primary">login</span>
                   Kirish
                 </Link>
               </div>
 
-              {/* Stats */}
-              <div className="d-flex gap-4 mt-4 justify-content-center justify-content-lg-start">
-                <div>
-                  <h3 className="h4 fw-bold text-primary mb-0">500+</h3>
-                  <p className="small text-muted mb-0">O'quvchilar</p>
+              {/* Trust badges */}
+              <div className="d-flex align-items-center gap-3 mt-4 justify-content-center justify-content-lg-start">
+                <div className="d-flex align-items-center gap-2 px-3 py-2 rounded-3" style={{ backgroundColor: '#dcfce7' }}>
+                  <span className="material-symbols-outlined text-success" style={{ fontSize: '20px' }}>verified</span>
+                  <span className="small fw-medium text-success">7 kun bepul</span>
                 </div>
-                <div>
-                  <h3 className="h4 fw-bold text-primary mb-0">50+</h3>
-                  <p className="small text-muted mb-0">Video darslar</p>
-                </div>
-                <div>
-                  <h3 className="h4 fw-bold text-primary mb-0">100+</h3>
-                  <p className="small text-muted mb-0">O'qituvchilar</p>
+                <div className="d-flex align-items-center gap-2 px-3 py-2 rounded-3" style={{ backgroundColor: '#fef3c7' }}>
+                  <span className="material-symbols-outlined text-warning" style={{ fontSize: '20px' }}>star</span>
+                  <span className="small fw-medium" style={{ color: '#b45309' }}>500+ o'quvchi</span>
                 </div>
               </div>
             </div>
 
             {/* Hero Image */}
             <div className="col-12 col-lg-6">
-              <div
-                className="rounded-5 shadow-lg mx-auto"
-                style={{
-                  maxWidth: '500px',
-                  aspectRatio: '4/3',
-                  backgroundImage: 'url("https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800")',
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center'
-                }}
-              />
+              <div className="position-relative">
+                <div
+                  className="rounded-5 shadow-lg mx-auto overflow-hidden"
+                  style={{
+                    maxWidth: '480px',
+                    aspectRatio: '4/3',
+                    backgroundImage: 'url("https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800")',
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center'
+                  }}
+                />
+                {/* Floating cards */}
+                <div
+                  className="position-absolute bg-white rounded-4 shadow-lg p-3 d-none d-lg-flex align-items-center gap-2"
+                  style={{ bottom: '-20px', left: '-30px' }}
+                >
+                  <div className="rounded-circle bg-success d-flex align-items-center justify-content-center" style={{ width: '40px', height: '40px' }}>
+                    <span className="material-symbols-outlined text-white" style={{ fontSize: '20px' }}>play_arrow</span>
+                  </div>
+                  <div>
+                    <p className="fw-bold mb-0 small">50+ video darslar</p>
+                    <p className="text-muted mb-0" style={{ fontSize: '12px' }}>Professional o'qituvchilar</p>
+                  </div>
+                </div>
+                <div
+                  className="position-absolute bg-white rounded-4 shadow-lg p-3 d-none d-lg-flex align-items-center gap-2"
+                  style={{ top: '20px', right: '-20px' }}
+                >
+                  <span style={{ fontSize: '28px' }}>🎮</span>
+                  <div>
+                    <p className="fw-bold mb-0 small">O'yin orqali</p>
+                    <p className="text-muted mb-0" style={{ fontSize: '12px' }}>o'rganish</p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -204,11 +229,68 @@ export default function HomePage() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-white border-top px-3 px-lg-5 py-4">
+      <footer className="bg-dark text-white px-3 px-lg-5 py-5">
         <div className="landing-container">
-          <div className="d-flex flex-column flex-md-row align-items-center justify-content-between gap-3">
-            <Image src="/logo.png" alt="Bolajon.uz" width={120} height={40} style={{ objectFit: 'contain' }} />
-            <p className="text-muted small mb-0">© 2024 Bolajon.uz. Barcha huquqlar himoyalangan.</p>
+          <div className="row g-4 mb-4">
+            {/* About */}
+            <div className="col-12 col-md-4">
+              <Image src="/logo.png" alt="Bolajon.uz" width={120} height={40} style={{ objectFit: 'contain', filter: 'brightness(0) invert(1)' }} />
+              <p className="text-white-50 mt-3 small">
+                Bolajon.uz - O'zbekistondagi bolalar uchun ingliz tili o'rgatish platformasi.
+                Interaktiv darslar, qiziqarli o'yinlar va professional o'qituvchilar bilan bolangizning kelajagiga sarmoya qiling.
+              </p>
+            </div>
+
+            {/* Quick Links */}
+            <div className="col-6 col-md-2">
+              <h6 className="fw-bold mb-3">Sahifalar</h6>
+              <ul className="list-unstyled">
+                <li className="mb-2"><Link href="/" className="text-white-50 text-decoration-none small">Bosh sahifa</Link></li>
+                <li className="mb-2"><Link href="#features" className="text-white-50 text-decoration-none small">Imkoniyatlar</Link></li>
+                <li className="mb-2"><Link href="#how-it-works" className="text-white-50 text-decoration-none small">Qanday ishlaydi</Link></li>
+                <li className="mb-2"><Link href="/login" className="text-white-50 text-decoration-none small">Kirish</Link></li>
+              </ul>
+            </div>
+
+            {/* Contact */}
+            <div className="col-6 col-md-3">
+              <h6 className="fw-bold mb-3">Bog'lanish</h6>
+              <ul className="list-unstyled">
+                <li className="mb-2 d-flex align-items-center gap-2">
+                  <span className="material-symbols-outlined text-white-50" style={{ fontSize: '18px' }}>language</span>
+                  <span className="text-white-50 small">bolajoon.uz</span>
+                </li>
+                <li className="mb-2 d-flex align-items-center gap-2">
+                  <span className="material-symbols-outlined text-white-50" style={{ fontSize: '18px' }}>location_on</span>
+                  <span className="text-white-50 small">O'zbekiston</span>
+                </li>
+              </ul>
+            </div>
+
+            {/* Developer */}
+            <div className="col-12 col-md-3">
+              <h6 className="fw-bold mb-3">Ishlab chiquvchi</h6>
+              <div className="d-flex align-items-center gap-3 p-3 rounded-3" style={{ backgroundColor: 'rgba(255,255,255,0.1)' }}>
+                <div className="rounded-circle bg-primary d-flex align-items-center justify-content-center" style={{ width: '40px', height: '40px' }}>
+                  <span className="material-symbols-outlined text-white" style={{ fontSize: '20px' }}>code</span>
+                </div>
+                <div>
+                  <p className="fw-semibold mb-0 small">Lakodros</p>
+                  <p className="text-white-50 mb-0" style={{ fontSize: '12px' }}>Prox Company</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom */}
+          <div className="border-top border-secondary pt-4">
+            <div className="d-flex flex-column flex-md-row align-items-center justify-content-between gap-2">
+              <p className="text-white-50 small mb-0">© 2024 Bolajon.uz. Barcha huquqlar himoyalangan.</p>
+              <p className="text-white-50 small mb-0">
+                <span className="material-symbols-outlined align-middle me-1" style={{ fontSize: '14px' }}>favorite</span>
+                O'zbekistonda ishlab chiqilgan
+              </p>
+            </div>
           </div>
         </div>
       </footer>
