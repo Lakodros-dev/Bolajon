@@ -13,7 +13,8 @@ export default function Sidebar() {
         { href: '/dashboard', icon: 'home', label: 'Asosiy' },
         { href: '/dashboard/lessons', icon: 'smart_display', label: 'Darslar' },
         { href: '/dashboard/games', icon: 'sports_esports', label: "O'yinlar" },
-        { href: '/dashboard/students', icon: 'school', label: "O'quvchilar" },
+        { href: '/dashboard/students', icon: 'school', label: "O'quvchilarim" },
+        { href: '/dashboard/leaderboard', icon: 'emoji_events', label: 'Leaderboard' },
         { href: '/dashboard/statistics', icon: 'leaderboard', label: 'Natijalar' },
         { href: '/dashboard/rewards', icon: 'redeem', label: "Sovg'alar" },
     ];
