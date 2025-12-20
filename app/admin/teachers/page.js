@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import Link from 'next/link';
 import ConfirmModal from '@/components/ConfirmModal';
+import AlertModal from '@/components/AlertModal';
 
 export default function TeachersPage() {
     const { getAuthHeader } = useAuth();
@@ -12,6 +12,8 @@ export default function TeachersPage() {
     const [searchQuery, setSearchQuery] = useState('');
     const [deleteModal, setDeleteModal] = useState({ show: false, teacher: null });
     const [deleting, setDeleting] = useState(false);
+    const [alertModal, setAlertModal] = useState({ show: false, title: '', message: '', type: 'success' });
+    const [activatingId, setActivatingId] = useState(null);
 
     useEffect(() => {
         fetchTeachers();
@@ -19,7 +21,9 @@ export default function TeachersPage() {
 
     const fetchTeachers = async () => {
         try {
-            const res = await fetch('/api/teachers', { headers: getAuthHeader() });
+            const res = await fetch('/api/teachers', {
+                headers: getAuthHeader()
+            });
             const data = await res.json();
             if (data.success) {
                 setTeachers(data.teachers || []);
@@ -49,6 +53,50 @@ export default function TeachersPage() {
         }
     };
 
+    const handleActivateSubscription = async (teacher) => {
+        setActivatingId(teacher._id);
+        try {
+            const res = await fetch('/api/subscription/activate', {
+                method: 'POST',
+                headers: getAuthHeader(),
+                body: JSON.stringify({ userId: teacher._id })
+            });
+            const data = await res.json();
+            if (data.success) {
+                setTeachers(teachers.map(t =>
+                    t._id === teacher._id ? {
+                        ...t,
+                        subscriptionStatus: 'active',
+                        subscriptionEndDate: data.subscriptionEndDate
+                    } : t
+                ));
+                setAlertModal({
+                    show: true,
+                    title: 'Muvaffaqiyatli',
+                    message: `${teacher.name} uchun 1 oylik obuna faollashtirildi`,
+                    type: 'success'
+                });
+            } else {
+                setAlertModal({
+                    show: true,
+                    title: 'Xatolik',
+                    message: data.error || 'Obunani faollashtirishda xatolik',
+                    type: 'danger'
+                });
+            }
+        } catch (error) {
+            console.error('Failed to activate subscription:', error);
+            setAlertModal({
+                show: true,
+                title: 'Xatolik',
+                message: 'Obunani faollashtirishda xatolik',
+                type: 'danger'
+            });
+        } finally {
+            setActivatingId(null);
+        }
+    };
+
     const handleDelete = async () => {
         const teacher = deleteModal.teacher;
         if (!teacher) return;
@@ -68,6 +116,31 @@ export default function TeachersPage() {
         } finally {
             setDeleting(false);
             setDeleteModal({ show: false, teacher: null });
+        }
+    };
+
+    const getSubscriptionBadge = (teacher) => {
+        const status = teacher.subscriptionStatus || 'trial';
+        const daysRemaining = teacher.daysRemaining || 0;
+
+        if (status === 'trial') {
+            return (
+                <span className="badge bg-info rounded-pill">
+                    Sinov: {daysRemaining} kun
+                </span>
+            );
+        } else if (status === 'active') {
+            return (
+                <span className="badge bg-success rounded-pill">
+                    Faol: {daysRemaining} kun
+                </span>
+            );
+        } else {
+            return (
+                <span className="badge bg-danger rounded-pill">
+                    Tugagan
+                </span>
+            );
         }
     };
 
@@ -121,8 +194,8 @@ export default function TeachersPage() {
                                         <th className="border-0 ps-4 py-3">O'qituvchi</th>
                                         <th className="border-0 py-3">Telefon</th>
                                         <th className="border-0 py-3">O'quvchilar</th>
+                                        <th className="border-0 py-3">Obuna</th>
                                         <th className="border-0 py-3">Holat</th>
-                                        <th className="border-0 py-3">Ro'yxatdan</th>
                                         <th className="border-0 pe-4 py-3 text-end">Amallar</th>
                                     </tr>
                                 </thead>
@@ -142,7 +215,9 @@ export default function TeachersPage() {
                                                     />
                                                     <div>
                                                         <p className="fw-semibold mb-0">{teacher.name}</p>
-                                                        <p className="small text-muted mb-0">{teacher.phone || '—'}</p>
+                                                        <p className="small text-muted mb-0">
+                                                            {new Date(teacher.createdAt).toLocaleDateString('uz-UZ')}
+                                                        </p>
                                                     </div>
                                                 </div>
                                             </td>
@@ -151,15 +226,27 @@ export default function TeachersPage() {
                                                 <span className="badge bg-primary rounded-pill">{teacher.studentCount || 0}</span>
                                             </td>
                                             <td className="py-3">
+                                                {getSubscriptionBadge(teacher)}
+                                            </td>
+                                            <td className="py-3">
                                                 <span className={`badge rounded-pill ${teacher.isActive ? 'bg-success' : 'bg-secondary'}`}>
                                                     {teacher.isActive ? 'Faol' : 'Nofaol'}
                                                 </span>
                                             </td>
-                                            <td className="py-3 text-muted small">
-                                                {new Date(teacher.createdAt).toLocaleDateString('uz-UZ')}
-                                            </td>
                                             <td className="pe-4 py-3 text-end">
                                                 <div className="d-flex gap-2 justify-content-end">
+                                                    <button
+                                                        onClick={() => handleActivateSubscription(teacher)}
+                                                        disabled={activatingId === teacher._id}
+                                                        className="btn btn-sm btn-outline-primary rounded-2"
+                                                        title="1 oy obuna berish"
+                                                    >
+                                                        {activatingId === teacher._id ? (
+                                                            <span className="spinner-border spinner-border-sm"></span>
+                                                        ) : (
+                                                            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>add_card</span>
+                                                        )}
+                                                    </button>
                                                     <button
                                                         onClick={() => handleToggleStatus(teacher)}
                                                         className={`btn btn-sm rounded-2 ${teacher.isActive ? 'btn-outline-warning' : 'btn-outline-success'}`}
@@ -196,6 +283,14 @@ export default function TeachersPage() {
                 confirmText="O'chirish"
                 type="danger"
                 loading={deleting}
+            />
+
+            <AlertModal
+                show={alertModal.show}
+                onClose={() => setAlertModal({ ...alertModal, show: false })}
+                title={alertModal.title}
+                message={alertModal.message}
+                type={alertModal.type}
             />
         </div>
     );

@@ -36,10 +36,69 @@ const UserSchema = new mongoose.Schema({
     isActive: {
         type: Boolean,
         default: true
+    },
+    // Subscription fields
+    subscriptionStatus: {
+        type: String,
+        enum: ['trial', 'active', 'expired'],
+        default: 'trial'
+    },
+    trialStartDate: {
+        type: Date,
+        default: Date.now
+    },
+    subscriptionEndDate: {
+        type: Date,
+        default: null
+    },
+    lastPaymentDate: {
+        type: Date,
+        default: null
     }
 }, {
     timestamps: true
 });
+
+// Check if subscription is valid
+UserSchema.methods.isSubscriptionValid = function () {
+    if (this.role === 'admin') return true;
+
+    const now = new Date();
+
+    // Check trial period (7 days)
+    if (this.subscriptionStatus === 'trial') {
+        const trialEnd = new Date(this.trialStartDate);
+        trialEnd.setDate(trialEnd.getDate() + 7);
+        return now < trialEnd;
+    }
+
+    // Check active subscription
+    if (this.subscriptionStatus === 'active' && this.subscriptionEndDate) {
+        return now < new Date(this.subscriptionEndDate);
+    }
+
+    return false;
+};
+
+// Get days remaining
+UserSchema.methods.getDaysRemaining = function () {
+    if (this.role === 'admin') return 999;
+
+    const now = new Date();
+    let endDate;
+
+    if (this.subscriptionStatus === 'trial') {
+        endDate = new Date(this.trialStartDate);
+        endDate.setDate(endDate.getDate() + 7);
+    } else if (this.subscriptionStatus === 'active' && this.subscriptionEndDate) {
+        endDate = new Date(this.subscriptionEndDate);
+    } else {
+        return 0;
+    }
+
+    const diff = endDate - now;
+    return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+};
 
 // Hash password before saving
 UserSchema.pre('save', async function () {

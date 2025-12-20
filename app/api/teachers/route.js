@@ -8,7 +8,7 @@ import Student from '@/models/Student';
 import { adminOnly } from '@/middleware/authMiddleware';
 import { successResponse, errorResponse, serverError } from '@/lib/apiResponse';
 
-// GET - Get all teachers with student counts
+// GET - Get all teachers with student counts and subscription info
 export async function GET(request) {
     try {
         const auth = await adminOnly(request);
@@ -23,18 +23,26 @@ export async function GET(request) {
             .sort({ createdAt: -1 })
             .lean();
 
-        // Get student counts for each teacher
-        const teachersWithCounts = await Promise.all(
+        // Get student counts and subscription info for each teacher
+        const teachersWithInfo = await Promise.all(
             teachers.map(async (teacher) => {
-                const studentCount = await Student.countDocuments({ teacherId: teacher._id });
+                const studentCount = await Student.countDocuments({ teacher: teacher._id });
+
+                // Calculate subscription status
+                const user = await User.findById(teacher._id);
+                const isSubscriptionValid = user ? user.isSubscriptionValid() : false;
+                const daysRemaining = user ? user.getDaysRemaining() : 0;
+
                 return {
                     ...teacher,
-                    studentCount
+                    studentCount,
+                    isSubscriptionValid,
+                    daysRemaining
                 };
             })
         );
 
-        return successResponse({ teachers: teachersWithCounts });
+        return successResponse({ teachers: teachersWithInfo });
     } catch (error) {
         console.error('Get teachers error:', error);
         return serverError('Failed to fetch teachers');

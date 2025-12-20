@@ -37,6 +37,7 @@ export default function AdminSidebar() {
         { href: '/admin/lessons', icon: 'smart_display', label: 'Darslar' },
         { href: '/admin/rewards', icon: 'redeem', label: "Sovg'alar" },
         { href: '/admin/statistics', icon: 'analytics', label: 'Statistika' },
+        { href: '/admin/settings', icon: 'settings', label: 'Sozlamalar' },
     ];
 
     return (
