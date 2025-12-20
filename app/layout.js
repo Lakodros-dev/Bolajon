@@ -5,6 +5,7 @@ import BootstrapClient from '@/components/BootstrapClient';
 import TopLoader from '@/components/TopLoader';
 import Providers from '@/components/Providers';
 import StructuredData from '@/components/StructuredData';
+import PWAInstall from '@/components/PWAInstall';
 
 export const metadata = {
   title: 'Bolajon.uz - Bolalar uchun ingliz tili | O\'zbek bolalari uchun English',
@@ -13,6 +14,15 @@ export const metadata = {
   authors: [{ name: 'Bolajon.uz' }],
   creator: 'Bolajon.uz',
   publisher: 'Bolajon.uz',
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'Bolajon.uz',
+  },
+  formatDetection: {
+    telephone: false,
+  },
   robots: {
     index: true,
     follow: true,
@@ -58,6 +68,17 @@ export default function RootLayout({ children }) {
   return (
     <html lang="uz">
       <head>
+        {/* PWA Meta Tags */}
+        <meta name="application-name" content="Bolajon.uz" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="Bolajon.uz" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="theme-color" content="#2b8cee" />
+
+        {/* Apple Touch Icons */}
+        <link rel="apple-touch-icon" href="/icons/icon-152x152.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-192x192.png" />
 
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -74,6 +95,7 @@ export default function RootLayout({ children }) {
         <Providers>
           {children}
         </Providers>
+        <PWAInstall />
         <BootstrapClient />
       </body>
     </html>
