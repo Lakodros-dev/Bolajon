@@ -3,25 +3,34 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 
-const COLORS = ['red', 'blue', 'green', 'yellow', 'purple'];
+const COLORS = ['red', 'blue', 'yellow', 'green', 'black'];
 const TARGET_SCORE = 15;
 const GAME_DURATION = 180;
 const GAME_AREA_PADDING = 10; // % padding from edges
 
+// Rasmdagi ranglar - aniq va yorqin
 const colorStyles = {
-    red: { bg: '#f87171' },
-    blue: { bg: '#60a5fa' },
-    green: { bg: '#4ade80' },
-    yellow: { bg: '#fde047' },
-    purple: { bg: '#c084fc' },
+    red: { bg: '#E53935', shadow: '#B71C1C' },      // Qizil
+    blue: { bg: '#1E88E5', shadow: '#0D47A1' },     // Ko'k
+    yellow: { bg: '#FDD835', shadow: '#F9A825' },   // Sariq
+    green: { bg: '#43A047', shadow: '#1B5E20' },    // Yashil
+    black: { bg: '#212121', shadow: '#000000' },    // Qora
 };
 
 const colorNames = {
     red: 'RED',
     blue: 'BLUE',
-    green: 'GREEN',
     yellow: 'YELLOW',
-    purple: 'PURPLE',
+    green: 'GREEN',
+    black: 'BLACK',
+};
+
+const colorNamesUz = {
+    red: 'qizil',
+    blue: "ko'k",
+    yellow: 'sariq',
+    green: 'yashil',
+    black: 'qora',
 };
 
 export default function PopTheBalloonGame() {
@@ -308,23 +317,27 @@ export default function PopTheBalloonGame() {
                     transform: 'translateX(-50%)',
                     zIndex: 30,
                     textAlign: 'center',
-                    backgroundColor: 'rgba(255,255,255,0.9)',
-                    padding: '16px 32px',
-                    borderRadius: '16px',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                    backgroundColor: 'rgba(255,255,255,0.95)',
+                    padding: '20px 40px',
+                    borderRadius: '20px',
+                    boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
+                    border: `4px solid ${colorStyles[targetColor]?.bg}`,
                 }}>
-                    <p style={{ fontSize: '16px', color: '#374151', marginBottom: '4px', fontWeight: '500' }}>Pop the</p>
+                    <p style={{ fontSize: '14px', color: '#6b7280', marginBottom: '8px', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '1px' }}>Pop the</p>
                     <p style={{
-                        fontSize: '42px',
+                        fontSize: '48px',
                         fontWeight: 'bold',
                         color: colorStyles[targetColor]?.bg,
-                        textShadow: '2px 2px 4px rgba(0,0,0,0.15)',
+                        textShadow: `2px 2px 0px ${colorStyles[targetColor]?.shadow}`,
                         animation: 'pulse 1.5s infinite',
-                        margin: '8px 0',
+                        margin: '4px 0',
+                        lineHeight: 1,
                     }}>
                         {colorNames[targetColor]}
                     </p>
-                    <p style={{ fontSize: '16px', color: '#374151', fontWeight: '500' }}>balloon!</p>
+                    <p style={{ fontSize: '13px', color: '#9ca3af', fontWeight: '500', marginTop: '4px' }}>
+                        ({colorNamesUz[targetColor]})
+                    </p>
                 </div>
             )}
 
@@ -341,43 +354,54 @@ export default function PopTheBalloonGame() {
                 >
                     {/* Balloon body */}
                     <div style={{
-                        width: '60px',
-                        height: '72px',
+                        width: '65px',
+                        height: '78px',
                         borderRadius: '50% 50% 50% 50%',
                         backgroundColor: colorStyles[balloon.color]?.bg,
                         position: 'relative',
-                        boxShadow: `inset -8px -8px 20px rgba(0,0,0,0.15), 0 4px 8px rgba(0,0,0,0.2)`,
+                        boxShadow: `inset -10px -10px 25px ${colorStyles[balloon.color]?.shadow}, 0 6px 12px rgba(0,0,0,0.25)`,
                         transition: 'transform 0.1s ease-out',
                     }}>
                         {/* Shine */}
                         <div style={{
                             position: 'absolute',
-                            top: '12px',
-                            left: '14px',
-                            width: '16px',
-                            height: '16px',
-                            backgroundColor: 'rgba(255,255,255,0.5)',
+                            top: '14px',
+                            left: '16px',
+                            width: '18px',
+                            height: '18px',
+                            backgroundColor: 'rgba(255,255,255,0.6)',
+                            borderRadius: '50%',
+                        }} />
+                        {/* Small shine */}
+                        <div style={{
+                            position: 'absolute',
+                            top: '28px',
+                            left: '12px',
+                            width: '8px',
+                            height: '8px',
+                            backgroundColor: 'rgba(255,255,255,0.4)',
                             borderRadius: '50%',
                         }} />
                         {/* Knot */}
                         <div style={{
                             position: 'absolute',
-                            bottom: '-6px',
+                            bottom: '-8px',
                             left: '50%',
                             transform: 'translateX(-50%)',
                             width: '0',
                             height: '0',
-                            borderLeft: '6px solid transparent',
-                            borderRight: '6px solid transparent',
-                            borderTop: `10px solid ${colorStyles[balloon.color]?.bg}`,
+                            borderLeft: '7px solid transparent',
+                            borderRight: '7px solid transparent',
+                            borderTop: `12px solid ${colorStyles[balloon.color]?.shadow}`,
                         }} />
                     </div>
                     {/* String */}
                     <div style={{
                         width: '2px',
-                        height: '40px',
-                        backgroundColor: '#9ca3af',
+                        height: '45px',
+                        backgroundColor: '#6b7280',
                         margin: '0 auto',
+                        background: 'linear-gradient(to bottom, #9ca3af, #6b7280)',
                     }} />
                     {/* Pop effect */}
                     {balloon.popped && (
@@ -386,7 +410,7 @@ export default function PopTheBalloonGame() {
                             top: '50%',
                             left: '50%',
                             transform: 'translate(-50%, -50%)',
-                            fontSize: '40px',
+                            fontSize: '48px',
                         }}>
                             💥
                         </div>
