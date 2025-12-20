@@ -9,7 +9,7 @@ import { adminOnly } from '@/middleware/authMiddleware';
 import { successResponse, errorResponse, serverError } from '@/lib/apiResponse';
 
 // GET - Get public settings (payment info)
-export async function GET(request) {
+export async function GET() {
     try {
         await dbConnect();
 
@@ -43,14 +43,36 @@ export async function PUT(request) {
         const body = await request.json();
         const { adminPhone, cardNumber, cardHolder, subscriptionPrice } = body;
 
-        if (adminPhone) await Settings.set('adminPhone', adminPhone);
-        if (cardNumber) await Settings.set('cardNumber', cardNumber);
-        if (cardHolder) await Settings.set('cardHolder', cardHolder);
-        if (subscriptionPrice) await Settings.set('subscriptionPrice', subscriptionPrice);
+        // Update each setting if provided
+        if (adminPhone !== undefined) {
+            await Settings.set('adminPhone', adminPhone);
+        }
+        if (cardNumber !== undefined) {
+            await Settings.set('cardNumber', cardNumber);
+        }
+        if (cardHolder !== undefined) {
+            await Settings.set('cardHolder', cardHolder);
+        }
+        if (subscriptionPrice !== undefined) {
+            await Settings.set('subscriptionPrice', subscriptionPrice);
+        }
 
-        return successResponse({ message: 'Sozlamalar saqlandi' });
+        return successResponse({
+            success: true,
+            message: 'Sozlamalar saqlandi'
+        });
     } catch (error) {
         console.error('Update settings error:', error);
         return serverError('Sozlamalarni saqlashda xatolik');
     }
+}
+
+// Handle OPTIONS for CORS
+export async function OPTIONS() {
+    return new Response(null, {
+        status: 200,
+        headers: {
+            'Allow': 'GET, PUT, OPTIONS'
+        }
+    });
 }
