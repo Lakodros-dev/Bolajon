@@ -17,9 +17,24 @@ function PageLoader() {
 export default function AdminLayout({ children }) {
     return (
         <AdminRoute>
-            <div className="d-flex min-vh-100" style={{ backgroundColor: '#f6f7f8' }}>
+            <div className="min-vh-100" style={{ backgroundColor: '#f6f7f8' }}>
                 <AdminSidebar />
-                <main className="flex-grow-1 p-4" style={{ marginLeft: '250px' }}>
+                {/* Main content - responsive margin */}
+                <main
+                    className="p-3 p-lg-4"
+                    style={{
+                        marginLeft: '0',
+                        paddingTop: '76px', // Mobile header height
+                    }}
+                >
+                    <style jsx global>{`
+                        @media (min-width: 992px) {
+                            main {
+                                margin-left: 280px !important;
+                                padding-top: 0 !important;
+                            }
+                        }
+                    `}</style>
                     <Suspense fallback={<PageLoader />}>
                         {children}
                     </Suspense>
