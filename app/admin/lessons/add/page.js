@@ -71,7 +71,7 @@ export default function AddLessonPage() {
                 if (xhr.status === 200) {
                     const data = JSON.parse(xhr.responseText);
                     if (data.success) {
-                        setFormData(prev => ({ ...prev, videoUrl: data.data.videoUrl }));
+                        setFormData(prev => ({ ...prev, videoUrl: data.videoUrl }));
                         setError('');
                     } else {
                         setError(data.error || 'Video yuklashda xatolik');
