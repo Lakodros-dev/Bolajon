@@ -14,7 +14,7 @@ const rootDir = join(__dirname, '..');
 const sizes = [72, 96, 128, 144, 152, 192, 384, 512];
 
 async function generateIcons() {
-    const inputPath = join(rootDir, 'public', 'logo.png');
+    const inputPath = join(rootDir, 'public', 'favicon.png');
     const outputDir = join(rootDir, 'public', 'icons');
 
     // Ensure output directory exists
