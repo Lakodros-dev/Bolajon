@@ -234,7 +234,7 @@ export default function HomePage() {
           <div className="row g-4 mb-4">
             {/* About */}
             <div className="col-12 col-md-4">
-              <Image src="/logo.png" alt="Bolajon.uz" width={120} height={40} style={{ objectFit: 'contain', filter: 'brightness(0) invert(1)' }} />
+              <Image src="/logo.png" alt="Bolajon.uz" width={120} height={40} style={{ objectFit: 'contain' }} />
               <p className="text-white-50 mt-3 small">
                 Bolajon.uz - O'zbekistondagi bolalar uchun ingliz tili o'rgatish platformasi.
                 Interaktiv darslar, qiziqarli o'yinlar va professional o'qituvchilar bilan bolangizning kelajagiga sarmoya qiling.

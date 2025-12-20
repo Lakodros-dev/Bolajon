@@ -6,6 +6,7 @@ import { useAuth } from '@/context/AuthContext';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import Navbar from '@/components/dashboard/Navbar';
 import Sidebar from '@/components/dashboard/Sidebar';
+import Footer from '@/components/dashboard/Footer';
 
 export default function DashboardLayout({ children }) {
     const router = useRouter();
@@ -44,14 +45,20 @@ export default function DashboardLayout({ children }) {
 
     return (
         <ProtectedRoute allowedRoles={['teacher', 'admin']}>
-            <div className="min-vh-100 d-flex" style={{ backgroundColor: '#f6f7f8' }}>
-                {/* Desktop Sidebar */}
-                <Sidebar />
+            <div className="min-vh-100 d-flex flex-column" style={{ backgroundColor: '#f6f7f8' }}>
+                <div className="d-flex flex-grow-1">
+                    {/* Desktop Sidebar */}
+                    <Sidebar />
 
-                {/* Main Content */}
-                <div className="flex-grow-1 dashboard-main">
-                    <div className="dashboard-content mx-auto">
-                        {children}
+                    {/* Main Content */}
+                    <div className="flex-grow-1 dashboard-main d-flex flex-column">
+                        <div className="dashboard-content mx-auto flex-grow-1">
+                            {children}
+                        </div>
+                        {/* Footer - hidden on mobile due to bottom nav */}
+                        <div className="d-none d-lg-block">
+                            <Footer />
+                        </div>
                     </div>
                 </div>
 
