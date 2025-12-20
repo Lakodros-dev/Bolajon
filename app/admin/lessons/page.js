@@ -18,7 +18,10 @@ export default function AdminLessonsPage() {
 
     const fetchLessons = async () => {
         try {
-            const res = await fetch('/api/lessons');
+            // Use admin endpoint to get ALL lessons (active and inactive)
+            const res = await fetch('/api/admin/lessons', {
+                headers: getAuthHeader()
+            });
             const data = await res.json();
             if (data.success) {
                 setLessons(data.lessons || []);

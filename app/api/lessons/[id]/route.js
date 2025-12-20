@@ -9,6 +9,7 @@ import Lesson from '@/models/Lesson';
 import Progress from '@/models/Progress';
 import { adminOnly } from '@/middleware/authMiddleware';
 import { successResponse, errorResponse, serverError, notFoundResponse } from '@/lib/apiResponse';
+import { clearCache } from '@/lib/cache';
 
 // GET - Get single lesson
 export async function GET(request, { params }) {
@@ -64,6 +65,9 @@ export async function PUT(request, { params }) {
 
         await lesson.save();
 
+        // Clear lessons cache so changes are reflected immediately
+        clearCache('lessons');
+
         return successResponse({
             message: 'Lesson updated successfully',
             lesson
@@ -94,6 +98,9 @@ export async function DELETE(request, { params }) {
 
         // Delete lesson
         await Lesson.findByIdAndDelete(params.id);
+
+        // Clear lessons cache
+        clearCache('lessons');
 
         return successResponse({
             message: 'Lesson deleted successfully'
