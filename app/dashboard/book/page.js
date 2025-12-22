@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
-const PDF_PATH = '/book/Bolajon  Ingliz tili (1).pdf';
+const PDF_PATH = '/book/bolajon-darslik.pdf';
 
 export default function BookPage() {
     const [loading, setLoading] = useState(true);
