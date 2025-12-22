@@ -3,6 +3,7 @@
 import { useMemo } from 'react';
 import { useData } from '@/context/DataContext';
 import Header from '@/components/dashboard/Header';
+import Link from 'next/link';
 
 export default function StatisticsPage() {
     const { statistics, initialLoading } = useData();
@@ -24,6 +25,15 @@ export default function StatisticsPage() {
             <Header title="Reyting va Statistika" />
 
             <main className="p-3">
+                {/* Back button - mobile only */}
+                <Link
+                    href="/dashboard/students"
+                    className="btn btn-light rounded-pill px-3 py-2 mb-3 d-inline-flex d-lg-none align-items-center gap-2"
+                >
+                    <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>arrow_back</span>
+                    <span className="small fw-semibold">O'quvchilar</span>
+                </Link>
+
                 {/* Total Stars Card */}
                 <div className="card border-0 rounded-4 mb-4 overflow-hidden position-relative" style={{ background: 'linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%)' }}>
                     <div className="card-body p-4">

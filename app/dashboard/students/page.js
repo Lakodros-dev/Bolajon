@@ -1,5 +1,6 @@
 'use client';
 
+import { useRef } from 'react';
 import { useData } from '@/context/DataContext';
 import Header from '@/components/dashboard/Header';
 import Link from 'next/link';
@@ -13,17 +14,77 @@ const cardColors = [
 
 export default function StudentsPage() {
     const { students, initialLoading } = useData();
+    const tabsRef = useRef(null);
+
+    const tabs = [
+        { id: 'students', label: "O'quvchilarim", icon: 'school', href: null },
+        { id: 'leaderboard', label: 'Umumiy reyting', icon: 'emoji_events', href: '/dashboard/leaderboard' },
+        { id: 'results', label: 'Natijalar', icon: 'analytics', href: '/dashboard/statistics' },
+    ];
+
+    const scrollTabs = (direction) => {
+        if (tabsRef.current) {
+            tabsRef.current.scrollBy({ left: direction * 150, behavior: 'smooth' });
+        }
+    };
 
     return (
         <div className="page-content">
-            <Header title="Mening O'quvchilarim" />
+            <Header title="O'quvchilar" />
 
             <main className="p-3">
+                {/* Tabs with scroll indicator */}
+                <div className="position-relative mb-4">
+                    <div
+                        ref={tabsRef}
+                        className="d-flex gap-2 overflow-auto pb-2"
+                        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                    >
+                        {tabs.map(tab => (
+                            tab.href ? (
+                                <Link
+                                    key={tab.id}
+                                    href={tab.href}
+                                    className="btn btn-light text-muted rounded-pill px-3 py-2 d-flex align-items-center gap-2 flex-shrink-0 text-decoration-none"
+                                >
+                                    <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>{tab.icon}</span>
+                                    <span className="small fw-semibold">{tab.label}</span>
+                                    <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>arrow_forward</span>
+                                </Link>
+                            ) : (
+                                <button
+                                    key={tab.id}
+                                    className="btn btn-primary rounded-pill px-3 py-2 d-flex align-items-center gap-2 flex-shrink-0"
+                                >
+                                    <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>{tab.icon}</span>
+                                    <span className="small fw-semibold">{tab.label}</span>
+                                </button>
+                            )
+                        ))}
+                    </div>
+
+                    {/* Scroll indicator - fade effect on right */}
+                    <div
+                        className="position-absolute top-0 end-0 h-100 d-flex align-items-center d-lg-none"
+                        style={{
+                            background: 'linear-gradient(to left, #f6f7f8 0%, transparent 100%)',
+                            width: '40px',
+                            pointerEvents: 'none'
+                        }}
+                    >
+                        <span
+                            className="material-symbols-outlined text-muted"
+                            style={{ fontSize: '20px', marginLeft: 'auto' }}
+                        >
+                            chevron_right
+                        </span>
+                    </div>
+                </div>
+
+                {/* Students List */}
                 {initialLoading ? (
                     <div className="text-center py-5">
-                        <div className="spinner-border text-primary" role="status">
-                            <span className="visually-hidden">Loading...</span>
-                        </div>
+                        <div className="spinner-border text-primary" role="status"></div>
                     </div>
                 ) : (
                     <div className="row g-3">
@@ -42,8 +103,7 @@ export default function StudentsPage() {
                                                                 width: '64px',
                                                                 height: '64px',
                                                                 backgroundImage: `url('https://ui-avatars.com/api/?name=${encodeURIComponent(student.name)}&background=random&size=128')`,
-                                                                backgroundSize: 'cover',
-                                                                backgroundPosition: 'center'
+                                                                backgroundSize: 'cover'
                                                             }}
                                                         />
                                                         <div className="pt-1">
@@ -53,12 +113,10 @@ export default function StudentsPage() {
                                                     </div>
                                                     <span className="material-symbols-outlined text-muted" style={{ fontSize: '20px' }}>chevron_right</span>
                                                 </div>
-
                                                 <div className="d-flex align-items-center justify-content-between mb-2">
-                                                    <span className="small text-muted fw-semibold text-uppercase" style={{ letterSpacing: '0.05em' }}>Yulduzlar</span>
+                                                    <span className="small text-muted fw-semibold">Yulduzlar</span>
                                                     <span className={`small fw-bold ${colorScheme.text}`}>{student.stars || 0} ⭐</span>
                                                 </div>
-
                                                 <div className="progress progress-custom bg-white">
                                                     <div className={`progress-bar ${colorScheme.progress}`} style={{ width: `${Math.min(100, (student.stars || 0) / 10)}%` }}></div>
                                                 </div>

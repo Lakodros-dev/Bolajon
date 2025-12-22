@@ -13,7 +13,8 @@ export default function SettingsPage() {
         adminPhone: '',
         cardNumber: '',
         cardHolder: '',
-        subscriptionPrice: 15000
+        dailyPrice: 200,
+        bookPrice: 50000
     });
 
     useEffect(() => {
@@ -31,7 +32,8 @@ export default function SettingsPage() {
                     adminPhone: data.adminPhone || '',
                     cardNumber: data.cardNumber || '',
                     cardHolder: data.cardHolder || '',
-                    subscriptionPrice: data.subscriptionPrice || 15000
+                    dailyPrice: data.dailyPrice || 200,
+                    bookPrice: data.bookPrice || 50000
                 });
             }
         } catch (error) {
@@ -87,6 +89,13 @@ export default function SettingsPage() {
         return groups.join(' ').slice(0, 19);
     };
 
+    // Obuna paketlari narxlari
+    const packages = [
+        { days: 15, total: settings.dailyPrice * 15 },
+        { days: 20, total: settings.dailyPrice * 20 },
+        { days: 30, total: settings.dailyPrice * 30 },
+    ];
+
     if (loading) {
         return (
             <div className="d-flex justify-content-center py-5">
@@ -112,9 +121,6 @@ export default function SettingsPage() {
                                     <span className="material-symbols-outlined text-primary">credit_card</span>
                                     To'lov ma'lumotlari
                                 </h5>
-                                <p className="text-muted small mb-0 mt-1">
-                                    Obuna tugaganda foydalanuvchilarga ko'rsatiladigan ma'lumotlar
-                                </p>
                             </div>
                             <div className="card-body p-4">
                                 <div className="row g-3">
@@ -177,24 +183,71 @@ export default function SettingsPage() {
                                 </h5>
                             </div>
                             <div className="card-body p-4">
-                                <div className="row align-items-end">
+                                <div className="row g-3 mb-4">
                                     <div className="col-md-6">
-                                        <label className="form-label small fw-semibold">Oylik obuna narxi (so'm)</label>
+                                        <label className="form-label small fw-semibold">Kunlik obuna narxi (so'm)</label>
                                         <div className="input-group">
                                             <input
                                                 type="number"
                                                 className="form-control border-0 bg-light"
-                                                placeholder="15000"
-                                                value={settings.subscriptionPrice}
-                                                onChange={(e) => setSettings({ ...settings, subscriptionPrice: parseInt(e.target.value) || 0 })}
+                                                placeholder="200"
+                                                value={settings.dailyPrice}
+                                                onChange={(e) => setSettings({ ...settings, dailyPrice: parseInt(e.target.value) || 0 })}
+                                            />
+                                            <span className="input-group-text bg-light border-0 fw-semibold">so'm/kun</span>
+                                        </div>
+                                    </div>
+                                    <div className="col-md-6">
+                                        <div className="bg-light rounded-3 p-3 h-100 d-flex flex-column justify-content-center">
+                                            <p className="small text-muted mb-1">Sinov muddati</p>
+                                            <p className="fw-bold mb-0">7 kun (bepul)</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Package prices preview */}
+                                <div className="bg-light rounded-3 p-3">
+                                    <p className="small fw-semibold mb-2">Obuna paketlari:</p>
+                                    <div className="d-flex flex-wrap gap-3">
+                                        {packages.map(pkg => (
+                                            <div key={pkg.days} className="bg-white rounded-2 px-3 py-2">
+                                                <span className="fw-bold text-primary">{pkg.days} kun</span>
+                                                <span className="text-muted mx-2">=</span>
+                                                <span className="fw-semibold">{pkg.total.toLocaleString()} so'm</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Book Price Card */}
+                        <div className="card border-0 rounded-4 shadow-sm mb-4">
+                            <div className="card-header bg-transparent border-0 pt-4 pb-0 px-4">
+                                <h5 className="fw-bold mb-0 d-flex align-items-center gap-2">
+                                    <span className="material-symbols-outlined text-warning">auto_stories</span>
+                                    Kitob narxi
+                                </h5>
+                            </div>
+                            <div className="card-body p-4">
+                                <div className="row g-3">
+                                    <div className="col-md-6">
+                                        <label className="form-label small fw-semibold">Bolajon darsligi narxi (so'm)</label>
+                                        <div className="input-group">
+                                            <input
+                                                type="number"
+                                                className="form-control border-0 bg-light"
+                                                placeholder="50000"
+                                                value={settings.bookPrice}
+                                                onChange={(e) => setSettings({ ...settings, bookPrice: parseInt(e.target.value) || 0 })}
                                             />
                                             <span className="input-group-text bg-light border-0 fw-semibold">so'm</span>
                                         </div>
                                     </div>
                                     <div className="col-md-6">
-                                        <div className="bg-light rounded-3 p-3">
-                                            <p className="small text-muted mb-1">Sinov muddati</p>
-                                            <p className="fw-bold mb-0">7 kun (bepul)</p>
+                                        <div className="bg-light rounded-3 p-3 h-100 d-flex flex-column justify-content-center">
+                                            <p className="small text-muted mb-1">Bosmaxona varianti</p>
+                                            <p className="fw-bold mb-0">{settings.bookPrice?.toLocaleString()} so'm</p>
                                         </div>
                                     </div>
                                 </div>
@@ -230,7 +283,7 @@ export default function SettingsPage() {
                                 </div>
                                 <h6 className="fw-bold mb-2">Obuna tugadi</h6>
                                 <p className="small text-muted mb-3">
-                                    Davom etish uchun {settings.subscriptionPrice?.toLocaleString()} so'm to'lang
+                                    Kunlik narx: {settings.dailyPrice?.toLocaleString()} so'm
                                 </p>
                                 <div className="bg-white rounded-3 p-3 text-start mb-3">
                                     <p className="small text-muted mb-1">Karta raqami:</p>

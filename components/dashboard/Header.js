@@ -38,7 +38,7 @@ export default function Header({ title, showStars = false, stars = 0 }) {
                         </div>
                     )}
                     <Link href="/dashboard/profile" className="btn btn-light rounded-circle p-2">
-                        <span className="material-symbols-outlined">notifications</span>
+                        <span className="material-symbols-outlined">settings</span>
                     </Link>
                 </div>
             </div>

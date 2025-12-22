@@ -16,6 +16,8 @@ export default function EditLessonPage() {
     const [error, setError] = useState('');
     const [videoSource, setVideoSource] = useState('url');
     const fileInputRef = useRef(null);
+    const imageInputRef = useRef(null);
+    const [uploadingImageIndex, setUploadingImageIndex] = useState(null);
 
     const [formData, setFormData] = useState({
         title: '',
@@ -24,7 +26,8 @@ export default function EditLessonPage() {
         thumbnail: '',
         level: 1,
         duration: 0,
-        order: 0
+        order: 0,
+        vocabulary: []
     });
 
     useEffect(() => {
@@ -44,7 +47,8 @@ export default function EditLessonPage() {
                     thumbnail: lesson.thumbnail || '',
                     level: lesson.level || 1,
                     duration: lesson.duration || 0,
-                    order: lesson.order || 0
+                    order: lesson.order || 0,
+                    vocabulary: lesson.vocabulary || []
                 });
                 // Set video source based on current URL
                 if (lesson.videoUrl?.startsWith('/api/video/')) {
@@ -64,6 +68,71 @@ export default function EditLessonPage() {
             ...formData,
             [name]: type === 'number' ? parseInt(value) || 0 : value
         });
+    };
+
+    // Vocabulary functions
+    const addVocabularyItem = () => {
+        setFormData(prev => ({
+            ...prev,
+            vocabulary: [...prev.vocabulary, { word: '', translation: '', image: '' }]
+        }));
+    };
+
+    const removeVocabularyItem = (index) => {
+        setFormData(prev => ({
+            ...prev,
+            vocabulary: prev.vocabulary.filter((_, i) => i !== index)
+        }));
+    };
+
+    const updateVocabularyItem = (index, field, value) => {
+        setFormData(prev => ({
+            ...prev,
+            vocabulary: prev.vocabulary.map((item, i) =>
+                i === index ? { ...item, [field]: value } : item
+            )
+        }));
+    };
+
+    const handleImageUpload = async (e, index) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        if (!allowedTypes.includes(file.type)) {
+            setError('Faqat JPG, PNG, GIF, WebP formatlar qabul qilinadi');
+            return;
+        }
+
+        if (file.size > 5 * 1024 * 1024) {
+            setError('Rasm hajmi 5MB dan oshmasligi kerak');
+            return;
+        }
+
+        setUploadingImageIndex(index);
+        setError('');
+
+        try {
+            const formDataUpload = new FormData();
+            formDataUpload.append('image', file);
+
+            const res = await fetch('/api/upload/image', {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` },
+                body: formDataUpload
+            });
+
+            const data = await res.json();
+            if (data.success) {
+                updateVocabularyItem(index, 'image', data.imageUrl);
+            } else {
+                setError(data.error || 'Rasm yuklashda xatolik');
+            }
+        } catch (err) {
+            setError('Rasm yuklashda xatolik');
+        } finally {
+            setUploadingImageIndex(null);
+        }
     };
 
     const handleVideoUpload = async (e) => {
@@ -324,6 +393,115 @@ export default function EditLessonPage() {
                                 onChange={handleChange}
                             />
                         </div>
+                    </div>
+                </div>
+
+                {/* Vocabulary Section */}
+                <div className="card border-0 rounded-4 shadow-sm mb-4">
+                    <div className="card-body p-4">
+                        <div className="d-flex justify-content-between align-items-center mb-4">
+                            <div>
+                                <h3 className="h6 fw-bold mb-1">Lug'at</h3>
+                                <p className="text-muted small mb-0">O'yin uchun so'zlar va rasmlar</p>
+                            </div>
+                            <button
+                                type="button"
+                                className="btn btn-outline-primary btn-sm rounded-3 d-flex align-items-center gap-1"
+                                onClick={addVocabularyItem}
+                            >
+                                <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>add</span>
+                                So'z qo'shish
+                            </button>
+                        </div>
+
+                        {formData.vocabulary.length === 0 ? (
+                            <div className="text-center py-4 bg-light rounded-3">
+                                <span className="material-symbols-outlined text-muted mb-2" style={{ fontSize: '40px' }}>dictionary</span>
+                                <p className="text-muted mb-0">Hali so'z qo'shilmagan</p>
+                            </div>
+                        ) : (
+                            <div className="d-flex flex-column gap-3">
+                                {formData.vocabulary.map((item, index) => (
+                                    <div key={index} className="border rounded-3 p-3 bg-light">
+                                        <div className="row g-3 align-items-center">
+                                            <div className="col-md-3">
+                                                <label className="form-label small fw-semibold">Inglizcha</label>
+                                                <input
+                                                    type="text"
+                                                    className="form-control rounded-3"
+                                                    placeholder="Apple"
+                                                    value={item.word}
+                                                    onChange={(e) => updateVocabularyItem(index, 'word', e.target.value)}
+                                                />
+                                            </div>
+                                            <div className="col-md-3">
+                                                <label className="form-label small fw-semibold">O'zbekcha</label>
+                                                <input
+                                                    type="text"
+                                                    className="form-control rounded-3"
+                                                    placeholder="Olma"
+                                                    value={item.translation}
+                                                    onChange={(e) => updateVocabularyItem(index, 'translation', e.target.value)}
+                                                />
+                                            </div>
+                                            <div className="col-md-4">
+                                                <label className="form-label small fw-semibold">Rasm</label>
+                                                <div className="d-flex gap-2 align-items-center">
+                                                    {item.image ? (
+                                                        <div className="position-relative">
+                                                            <img
+                                                                src={item.image}
+                                                                alt={item.word}
+                                                                className="rounded-2"
+                                                                style={{ width: '50px', height: '50px', objectFit: 'cover' }}
+                                                            />
+                                                            <button
+                                                                type="button"
+                                                                className="btn btn-danger btn-sm position-absolute top-0 end-0 rounded-circle p-0"
+                                                                style={{ width: '20px', height: '20px', transform: 'translate(30%, -30%)' }}
+                                                                onClick={() => updateVocabularyItem(index, 'image', '')}
+                                                            >
+                                                                <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>close</span>
+                                                            </button>
+                                                        </div>
+                                                    ) : (
+                                                        <label
+                                                            className="btn btn-outline-secondary btn-sm rounded-3 d-flex align-items-center gap-1"
+                                                            style={{ cursor: uploadingImageIndex === index ? 'not-allowed' : 'pointer' }}
+                                                        >
+                                                            {uploadingImageIndex === index ? (
+                                                                <span className="spinner-border spinner-border-sm"></span>
+                                                            ) : (
+                                                                <>
+                                                                    <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>upload</span>
+                                                                    Yuklash
+                                                                </>
+                                                            )}
+                                                            <input
+                                                                type="file"
+                                                                accept="image/jpeg,image/png,image/gif,image/webp"
+                                                                className="d-none"
+                                                                onChange={(e) => handleImageUpload(e, index)}
+                                                                disabled={uploadingImageIndex === index}
+                                                            />
+                                                        </label>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            <div className="col-md-2 text-end">
+                                                <button
+                                                    type="button"
+                                                    className="btn btn-outline-danger btn-sm rounded-3"
+                                                    onClick={() => removeVocabularyItem(index)}
+                                                >
+                                                    <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>delete</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 </div>
 

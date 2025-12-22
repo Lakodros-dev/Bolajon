@@ -1,6 +1,6 @@
 /**
  * Subscription Activate API (Admin only)
- * POST /api/subscription/activate - Activate 1 month subscription for a user
+ * POST /api/subscription/activate - Activate subscription for a user
  */
 import dbConnect from '@/lib/mongodb';
 import User from '@/models/User';
@@ -16,11 +16,14 @@ export async function POST(request) {
 
         await dbConnect();
 
-        const { userId } = await request.json();
+        const { userId, days = 30 } = await request.json();
 
         if (!userId) {
             return errorResponse('User ID kerak');
         }
+
+        // Validate days (minimum 1)
+        const subscriptionDays = Math.max(1, parseInt(days) || 30);
 
         const user = await User.findById(userId);
         if (!user) {
@@ -31,9 +34,9 @@ export async function POST(request) {
             return errorResponse('Admin uchun obuna kerak emas');
         }
 
-        // Set subscription end date to 30 days from now
+        // Set subscription end date
         const endDate = new Date();
-        endDate.setDate(endDate.getDate() + 30);
+        endDate.setDate(endDate.getDate() + subscriptionDays);
 
         user.subscriptionStatus = 'active';
         user.subscriptionEndDate = endDate;
@@ -41,8 +44,9 @@ export async function POST(request) {
         await user.save();
 
         return successResponse({
-            message: 'Obuna faollashtirildi',
-            subscriptionEndDate: endDate
+            message: `${subscriptionDays} kunlik obuna faollashtirildi`,
+            subscriptionEndDate: endDate,
+            days: subscriptionDays
         });
     } catch (error) {
         console.error('Activate subscription error:', error);

@@ -52,7 +52,7 @@ export async function PUT(request, { params }) {
         }
 
         const body = await request.json();
-        const { title, description, videoUrl, thumbnail, level, duration, order, isActive } = body;
+        const { title, description, videoUrl, thumbnail, level, duration, order, isActive, vocabulary } = body;
 
         if (title) lesson.title = title;
         if (description) lesson.description = description;
@@ -62,6 +62,7 @@ export async function PUT(request, { params }) {
         if (duration !== undefined) lesson.duration = duration;
         if (order !== undefined) lesson.order = order;
         if (isActive !== undefined) lesson.isActive = isActive;
+        if (vocabulary !== undefined) lesson.vocabulary = vocabulary;
 
         await lesson.save();
 

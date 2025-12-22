@@ -4,6 +4,23 @@
  */
 import mongoose from 'mongoose';
 
+const VocabularySchema = new mongoose.Schema({
+    word: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    translation: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    image: {
+        type: String,
+        default: ''
+    }
+}, { _id: true });
+
 const LessonSchema = new mongoose.Schema({
     title: {
         type: String,
@@ -41,6 +58,10 @@ const LessonSchema = new mongoose.Schema({
     isActive: {
         type: Boolean,
         default: true
+    },
+    vocabulary: {
+        type: [VocabularySchema],
+        default: []
     }
 }, {
     timestamps: true

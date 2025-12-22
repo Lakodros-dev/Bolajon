@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import Header from '@/components/dashboard/Header';
+import Link from 'next/link';
 
 export default function LeaderboardPage() {
     const { getAuthHeader } = useAuth();
@@ -62,6 +63,15 @@ export default function LeaderboardPage() {
             <Header title="Leaderboard" />
 
             <main className="p-3">
+                {/* Back button - mobile only */}
+                <Link
+                    href="/dashboard/students"
+                    className="btn btn-light rounded-pill px-3 py-2 mb-3 d-inline-flex d-lg-none align-items-center gap-2"
+                >
+                    <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>arrow_back</span>
+                    <span className="small fw-semibold">O'quvchilar</span>
+                </Link>
+
                 {/* Search */}
                 <div className="mb-4">
                     <div className="position-relative">

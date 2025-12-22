@@ -16,13 +16,15 @@ export async function GET() {
         const adminPhone = await Settings.get('adminPhone', '+998900000000');
         const cardNumber = await Settings.get('cardNumber', '8600 0000 0000 0000');
         const cardHolder = await Settings.get('cardHolder', 'Admin');
-        const subscriptionPrice = await Settings.get('subscriptionPrice', 15000);
+        const dailyPrice = await Settings.get('dailyPrice', 200);
+        const bookPrice = await Settings.get('bookPrice', 50000);
 
         return successResponse({
             adminPhone,
             cardNumber,
             cardHolder,
-            subscriptionPrice
+            dailyPrice,
+            bookPrice
         });
     } catch (error) {
         console.error('Get settings error:', error);
@@ -41,7 +43,7 @@ export async function PUT(request) {
         await dbConnect();
 
         const body = await request.json();
-        const { adminPhone, cardNumber, cardHolder, subscriptionPrice } = body;
+        const { adminPhone, cardNumber, cardHolder, dailyPrice, bookPrice } = body;
 
         // Update each setting if provided
         if (adminPhone !== undefined) {
@@ -53,8 +55,11 @@ export async function PUT(request) {
         if (cardHolder !== undefined) {
             await Settings.set('cardHolder', cardHolder);
         }
-        if (subscriptionPrice !== undefined) {
-            await Settings.set('subscriptionPrice', subscriptionPrice);
+        if (dailyPrice !== undefined) {
+            await Settings.set('dailyPrice', dailyPrice);
+        }
+        if (bookPrice !== undefined) {
+            await Settings.set('bookPrice', bookPrice);
         }
 
         return successResponse({

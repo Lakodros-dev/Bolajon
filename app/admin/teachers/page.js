@@ -11,9 +11,11 @@ export default function TeachersPage() {
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [deleteModal, setDeleteModal] = useState({ show: false, teacher: null });
+    const [subscriptionModal, setSubscriptionModal] = useState({ show: false, teacher: null });
     const [deleting, setDeleting] = useState(false);
     const [alertModal, setAlertModal] = useState({ show: false, title: '', message: '', type: 'success' });
     const [activatingId, setActivatingId] = useState(null);
+    const [selectedDays, setSelectedDays] = useState(30);
 
     useEffect(() => {
         fetchTeachers();
@@ -53,13 +55,21 @@ export default function TeachersPage() {
         }
     };
 
-    const handleActivateSubscription = async (teacher) => {
+    const openSubscriptionModal = (teacher) => {
+        setSelectedDays(30);
+        setSubscriptionModal({ show: true, teacher });
+    };
+
+    const handleActivateSubscription = async () => {
+        const teacher = subscriptionModal.teacher;
+        if (!teacher) return;
+
         setActivatingId(teacher._id);
         try {
             const res = await fetch('/api/subscription/activate', {
                 method: 'POST',
                 headers: getAuthHeader(),
-                body: JSON.stringify({ userId: teacher._id })
+                body: JSON.stringify({ userId: teacher._id, days: selectedDays })
             });
             const data = await res.json();
             if (data.success) {
@@ -67,15 +77,17 @@ export default function TeachersPage() {
                     t._id === teacher._id ? {
                         ...t,
                         subscriptionStatus: 'active',
-                        subscriptionEndDate: data.subscriptionEndDate
+                        subscriptionEndDate: data.subscriptionEndDate,
+                        daysRemaining: selectedDays
                     } : t
                 ));
                 setAlertModal({
                     show: true,
                     title: 'Muvaffaqiyatli',
-                    message: `${teacher.name} uchun 1 oylik obuna faollashtirildi`,
+                    message: `${teacher.name} uchun ${selectedDays} kunlik obuna faollashtirildi`,
                     type: 'success'
                 });
+                setSubscriptionModal({ show: false, teacher: null });
             } else {
                 setAlertModal({
                     show: true,
@@ -236,16 +248,11 @@ export default function TeachersPage() {
                                             <td className="pe-4 py-3 text-end">
                                                 <div className="d-flex gap-2 justify-content-end">
                                                     <button
-                                                        onClick={() => handleActivateSubscription(teacher)}
-                                                        disabled={activatingId === teacher._id}
+                                                        onClick={() => openSubscriptionModal(teacher)}
                                                         className="btn btn-sm btn-outline-primary rounded-2"
-                                                        title="1 oy obuna berish"
+                                                        title="Obuna berish"
                                                     >
-                                                        {activatingId === teacher._id ? (
-                                                            <span className="spinner-border spinner-border-sm"></span>
-                                                        ) : (
-                                                            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>add_card</span>
-                                                        )}
+                                                        <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>add_card</span>
                                                     </button>
                                                     <button
                                                         onClick={() => handleToggleStatus(teacher)}
@@ -273,6 +280,81 @@ export default function TeachersPage() {
                     )}
                 </div>
             </div>
+
+            {/* Subscription Modal */}
+            {subscriptionModal.show && (
+                <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                    <div className="modal-dialog modal-dialog-centered">
+                        <div className="modal-content rounded-4 border-0">
+                            <div className="modal-header border-0 pb-0">
+                                <h5 className="modal-title fw-bold">Obuna berish</h5>
+                                <button
+                                    type="button"
+                                    className="btn-close"
+                                    onClick={() => setSubscriptionModal({ show: false, teacher: null })}
+                                ></button>
+                            </div>
+                            <div className="modal-body">
+                                <p className="text-muted mb-3">
+                                    <strong>{subscriptionModal.teacher?.name}</strong> uchun obuna muddatini kiriting:
+                                </p>
+
+                                {/* Custom days input */}
+                                <div className="mb-4">
+                                    <label className="form-label small fw-semibold">Kun soni</label>
+                                    <div className="input-group">
+                                        <input
+                                            type="number"
+                                            className="form-control form-control-lg border-0 bg-light text-center fw-bold"
+                                            value={selectedDays}
+                                            onChange={(e) => setSelectedDays(Math.max(1, parseInt(e.target.value) || 1))}
+                                            min={1}
+                                            style={{ fontSize: '24px' }}
+                                        />
+                                        <span className="input-group-text bg-light border-0 fw-semibold">kun</span>
+                                    </div>
+                                </div>
+
+                                {/* Quick select buttons */}
+                                <p className="small text-muted mb-2">Tezkor tanlash:</p>
+                                <div className="d-flex flex-wrap gap-2">
+                                    {[1, 3, 7, 15, 20, 30, 60, 90].map(days => (
+                                        <button
+                                            key={days}
+                                            onClick={() => setSelectedDays(days)}
+                                            className={`btn btn-sm rounded-pill px-3 ${selectedDays === days ? 'btn-primary' : 'btn-outline-secondary'}`}
+                                        >
+                                            {days} kun
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="modal-footer border-0 pt-0">
+                                <button
+                                    type="button"
+                                    className="btn btn-light rounded-3"
+                                    onClick={() => setSubscriptionModal({ show: false, teacher: null })}
+                                >
+                                    Bekor qilish
+                                </button>
+                                <button
+                                    type="button"
+                                    className="btn btn-primary rounded-3 d-flex align-items-center gap-2"
+                                    onClick={handleActivateSubscription}
+                                    disabled={activatingId || selectedDays < 1}
+                                >
+                                    {activatingId ? (
+                                        <span className="spinner-border spinner-border-sm"></span>
+                                    ) : (
+                                        <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>check</span>
+                                    )}
+                                    {selectedDays} kun faollashtirish
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             <ConfirmModal
                 show={deleteModal.show}

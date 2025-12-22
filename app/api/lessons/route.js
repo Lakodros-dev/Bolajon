@@ -49,7 +49,7 @@ export async function POST(request) {
         await dbConnect();
 
         const body = await request.json();
-        const { title, description, videoUrl, thumbnail, level, duration, order } = body;
+        const { title, description, videoUrl, thumbnail, level, duration, order, vocabulary } = body;
 
         // Validation
         if (!title || !description || !videoUrl || !level) {
@@ -63,7 +63,8 @@ export async function POST(request) {
             thumbnail: thumbnail || '',
             level,
             duration: duration || 0,
-            order: order || 0
+            order: order || 0,
+            vocabulary: vocabulary || []
         });
 
         // Clear lessons cache
