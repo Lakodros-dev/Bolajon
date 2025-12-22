@@ -70,31 +70,31 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Stats Cards */}
-                <div className="row g-3 mb-4">
+                <div className="row g-2 mb-4">
                     <div className="col-4">
                         <div className="card border-0 rounded-4 h-100 card-pastel-blue">
-                            <div className="card-body text-center p-3">
-                                <span className="material-symbols-outlined mb-2" style={{ fontSize: '32px', color: '#0284c7' }}>school</span>
-                                <h3 className="h4 fw-bold mb-0">{initialLoading ? '-' : dashboard.totalStudents}</h3>
-                                <p className="small text-muted mb-0">O'quvchilar</p>
+                            <div className="card-body text-center p-2 p-sm-3">
+                                <span className="material-symbols-outlined mb-1" style={{ fontSize: '28px', color: '#0284c7' }}>school</span>
+                                <h3 className="h5 fw-bold mb-0">{initialLoading ? '-' : dashboard.totalStudents}</h3>
+                                <p className="small text-muted mb-0" style={{ fontSize: '11px', whiteSpace: 'nowrap' }}>Bolalar</p>
                             </div>
                         </div>
                     </div>
                     <div className="col-4">
                         <div className="card border-0 rounded-4 h-100 card-pastel-green">
-                            <div className="card-body text-center p-3">
-                                <span className="material-symbols-outlined mb-2" style={{ fontSize: '32px', color: '#16a34a' }}>task_alt</span>
-                                <h3 className="h4 fw-bold mb-0">{initialLoading ? '-' : dashboard.completedLessons}</h3>
-                                <p className="small text-muted mb-0">Darslar</p>
+                            <div className="card-body text-center p-2 p-sm-3">
+                                <span className="material-symbols-outlined mb-1" style={{ fontSize: '28px', color: '#16a34a' }}>task_alt</span>
+                                <h3 className="h5 fw-bold mb-0">{initialLoading ? '-' : dashboard.completedLessons}</h3>
+                                <p className="small text-muted mb-0" style={{ fontSize: '11px', whiteSpace: 'nowrap' }}>Darslar</p>
                             </div>
                         </div>
                     </div>
                     <div className="col-4">
                         <div className="card border-0 rounded-4 h-100 card-pastel-yellow">
-                            <div className="card-body text-center p-3">
-                                <span className="material-symbols-outlined filled mb-2" style={{ fontSize: '32px', color: '#d97706' }}>star</span>
-                                <h3 className="h4 fw-bold mb-0">{initialLoading ? '-' : dashboard.totalStars}</h3>
-                                <p className="small text-muted mb-0">Yulduzlar</p>
+                            <div className="card-body text-center p-2 p-sm-3">
+                                <span className="material-symbols-outlined filled mb-1" style={{ fontSize: '28px', color: '#d97706' }}>star</span>
+                                <h3 className="h5 fw-bold mb-0">{initialLoading ? '-' : dashboard.totalStars}</h3>
+                                <p className="small text-muted mb-0" style={{ fontSize: '11px', whiteSpace: 'nowrap' }}>Yulduzlar</p>
                             </div>
                         </div>
                     </div>
