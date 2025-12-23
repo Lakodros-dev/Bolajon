@@ -65,7 +65,10 @@ export default function BookPage() {
         if (!canvas) return;
 
         const context = canvas.getContext('2d');
-        const viewport = page.getViewport({ scale: scale * 1.5 });
+
+        // Get page rotation and apply it
+        const rotation = page.rotate || 0;
+        const viewport = page.getViewport({ scale: scale * 1.5, rotation: rotation });
 
         canvas.height = viewport.height;
         canvas.width = viewport.width;
