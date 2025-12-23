@@ -1,99 +1,20 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
 const PDF_PATH = '/book/bolajon-darslik.pdf';
 
 export default function BookPage() {
     const [loading, setLoading] = useState(true);
-    const [loadingProgress, setLoadingProgress] = useState(0);
-    const [numPages, setNumPages] = useState(0);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [scale, setScale] = useState(1);
     const [showBuyModal, setShowBuyModal] = useState(false);
     const [paymentInfo, setPaymentInfo] = useState(null);
     const [copied, setCopied] = useState(false);
-    const [pdfDoc, setPdfDoc] = useState(null);
-    const [renderedPages, setRenderedPages] = useState({});
-
-    const containerRef = useRef(null);
-    const canvasRefs = useRef({});
+    const [viewerType, setViewerType] = useState('native'); // 'native' or 'google'
 
     useEffect(() => {
         fetchPaymentInfo();
-        loadPdfJs();
     }, []);
-
-    const loadPdfJs = async () => {
-        // Load PDF.js from CDN
-        const script = document.createElement('script');
-        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
-        script.onload = () => {
-            window.pdfjsLib.GlobalWorkerOptions.workerSrc =
-                'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-            loadPdf();
-        };
-        document.head.appendChild(script);
-    };
-
-    const loadPdf = async () => {
-        try {
-            const loadingTask = window.pdfjsLib.getDocument(PDF_PATH);
-
-            loadingTask.onProgress = (progress) => {
-                if (progress.total > 0) {
-                    setLoadingProgress(Math.round((progress.loaded / progress.total) * 100));
-                }
-            };
-
-            const pdf = await loadingTask.promise;
-            setPdfDoc(pdf);
-            setNumPages(pdf.numPages);
-            setLoading(false);
-        } catch (error) {
-            console.error('PDF yuklashda xatolik:', error);
-            setLoading(false);
-        }
-    };
-
-    const renderPage = useCallback(async (pageNum) => {
-        if (!pdfDoc || renderedPages[pageNum]) return;
-
-        const page = await pdfDoc.getPage(pageNum);
-        const canvas = canvasRefs.current[pageNum];
-        if (!canvas) return;
-
-        const context = canvas.getContext('2d');
-
-        // Get page rotation and apply it
-        const rotation = page.rotate || 0;
-        const viewport = page.getViewport({ scale: scale * 1.5, rotation: rotation });
-
-        canvas.height = viewport.height;
-        canvas.width = viewport.width;
-        canvas.style.width = '100%';
-        canvas.style.height = 'auto';
-
-        await page.render({
-            canvasContext: context,
-            viewport: viewport
-        }).promise;
-
-        setRenderedPages(prev => ({ ...prev, [pageNum]: true }));
-    }, [pdfDoc, scale, renderedPages]);
-
-    useEffect(() => {
-        if (pdfDoc) {
-            // Render current page and adjacent pages
-            const pagesToRender = [currentPage - 1, currentPage, currentPage + 1]
-                .filter(p => p >= 1 && p <= numPages);
-
-            pagesToRender.forEach(pageNum => {
-                renderPage(pageNum);
-            });
-        }
-    }, [pdfDoc, currentPage, numPages, renderPage]);
 
     const fetchPaymentInfo = async () => {
         try {
@@ -120,33 +41,12 @@ export default function BookPage() {
         }
     };
 
-    const goToPage = (page) => {
-        const newPage = Math.max(1, Math.min(page, numPages));
-        setCurrentPage(newPage);
-        // Scroll to page
-        const pageElement = document.getElementById(`page-${newPage}`);
-        if (pageElement) {
-            pageElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // Get full URL for Google Docs viewer
+    const getFullPdfUrl = () => {
+        if (typeof window !== 'undefined') {
+            return `${window.location.origin}${PDF_PATH}`;
         }
-    };
-
-    const handleScroll = () => {
-        if (!containerRef.current) return;
-        const container = containerRef.current;
-        const scrollTop = container.scrollTop;
-
-        // Find which page is most visible
-        for (let i = 1; i <= numPages; i++) {
-            const pageElement = document.getElementById(`page-${i}`);
-            if (pageElement) {
-                const rect = pageElement.getBoundingClientRect();
-                const containerRect = container.getBoundingClientRect();
-                if (rect.top >= containerRect.top - 100 && rect.top <= containerRect.top + 200) {
-                    if (currentPage !== i) setCurrentPage(i);
-                    break;
-                }
-            }
-        }
+        return PDF_PATH;
     };
 
     return (
@@ -172,7 +72,7 @@ export default function BookPage() {
                 </button>
             </div>
 
-            {/* Header with Navigation */}
+            {/* Header */}
             <div className="bg-white border-bottom px-3 py-2">
                 <div className="d-flex align-items-center justify-content-between">
                     <div className="d-flex align-items-center gap-2">
@@ -184,72 +84,49 @@ export default function BookPage() {
                         </div>
                     </div>
 
-                    {!loading && numPages > 0 && (
-                        <div className="d-flex align-items-center gap-2">
-                            <button
-                                onClick={() => goToPage(currentPage - 1)}
-                                disabled={currentPage <= 1}
-                                className="btn btn-sm btn-light rounded-circle p-1"
-                            >
-                                <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>chevron_left</span>
-                            </button>
-                            <span className="small fw-semibold" style={{ minWidth: '60px', textAlign: 'center' }}>
-                                {currentPage} / {numPages}
-                            </span>
-                            <button
-                                onClick={() => goToPage(currentPage + 1)}
-                                disabled={currentPage >= numPages}
-                                className="btn btn-sm btn-light rounded-circle p-1"
-                            >
-                                <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>chevron_right</span>
-                            </button>
-                        </div>
-                    )}
+                    {/* Viewer toggle */}
+                    <div className="btn-group btn-group-sm">
+                        <button
+                            className={`btn ${viewerType === 'native' ? 'btn-primary' : 'btn-outline-primary'} rounded-start-pill`}
+                            onClick={() => { setViewerType('native'); setLoading(true); }}
+                        >
+                            Oddiy
+                        </button>
+                        <button
+                            className={`btn ${viewerType === 'google' ? 'btn-primary' : 'btn-outline-primary'} rounded-end-pill`}
+                            onClick={() => { setViewerType('google'); setLoading(true); }}
+                        >
+                            Google
+                        </button>
+                    </div>
                 </div>
             </div>
 
             {/* PDF Viewer */}
-            <div
-                ref={containerRef}
-                className="flex-grow-1 overflow-auto bg-secondary bg-opacity-25"
-                onScroll={handleScroll}
-                style={{ scrollBehavior: 'smooth' }}
-            >
-                {loading ? (
-                    <div className="d-flex flex-column align-items-center justify-content-center h-100">
+            <div className="flex-grow-1 position-relative bg-light">
+                {loading && (
+                    <div className="position-absolute top-50 start-50 translate-middle text-center" style={{ zIndex: 10 }}>
                         <div className="spinner-border text-primary mb-3" role="status"></div>
-                        <p className="text-muted mb-2">Kitob yuklanmoqda...</p>
-                        {loadingProgress > 0 && (
-                            <div className="progress" style={{ width: '200px', height: '6px' }}>
-                                <div
-                                    className="progress-bar"
-                                    style={{ width: `${loadingProgress}%` }}
-                                ></div>
-                            </div>
-                        )}
-                        <p className="small text-muted mt-2">{loadingProgress}%</p>
+                        <p className="text-muted">Kitob yuklanmoqda...</p>
                     </div>
+                )}
+
+                {viewerType === 'native' ? (
+                    <iframe
+                        src={`${PDF_PATH}#toolbar=1&navpanes=0&scrollbar=1`}
+                        className="w-100 h-100 border-0"
+                        style={{ display: loading ? 'none' : 'block' }}
+                        onLoad={() => setLoading(false)}
+                        title="Bolajon Darsligi"
+                    />
                 ) : (
-                    <div className="d-flex flex-column align-items-center py-3 gap-3">
-                        {Array.from({ length: numPages }, (_, i) => i + 1).map(pageNum => (
-                            <div
-                                key={pageNum}
-                                id={`page-${pageNum}`}
-                                className="bg-white shadow-sm"
-                                style={{ maxWidth: '100%', width: 'fit-content' }}
-                            >
-                                <canvas
-                                    ref={el => canvasRefs.current[pageNum] = el}
-                                    style={{ display: 'block', maxWidth: '100%' }}
-                                />
-                                {!renderedPages[pageNum] && (
-                                    <div className="d-flex align-items-center justify-content-center p-5">
-                                        <div className="spinner-border spinner-border-sm text-primary"></div>
-                                    </div>
-                                )}
-                            </div>
-                        ))}
-                    </div>
+                    <iframe
+                        src={`https://docs.google.com/viewer?url=${encodeURIComponent(getFullPdfUrl())}&embedded=true`}
+                        className="w-100 h-100 border-0"
+                        style={{ display: loading ? 'none' : 'block' }}
+                        onLoad={() => setLoading(false)}
+                        title="Bolajon Darsligi"
+                    />
                 )}
             </div>
 
