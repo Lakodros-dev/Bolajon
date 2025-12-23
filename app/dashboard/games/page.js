@@ -1,7 +1,6 @@
 'use client';
 
 import Header from '@/components/dashboard/Header';
-import Onboarding from '@/components/Onboarding';
 import Link from 'next/link';
 
 const games = [
@@ -100,8 +99,6 @@ export default function GamesPage() {
                     </div>
                 </div>
             </main>
-
-            <Onboarding page="games" />
         </div>
     );
 }

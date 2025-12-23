@@ -3,7 +3,6 @@
 import { useRef } from 'react';
 import { useData } from '@/context/DataContext';
 import Header from '@/components/dashboard/Header';
-import Onboarding from '@/components/Onboarding';
 import Link from 'next/link';
 
 const cardColors = [
@@ -157,8 +156,6 @@ export default function StudentsPage() {
                     </div>
                 )}
             </main>
-
-            <Onboarding page="students" />
         </div>
     );
 }

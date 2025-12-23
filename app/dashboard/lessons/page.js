@@ -3,7 +3,6 @@
 import { useMemo } from 'react';
 import { useData } from '@/context/DataContext';
 import Header from '@/components/dashboard/Header';
-import Onboarding from '@/components/Onboarding';
 import Link from 'next/link';
 
 const levelNames = {
@@ -163,8 +162,6 @@ export default function LessonsPage() {
                     </div>
                 )}
             </main>
-
-            <Onboarding page="lessons" />
         </div>
     );
 }

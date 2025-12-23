@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { useData } from '@/context/DataContext';
 import Header from '@/components/dashboard/Header';
-import Onboarding from '@/components/Onboarding';
 import Link from 'next/link';
 
 const quickActions = [
@@ -275,9 +274,6 @@ export default function DashboardPage() {
                     </div>
                 </div>
             )}
-
-            {/* Onboarding Guide */}
-            <Onboarding page="dashboard" />
         </div>
     );
 }
