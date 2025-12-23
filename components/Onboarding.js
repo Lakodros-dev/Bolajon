@@ -347,32 +347,58 @@ export default function Onboarding({ page = 'dashboard' }) {
 
     return (
         <>
-            {/* Overlay */}
+            {/* Overlay - faqat qorong'i fon */}
             <div
-                onClick={handleComplete}
                 style={{
                     position: 'fixed',
                     top: 0,
                     left: 0,
                     right: 0,
                     bottom: 0,
-                    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                    backgroundColor: 'rgba(0, 0, 0, 0.6)',
                     zIndex: 9998,
+                    pointerEvents: 'none',
                 }}
             />
 
-            {/* Highlight */}
+            {/* Highlight - element o'z rangida ko'rinadi */}
             <div
                 style={{
                     position: 'absolute',
                     ...highlightStyle,
                     borderRadius: '16px',
-                    boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.7)',
+                    boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.6), 0 0 20px rgba(43, 140, 238, 0.5)',
+                    border: '3px solid #2b8cee',
                     zIndex: 9999,
                     pointerEvents: 'none',
                     transition: 'all 0.3s ease',
+                    background: 'transparent',
                 }}
             />
+
+            {/* Skip button - yuqori o'ng burchakda */}
+            <button
+                onClick={handleSkipAll}
+                style={{
+                    position: 'fixed',
+                    top: '16px',
+                    right: '16px',
+                    zIndex: 10001,
+                    backgroundColor: 'white',
+                    border: 'none',
+                    borderRadius: '50px',
+                    padding: '8px 16px',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    cursor: 'pointer',
+                }}
+                className="fw-semibold text-danger"
+            >
+                <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>close</span>
+                O'tkazish
+            </button>
 
             {/* Tooltip */}
             <div
@@ -408,31 +434,21 @@ export default function Onboarding({ page = 'dashboard' }) {
                 <p className="text-muted mb-3" style={{ fontSize: '0.85rem', lineHeight: 1.4 }}>{step.content}</p>
 
                 {/* Navigation */}
-                <div className="d-flex justify-content-between align-items-center">
-                    <button
-                        onClick={handleSkipAll}
-                        className="btn btn-outline-danger btn-sm rounded-pill px-3 d-flex align-items-center gap-1"
-                    >
-                        <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>close</span>
-                        O'tkazish
-                    </button>
-
-                    <div className="d-flex gap-2">
-                        {currentStep > 0 && (
-                            <button onClick={handlePrev} className="btn btn-light btn-sm rounded-pill px-2">
-                                <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>arrow_back</span>
-                            </button>
-                        )}
-                        <button
-                            onClick={handleNext}
-                            className="btn btn-primary btn-sm rounded-pill px-3 d-flex align-items-center gap-1"
-                        >
-                            {currentStep === steps.length - 1 ? 'Tayyor' : 'Keyingi'}
-                            <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>
-                                {currentStep === steps.length - 1 ? 'check' : 'arrow_forward'}
-                            </span>
+                <div className="d-flex justify-content-end align-items-center gap-2">
+                    {currentStep > 0 && (
+                        <button onClick={handlePrev} className="btn btn-light btn-sm rounded-pill px-2">
+                            <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>arrow_back</span>
                         </button>
-                    </div>
+                    )}
+                    <button
+                        onClick={handleNext}
+                        className="btn btn-primary btn-sm rounded-pill px-3 d-flex align-items-center gap-1"
+                    >
+                        {currentStep === steps.length - 1 ? 'Tayyor' : 'Keyingi'}
+                        <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>
+                            {currentStep === steps.length - 1 ? 'check' : 'arrow_forward'}
+                        </span>
+                    </button>
                 </div>
             </div>
         </>
