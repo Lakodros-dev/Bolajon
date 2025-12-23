@@ -277,7 +277,7 @@ export default function DashboardPage() {
             )}
 
             {/* Onboarding Guide */}
-            <Onboarding />
+            <Onboarding page="dashboard" />
         </div>
     );
 }

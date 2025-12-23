@@ -1,6 +1,7 @@
 'use client';
 
 import Header from '@/components/dashboard/Header';
+import Onboarding from '@/components/Onboarding';
 import Link from 'next/link';
 
 const games = [
@@ -48,11 +49,12 @@ export default function GamesPage() {
                 </div>
 
                 {/* Games Grid */}
-                <div className="row g-3">
-                    {games.map((game) => (
+                <div data-tour="games-list" className="row g-3">
+                    {games.map((game, index) => (
                         <div key={game.id} className="col-12 col-md-6 col-lg-4">
                             <Link href={`/games/${game.id}`} className="text-decoration-none">
                                 <div
+                                    data-tour={index === 0 ? "game-card" : undefined}
                                     className="card border-0 rounded-4 h-100 lesson-card"
                                     style={{ backgroundColor: game.color }}
                                 >
@@ -98,6 +100,8 @@ export default function GamesPage() {
                     </div>
                 </div>
             </main>
+
+            <Onboarding page="games" />
         </div>
     );
 }

@@ -3,6 +3,7 @@
 import { useRef } from 'react';
 import { useData } from '@/context/DataContext';
 import Header from '@/components/dashboard/Header';
+import Onboarding from '@/components/Onboarding';
 import Link from 'next/link';
 
 const cardColors = [
@@ -87,13 +88,16 @@ export default function StudentsPage() {
                         <div className="spinner-border text-primary" role="status"></div>
                     </div>
                 ) : (
-                    <div className="row g-3">
+                    <div data-tour="students-list" className="row g-3">
                         {students.map((student, index) => {
                             const colorScheme = cardColors[index % cardColors.length];
                             return (
                                 <div key={student._id} className="col-12 col-lg-6">
                                     <Link href={`/dashboard/students/${student._id}`} className="text-decoration-none">
-                                        <div className={`card border rounded-4 ${colorScheme.bg} lesson-card h-100`}>
+                                        <div
+                                            data-tour={index === 0 ? "student-card" : undefined}
+                                            className={`card border rounded-4 ${colorScheme.bg} lesson-card h-100`}
+                                        >
                                             <div className="card-body p-3">
                                                 <div className="d-flex align-items-start justify-content-between mb-3">
                                                     <div className="d-flex gap-3">
@@ -128,7 +132,7 @@ export default function StudentsPage() {
                         })}
 
                         <div className="col-12 col-lg-6">
-                            <Link href="/dashboard/students/add" className="text-decoration-none">
+                            <Link href="/dashboard/students/add" data-tour="add-student-btn" className="text-decoration-none">
                                 <div className="card border-2 border-dashed rounded-4 h-100" style={{ borderColor: '#cbd5e1', minHeight: '150px' }}>
                                     <div className="card-body p-4 text-center d-flex align-items-center justify-content-center">
                                         <div className="d-flex flex-column align-items-center gap-2">
@@ -153,6 +157,8 @@ export default function StudentsPage() {
                     </div>
                 )}
             </main>
+
+            <Onboarding page="students" />
         </div>
     );
 }

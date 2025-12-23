@@ -54,6 +54,11 @@ const UserSchema = new mongoose.Schema({
     lastPaymentDate: {
         type: Date,
         default: null
+    },
+    // Onboarding tracking - which pages user has seen the guide
+    onboardingCompleted: {
+        type: [String],
+        default: []
     }
 }, {
     timestamps: true

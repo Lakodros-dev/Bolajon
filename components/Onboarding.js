@@ -1,83 +1,160 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useAuth } from '@/context/AuthContext';
+import { useRouter } from 'next/navigation';
 
 /**
- * Onboarding Guide Component
- * Interactive step-by-step tour for new users
+ * Onboarding flow - ketma-ket sahifalar
  */
-
-const ONBOARDING_STEPS = [
-    {
-        target: '[data-tour="welcome"]',
-        title: 'Xush kelibsiz! 👋',
-        content: "Bolajon platformasiga xush kelibsiz! Bu qo'llanma sizga platformadan foydalanishni o'rgatadi.",
-        position: 'bottom'
-    },
-    {
-        target: '[data-tour="stats"]',
-        title: 'Statistika 📊',
-        content: "Bu yerda o'quvchilaringiz soni, o'tilgan darslar va yig'ilgan yulduzlarni ko'rishingiz mumkin.",
-        position: 'bottom'
-    },
-    {
-        target: '[data-tour="book"]',
-        title: 'Mashq kitobi 📚',
-        content: "Bolajon kursining mashq kitobini yuklab oling yoki onlayn o'qing. Bosmaxona variantini ham sotib olishingiz mumkin.",
-        position: 'top'
-    },
-    {
-        target: '[data-tour="quick-actions"]',
-        title: 'Tezkor harakatlar ⚡',
-        content: "Bu tugmalar orqali tez o'quvchi qo'shish, dars boshlash, yulduz va sovg'a berishingiz mumkin.",
-        position: 'top'
-    },
-    {
-        target: '[data-tour="add-student"]',
-        title: "O'quvchi qo'shish 👤",
-        content: "Birinchi qadamingiz - o'quvchilaringizni qo'shing. Har bir bola uchun ism kiriting.",
-        position: 'bottom'
-    },
-    {
-        target: '[data-tour="start-lesson"]',
-        title: 'Dars boshlash 🎬',
-        content: "Video darslarni tomosha qiling va bolalarga ingliz tilini o'rgating.",
-        position: 'bottom'
-    }
+const ONBOARDING_FLOW = [
+    { page: 'dashboard', nextPage: '/dashboard/lessons', nextLabel: 'Darslar' },
+    { page: 'lessons', nextPage: '/dashboard/students', nextLabel: "O'quvchilar" },
+    { page: 'students', nextPage: '/dashboard/games', nextLabel: "O'yinlar" },
+    { page: 'games', nextPage: null, nextLabel: null }
 ];
 
-export default function Onboarding({ onComplete }) {
+const PAGE_STEPS = {
+    dashboard: [
+        {
+            target: '[data-tour="welcome"]',
+            title: 'Xush kelibsiz! 👋',
+            content: "Bolajon - bolalarga ingliz tilini o'rgatish platformasi.",
+            position: 'bottom'
+        },
+        {
+            target: '[data-tour="stats"]',
+            title: 'Statistika 📊',
+            content: "O'quvchilar, darslar va yulduzlar soni.",
+            position: 'bottom'
+        },
+        {
+            target: '[data-tour="book"]',
+            title: 'Mashq kitobi 📚',
+            content: "Kitobni yuklab oling yoki onlayn o'qing.",
+            position: 'top'
+        },
+        {
+            target: '[data-tour="add-student"]',
+            title: "O'quvchi qo'shish 👤",
+            content: "Avval o'quvchilaringizni qo'shing.",
+            position: 'bottom'
+        },
+        {
+            target: '[data-tour="start-lesson"]',
+            title: 'Dars boshlash 🎬',
+            content: "Video darslarni ko'ring va o'rgating.",
+            position: 'bottom'
+        }
+    ],
+    lessons: [
+        {
+            target: '[data-tour="lessons-list"]',
+            title: 'Video darslar 🎬',
+            content: "Barcha darslar darajalar bo'yicha tartiblangan.",
+            position: 'bottom'
+        },
+        {
+            target: '[data-tour="lesson-card"]',
+            title: 'Darsni tanlang',
+            content: "Darsni bosib videoni tomosha qiling.",
+            position: 'bottom'
+        }
+    ],
+    students: [
+        {
+            target: '[data-tour="students-list"]',
+            title: "O'quvchilar 👥",
+            content: "Barcha o'quvchilaringiz shu yerda.",
+            position: 'bottom'
+        },
+        {
+            target: '[data-tour="add-student-btn"]',
+            title: "Yangi o'quvchi ➕",
+            content: "Bu tugma orqali yangi o'quvchi qo'shing.",
+            position: 'top'
+        },
+        {
+            target: '[data-tour="student-card"]',
+            title: "O'quvchi kartasi",
+            content: "Yulduz berish uchun o'quvchini tanlang.",
+            position: 'bottom'
+        }
+    ],
+    games: [
+        {
+            target: '[data-tour="games-list"]',
+            title: "O'yinlar 🎮",
+            content: "Bolalar bilan birga o'ynash uchun o'yinlar.",
+            position: 'bottom'
+        },
+        {
+            target: '[data-tour="game-card"]',
+            title: "O'yin tanlang",
+            content: "O'yinni bosing va bolalar bilan o'ynang.",
+            position: 'bottom'
+        }
+    ]
+};
+
+export default function Onboarding({ page = 'dashboard' }) {
+    const { token } = useAuth();
+    const router = useRouter();
     const [isActive, setIsActive] = useState(false);
     const [currentStep, setCurrentStep] = useState(0);
+    const [showNextPage, setShowNextPage] = useState(false);
     const [tooltipStyle, setTooltipStyle] = useState({});
     const [highlightStyle, setHighlightStyle] = useState({});
+    const [steps, setSteps] = useState([]);
+
+    const flowInfo = ONBOARDING_FLOW.find(f => f.page === page);
 
     useEffect(() => {
-        // Check if onboarding was completed
-        const completed = localStorage.getItem('onboarding_completed');
-        if (!completed) {
-            // Delay to let page render
-            setTimeout(() => setIsActive(true), 1000);
-        }
-    }, []);
+        if (!token) return;
+
+        const checkOnboarding = async () => {
+            try {
+                const res = await fetch('/api/onboarding', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+
+                if (data.success && !data.completedPages?.includes(page)) {
+                    const pageSteps = PAGE_STEPS[page] || [];
+                    if (pageSteps.length > 0) {
+                        setSteps(pageSteps);
+                        setTimeout(() => setIsActive(true), 800);
+                    }
+                }
+            } catch (error) {
+                console.error('Onboarding check error:', error);
+            }
+        };
+
+        checkOnboarding();
+    }, [token, page]);
 
     const calculatePosition = useCallback(() => {
-        const step = ONBOARDING_STEPS[currentStep];
+        if (steps.length === 0 || showNextPage) return;
+
+        const step = steps[currentStep];
+        if (!step) return;
+
         const element = document.querySelector(step.target);
 
         if (!element) {
-            // If element not found, try next step
-            if (currentStep < ONBOARDING_STEPS.length - 1) {
+            if (currentStep < steps.length - 1) {
                 setCurrentStep(prev => prev + 1);
+            } else {
+                finishPageTour();
             }
             return;
         }
 
         const rect = element.getBoundingClientRect();
-        const scrollTop = window.scrollY || document.documentElement.scrollTop;
-        const scrollLeft = window.scrollX || document.documentElement.scrollLeft;
+        const scrollTop = window.scrollY;
+        const scrollLeft = window.scrollX;
 
-        // Highlight position
         setHighlightStyle({
             top: rect.top + scrollTop - 8,
             left: rect.left + scrollLeft - 8,
@@ -85,47 +162,54 @@ export default function Onboarding({ onComplete }) {
             height: rect.height + 16,
         });
 
-        // Tooltip position
-        const tooltipWidth = Math.min(320, window.innerWidth - 32);
+        const tooltipWidth = Math.min(300, window.innerWidth - 32);
         let tooltipTop, tooltipLeft;
 
-        if (step.position === 'bottom') {
-            tooltipTop = rect.bottom + scrollTop + 16;
-            tooltipLeft = Math.max(16, Math.min(
-                rect.left + scrollLeft + (rect.width / 2) - (tooltipWidth / 2),
-                window.innerWidth - tooltipWidth - 16
-            ));
-        } else if (step.position === 'top') {
-            tooltipTop = rect.top + scrollTop - 180;
+        switch (step.position) {
+            case 'top':
+                tooltipTop = rect.top + scrollTop - 150;
+                break;
+            case 'left':
+                tooltipTop = rect.top + scrollTop;
+                tooltipLeft = Math.max(16, rect.left + scrollLeft - tooltipWidth - 16);
+                break;
+            default:
+                tooltipTop = rect.bottom + scrollTop + 16;
+        }
+
+        if (step.position !== 'left') {
             tooltipLeft = Math.max(16, Math.min(
                 rect.left + scrollLeft + (rect.width / 2) - (tooltipWidth / 2),
                 window.innerWidth - tooltipWidth - 16
             ));
         }
 
-        setTooltipStyle({
-            top: tooltipTop,
-            left: tooltipLeft,
-            width: tooltipWidth,
-        });
-
-        // Scroll element into view
+        setTooltipStyle({ top: tooltipTop, left: tooltipLeft, width: tooltipWidth });
         element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }, [currentStep]);
+    }, [currentStep, steps, showNextPage]);
 
     useEffect(() => {
-        if (isActive) {
+        if (isActive && steps.length > 0 && !showNextPage) {
             calculatePosition();
             window.addEventListener('resize', calculatePosition);
             return () => window.removeEventListener('resize', calculatePosition);
         }
-    }, [isActive, currentStep, calculatePosition]);
+    }, [isActive, currentStep, calculatePosition, steps, showNextPage]);
 
-    const handleNext = () => {
-        if (currentStep < ONBOARDING_STEPS.length - 1) {
-            setCurrentStep(prev => prev + 1);
+    const finishPageTour = () => {
+        // Show next page prompt if there's a next page
+        if (flowInfo?.nextPage) {
+            setShowNextPage(true);
         } else {
             handleComplete();
+        }
+    };
+
+    const handleNext = () => {
+        if (currentStep < steps.length - 1) {
+            setCurrentStep(prev => prev + 1);
+        } else {
+            finishPageTour();
         }
     };
 
@@ -135,45 +219,157 @@ export default function Onboarding({ onComplete }) {
         }
     };
 
-    const handleSkip = () => {
-        handleComplete();
+    const handleComplete = async () => {
+        setIsActive(false);
+        setShowNextPage(false);
+
+        try {
+            await fetch('/api/onboarding', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ page })
+            });
+        } catch (error) {
+            console.error('Complete onboarding error:', error);
+        }
     };
 
-    const handleComplete = () => {
+    const handleGoToNextPage = async () => {
+        await handleComplete();
+        if (flowInfo?.nextPage) {
+            router.push(flowInfo.nextPage);
+        }
+    };
+
+    const handleSkipAll = async () => {
         setIsActive(false);
-        localStorage.setItem('onboarding_completed', 'true');
-        if (onComplete) onComplete();
+        setShowNextPage(false);
+
+        try {
+            // Mark all pages as completed
+            for (const flow of ONBOARDING_FLOW) {
+                await fetch('/api/onboarding', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ page: flow.page })
+                });
+            }
+        } catch (error) {
+            console.error('Skip all error:', error);
+        }
     };
 
     if (!isActive) return null;
 
-    const step = ONBOARDING_STEPS[currentStep];
+    // Next page prompt
+    if (showNextPage && flowInfo?.nextPage) {
+        return (
+            <>
+                <div
+                    style={{
+                        position: 'fixed',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        zIndex: 9998,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: '16px'
+                    }}
+                >
+                    <div
+                        style={{
+                            backgroundColor: 'white',
+                            borderRadius: '20px',
+                            padding: '24px',
+                            maxWidth: '340px',
+                            width: '100%',
+                            textAlign: 'center',
+                        }}
+                    >
+                        <div
+                            className="rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center"
+                            style={{
+                                width: '64px',
+                                height: '64px',
+                                backgroundColor: '#dcfce7'
+                            }}
+                        >
+                            <span className="material-symbols-outlined" style={{ fontSize: '32px', color: '#16a34a' }}>
+                                check_circle
+                            </span>
+                        </div>
+
+                        <h4 className="fw-bold mb-2">Ajoyib! ✨</h4>
+                        <p className="text-muted mb-4" style={{ fontSize: '0.9rem' }}>
+                            Bu sahifa bilan tanishdingiz. Endi "{flowInfo.nextLabel}" sahifasiga o'tamizmi?
+                        </p>
+
+                        <div className="d-flex flex-column gap-2">
+                            <button
+                                onClick={handleGoToNextPage}
+                                className="btn btn-primary rounded-pill py-2 d-flex align-items-center justify-content-center gap-2"
+                            >
+                                {flowInfo.nextLabel} sahifasiga o'tish
+                                <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>arrow_forward</span>
+                            </button>
+
+                            <button
+                                onClick={handleComplete}
+                                className="btn btn-light rounded-pill py-2"
+                            >
+                                Keyinroq davom etaman
+                            </button>
+
+                            <button
+                                onClick={handleSkipAll}
+                                className="btn btn-link text-muted text-decoration-none"
+                                style={{ fontSize: '0.8rem' }}
+                            >
+                                Qo'llanmani o'tkazib yuborish
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </>
+        );
+    }
+
+    const step = steps[currentStep];
+    if (!step) return null;
 
     return (
         <>
             {/* Overlay */}
             <div
-                className="onboarding-overlay"
+                onClick={handleComplete}
                 style={{
                     position: 'fixed',
                     top: 0,
                     left: 0,
                     right: 0,
                     bottom: 0,
-                    backgroundColor: 'rgba(0, 0, 0, 0.75)',
+                    backgroundColor: 'rgba(0, 0, 0, 0.7)',
                     zIndex: 9998,
                 }}
-                onClick={handleSkip}
             />
 
             {/* Highlight */}
             <div
-                className="onboarding-highlight"
                 style={{
                     position: 'absolute',
                     ...highlightStyle,
                     borderRadius: '16px',
-                    boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.75)',
+                    boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.7)',
                     zIndex: 9999,
                     pointerEvents: 'none',
                     transition: 'all 0.3s ease',
@@ -182,81 +378,63 @@ export default function Onboarding({ onComplete }) {
 
             {/* Tooltip */}
             <div
-                className="onboarding-tooltip"
                 style={{
                     position: 'absolute',
                     ...tooltipStyle,
                     backgroundColor: 'white',
                     borderRadius: '16px',
-                    padding: '20px',
+                    padding: '16px',
                     zIndex: 10000,
                     boxShadow: '0 10px 40px rgba(0,0,0,0.3)',
                     transition: 'all 0.3s ease',
                 }}
             >
-                {/* Progress dots */}
-                <div className="d-flex justify-content-center gap-1 mb-3">
-                    {ONBOARDING_STEPS.map((_, index) => (
+                {/* Progress */}
+                <div className="d-flex justify-content-center gap-1 mb-2">
+                    {steps.map((_, i) => (
                         <div
-                            key={index}
+                            key={i}
                             style={{
-                                width: index === currentStep ? '24px' : '8px',
-                                height: '8px',
-                                borderRadius: '4px',
-                                backgroundColor: index === currentStep ? '#2b8cee' : '#e5e7eb',
-                                transition: 'all 0.3s ease',
+                                width: i === currentStep ? '20px' : '6px',
+                                height: '6px',
+                                borderRadius: '3px',
+                                backgroundColor: i === currentStep ? '#2b8cee' : '#e5e7eb',
+                                transition: 'all 0.3s',
                             }}
                         />
                     ))}
                 </div>
 
                 {/* Content */}
-                <h4 className="fw-bold mb-2" style={{ fontSize: '1.1rem' }}>{step.title}</h4>
-                <p className="text-muted mb-4" style={{ fontSize: '0.9rem', lineHeight: 1.5 }}>{step.content}</p>
+                <h5 className="fw-bold mb-1" style={{ fontSize: '1rem' }}>{step.title}</h5>
+                <p className="text-muted mb-3" style={{ fontSize: '0.85rem', lineHeight: 1.4 }}>{step.content}</p>
 
                 {/* Navigation */}
                 <div className="d-flex justify-content-between align-items-center">
                     <button
-                        onClick={handleSkip}
+                        onClick={handleSkipAll}
                         className="btn btn-link text-muted text-decoration-none p-0"
-                        style={{ fontSize: '0.85rem' }}
+                        style={{ fontSize: '0.8rem' }}
                     >
-                        O'tkazib yuborish
+                        O'tkazish
                     </button>
 
                     <div className="d-flex gap-2">
                         {currentStep > 0 && (
-                            <button
-                                onClick={handlePrev}
-                                className="btn btn-light btn-sm rounded-pill px-3"
-                            >
-                                <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>arrow_back</span>
+                            <button onClick={handlePrev} className="btn btn-light btn-sm rounded-pill px-2">
+                                <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>arrow_back</span>
                             </button>
                         )}
                         <button
                             onClick={handleNext}
-                            className="btn btn-primary btn-sm rounded-pill px-4 d-flex align-items-center gap-1"
+                            className="btn btn-primary btn-sm rounded-pill px-3 d-flex align-items-center gap-1"
                         >
-                            {currentStep === ONBOARDING_STEPS.length - 1 ? (
-                                <>
-                                    Tayyor
-                                    <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>check</span>
-                                </>
-                            ) : (
-                                <>
-                                    Keyingi
-                                    <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>arrow_forward</span>
-                                </>
-                            )}
+                            {currentStep === steps.length - 1 ? 'Tayyor' : 'Keyingi'}
+                            <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>
+                                {currentStep === steps.length - 1 ? 'check' : 'arrow_forward'}
+                            </span>
                         </button>
                     </div>
-                </div>
-
-                {/* Step counter */}
-                <div className="text-center mt-3">
-                    <span className="text-muted" style={{ fontSize: '0.75rem' }}>
-                        {currentStep + 1} / {ONBOARDING_STEPS.length}
-                    </span>
                 </div>
             </div>
         </>
