@@ -3,11 +3,12 @@
 import { useState, useEffect } from 'react';
 import { useData } from '@/context/DataContext';
 import Header from '@/components/dashboard/Header';
+import Onboarding from '@/components/Onboarding';
 import Link from 'next/link';
 
 const quickActions = [
-    { icon: 'person_add', label: "O'quvchi qo'shish", href: '/dashboard/students/add', color: '#E0F2FE', iconColor: '#0284c7' },
-    { icon: 'play_lesson', label: 'Dars boshlash', href: '/dashboard/lessons', color: '#DCFCE7', iconColor: '#16a34a' },
+    { icon: 'person_add', label: "O'quvchi qo'shish", href: '/dashboard/students/add', color: '#E0F2FE', iconColor: '#0284c7', tour: 'add-student' },
+    { icon: 'play_lesson', label: 'Dars boshlash', href: '/dashboard/lessons', color: '#DCFCE7', iconColor: '#16a34a', tour: 'start-lesson' },
     { icon: 'star', label: 'Yulduz berish', href: '/dashboard/students', color: '#FEF3C7', iconColor: '#d97706' },
     { icon: 'redeem', label: "Sovg'a berish", href: '/dashboard/rewards', color: '#F3E8FF', iconColor: '#9333ea' },
 ];
@@ -53,7 +54,7 @@ export default function DashboardPage() {
 
             <main className="p-3">
                 {/* Welcome Banner */}
-                <div className="card border-0 rounded-4 mb-4 overflow-hidden" style={{ background: 'linear-gradient(135deg, #2b8cee 0%, #1e40af 100%)' }}>
+                <div data-tour="welcome" className="card border-0 rounded-4 mb-4 overflow-hidden" style={{ background: 'linear-gradient(135deg, #2b8cee 0%, #1e40af 100%)' }}>
                     <div className="card-body text-white p-4">
                         <h2 className="h4 fw-bold mb-2">
                             Ingliz tilini o'rgatishga <br />
@@ -70,7 +71,7 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Stats Cards */}
-                <div className="row g-2 mb-4">
+                <div data-tour="stats" className="row g-2 mb-4">
                     <div className="col-4">
                         <div className="card border-0 rounded-4 h-100 card-pastel-blue">
                             <div className="card-body text-center p-2 p-sm-3">
@@ -101,7 +102,7 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Book Promo Card */}
-                <div className="card border-0 rounded-4 mb-4 overflow-hidden" style={{ background: 'linear-gradient(135deg, #f59e0b 0%, #ea580c 100%)' }}>
+                <div data-tour="book" className="card border-0 rounded-4 mb-4 overflow-hidden" style={{ background: 'linear-gradient(135deg, #f59e0b 0%, #ea580c 100%)' }}>
                     <div className="card-body text-white p-4">
                         <div className="d-flex align-items-center gap-3">
                             <Link href="/dashboard/book" className="rounded-4 p-3 bg-white bg-opacity-25 text-white text-decoration-none" style={{ cursor: 'pointer' }}>
@@ -133,11 +134,15 @@ export default function DashboardPage() {
 
                 {/* Quick Actions */}
                 <h3 className="h6 fw-bold mb-3">Tezkor harakatlar</h3>
-                <div className="row g-3 mb-4">
+                <div data-tour="quick-actions" className="row g-3 mb-4">
                     {quickActions.map((action, index) => (
                         <div key={index} className="col-6 col-lg-3">
                             <Link href={action.href} prefetch={true} className="text-decoration-none">
-                                <div className="card border-0 rounded-4 lesson-card h-100" style={{ backgroundColor: action.color }}>
+                                <div
+                                    data-tour={action.tour}
+                                    className="card border-0 rounded-4 lesson-card h-100"
+                                    style={{ backgroundColor: action.color }}
+                                >
                                     <div className="card-body p-3 d-flex flex-column flex-lg-row align-items-center gap-3">
                                         <div className="rounded-3 p-2" style={{ backgroundColor: 'white' }}>
                                             <span className="material-symbols-outlined" style={{ color: action.iconColor, fontSize: '24px' }}>
@@ -270,6 +275,9 @@ export default function DashboardPage() {
                     </div>
                 </div>
             )}
+
+            {/* Onboarding Guide */}
+            <Onboarding />
         </div>
     );
 }
