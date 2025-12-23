@@ -104,19 +104,22 @@ export default function DashboardPage() {
                 <div className="card border-0 rounded-4 mb-4 overflow-hidden" style={{ background: 'linear-gradient(135deg, #f59e0b 0%, #ea580c 100%)' }}>
                     <div className="card-body text-white p-4">
                         <div className="d-flex align-items-center gap-3">
-                            <div className="rounded-4 p-3 bg-white bg-opacity-25">
+                            <Link href="/dashboard/book" className="rounded-4 p-3 bg-white bg-opacity-25 text-white text-decoration-none" style={{ cursor: 'pointer' }}>
                                 <span className="material-symbols-outlined" style={{ fontSize: '40px' }}>auto_stories</span>
-                            </div>
+                            </Link>
                             <div className="flex-grow-1">
-                                <h3 className="h5 fw-bold mb-1">Bolajon Darsligi</h3>
-                                <p className="small mb-0 opacity-75">Elektron kitobni o'qing yoki bosmaxona variantini xarid qiling</p>
+                                <h3 className="h6 fw-bold mb-0">Bolajon kursining mashq kitobidan foydalaning</h3>
                             </div>
                         </div>
                         <div className="d-flex gap-2 mt-3">
-                            <Link href="/dashboard/book" className="btn btn-light btn-sm rounded-pill px-4 fw-semibold d-inline-flex align-items-center">
-                                <span className="material-symbols-outlined me-1" style={{ fontSize: '18px' }}>menu_book</span>
-                                Elektron kitob
-                            </Link>
+                            <a
+                                href="/book/bolajon-darslik.pdf"
+                                download="Bolajon-Mashq-Kitobi.pdf"
+                                className="btn btn-light btn-sm rounded-pill px-4 fw-semibold d-inline-flex align-items-center"
+                            >
+                                <span className="material-symbols-outlined me-1" style={{ fontSize: '18px' }}>download</span>
+                                Yuklab olish
+                            </a>
                             <button
                                 onClick={() => setShowBuyModal(true)}
                                 className="btn btn-outline-light btn-sm rounded-pill px-4 fw-semibold d-inline-flex align-items-center"
