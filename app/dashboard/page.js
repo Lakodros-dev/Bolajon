@@ -108,7 +108,7 @@ export default function DashboardPage() {
                                 <span className="material-symbols-outlined" style={{ fontSize: '40px' }}>auto_stories</span>
                             </Link>
                             <div className="flex-grow-1">
-                                <h3 className="h6 fw-bold mb-0">Bolajon kursining mashq kitobidan foydalaning</h3>
+                                <h3 className="fw-bold mb-0" style={{ fontSize: '1.1rem' }}>Bolajon kursining mashq kitobidan foydalaning</h3>
                             </div>
                         </div>
                         <div className="d-flex gap-2 mt-3">
