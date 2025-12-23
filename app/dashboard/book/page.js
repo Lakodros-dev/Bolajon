@@ -1,19 +1,96 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 
 const PDF_PATH = '/book/bolajon-darslik.pdf';
 
 export default function BookPage() {
     const [loading, setLoading] = useState(true);
+    const [loadingProgress, setLoadingProgress] = useState(0);
+    const [numPages, setNumPages] = useState(0);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [scale, setScale] = useState(1);
     const [showBuyModal, setShowBuyModal] = useState(false);
     const [paymentInfo, setPaymentInfo] = useState(null);
     const [copied, setCopied] = useState(false);
+    const [pdfDoc, setPdfDoc] = useState(null);
+    const [renderedPages, setRenderedPages] = useState({});
+
+    const containerRef = useRef(null);
+    const canvasRefs = useRef({});
 
     useEffect(() => {
         fetchPaymentInfo();
+        loadPdfJs();
     }, []);
+
+    const loadPdfJs = async () => {
+        // Load PDF.js from CDN
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+        script.onload = () => {
+            window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+                'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+            loadPdf();
+        };
+        document.head.appendChild(script);
+    };
+
+    const loadPdf = async () => {
+        try {
+            const loadingTask = window.pdfjsLib.getDocument(PDF_PATH);
+
+            loadingTask.onProgress = (progress) => {
+                if (progress.total > 0) {
+                    setLoadingProgress(Math.round((progress.loaded / progress.total) * 100));
+                }
+            };
+
+            const pdf = await loadingTask.promise;
+            setPdfDoc(pdf);
+            setNumPages(pdf.numPages);
+            setLoading(false);
+        } catch (error) {
+            console.error('PDF yuklashda xatolik:', error);
+            setLoading(false);
+        }
+    };
+
+    const renderPage = useCallback(async (pageNum) => {
+        if (!pdfDoc || renderedPages[pageNum]) return;
+
+        const page = await pdfDoc.getPage(pageNum);
+        const canvas = canvasRefs.current[pageNum];
+        if (!canvas) return;
+
+        const context = canvas.getContext('2d');
+        const viewport = page.getViewport({ scale: scale * 1.5 });
+
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
+        canvas.style.width = '100%';
+        canvas.style.height = 'auto';
+
+        await page.render({
+            canvasContext: context,
+            viewport: viewport
+        }).promise;
+
+        setRenderedPages(prev => ({ ...prev, [pageNum]: true }));
+    }, [pdfDoc, scale, renderedPages]);
+
+    useEffect(() => {
+        if (pdfDoc) {
+            // Render current page and adjacent pages
+            const pagesToRender = [currentPage - 1, currentPage, currentPage + 1]
+                .filter(p => p >= 1 && p <= numPages);
+
+            pagesToRender.forEach(pageNum => {
+                renderPage(pageNum);
+            });
+        }
+    }, [pdfDoc, currentPage, numPages, renderPage]);
 
     const fetchPaymentInfo = async () => {
         try {
@@ -40,9 +117,38 @@ export default function BookPage() {
         }
     };
 
+    const goToPage = (page) => {
+        const newPage = Math.max(1, Math.min(page, numPages));
+        setCurrentPage(newPage);
+        // Scroll to page
+        const pageElement = document.getElementById(`page-${newPage}`);
+        if (pageElement) {
+            pageElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    };
+
+    const handleScroll = () => {
+        if (!containerRef.current) return;
+        const container = containerRef.current;
+        const scrollTop = container.scrollTop;
+
+        // Find which page is most visible
+        for (let i = 1; i <= numPages; i++) {
+            const pageElement = document.getElementById(`page-${i}`);
+            if (pageElement) {
+                const rect = pageElement.getBoundingClientRect();
+                const containerRect = container.getBoundingClientRect();
+                if (rect.top >= containerRect.top - 100 && rect.top <= containerRect.top + 200) {
+                    if (currentPage !== i) setCurrentPage(i);
+                    break;
+                }
+            }
+        }
+    };
+
     return (
         <div className="page-content d-flex flex-column" style={{ height: '100vh' }}>
-            {/* Buy Book Banner - Pinned */}
+            {/* Buy Book Banner */}
             <div className="text-white py-2 px-3 d-flex align-items-center justify-content-between flex-wrap gap-2"
                 style={{
                     background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
@@ -52,7 +158,7 @@ export default function BookPage() {
                 }}>
                 <div className="d-flex align-items-center gap-2">
                     <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>auto_stories</span>
-                    <span className="small fw-semibold">Kitobning bosmaxona variantini xarid qiling!</span>
+                    <span className="small fw-semibold">Bosmaxona variantini xarid qiling!</span>
                 </div>
                 <button
                     onClick={() => setShowBuyModal(true)}
@@ -63,34 +169,85 @@ export default function BookPage() {
                 </button>
             </div>
 
-            {/* Header */}
-            <div className="bg-white border-bottom px-3 py-3">
-                <div className="d-flex align-items-center gap-3">
-                    <Link href="/dashboard" className="btn btn-light rounded-circle p-2">
-                        <span className="material-symbols-outlined">arrow_back</span>
-                    </Link>
-                    <div>
-                        <h1 className="h6 fw-bold mb-0">Bolajon Darsligi</h1>
-                        <p className="small text-muted mb-0">Elektron variant</p>
+            {/* Header with Navigation */}
+            <div className="bg-white border-bottom px-3 py-2">
+                <div className="d-flex align-items-center justify-content-between">
+                    <div className="d-flex align-items-center gap-2">
+                        <Link href="/dashboard" className="btn btn-light rounded-circle p-2">
+                            <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>arrow_back</span>
+                        </Link>
+                        <div>
+                            <h1 className="small fw-bold mb-0">Bolajon Darsligi</h1>
+                        </div>
                     </div>
+
+                    {!loading && numPages > 0 && (
+                        <div className="d-flex align-items-center gap-2">
+                            <button
+                                onClick={() => goToPage(currentPage - 1)}
+                                disabled={currentPage <= 1}
+                                className="btn btn-sm btn-light rounded-circle p-1"
+                            >
+                                <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>chevron_left</span>
+                            </button>
+                            <span className="small fw-semibold" style={{ minWidth: '60px', textAlign: 'center' }}>
+                                {currentPage} / {numPages}
+                            </span>
+                            <button
+                                onClick={() => goToPage(currentPage + 1)}
+                                disabled={currentPage >= numPages}
+                                className="btn btn-sm btn-light rounded-circle p-1"
+                            >
+                                <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>chevron_right</span>
+                            </button>
+                        </div>
+                    )}
                 </div>
             </div>
 
             {/* PDF Viewer */}
-            <div className="flex-grow-1 position-relative bg-light">
-                {loading && (
-                    <div className="position-absolute top-50 start-50 translate-middle text-center">
+            <div
+                ref={containerRef}
+                className="flex-grow-1 overflow-auto bg-secondary bg-opacity-25"
+                onScroll={handleScroll}
+                style={{ scrollBehavior: 'smooth' }}
+            >
+                {loading ? (
+                    <div className="d-flex flex-column align-items-center justify-content-center h-100">
                         <div className="spinner-border text-primary mb-3" role="status"></div>
-                        <p className="text-muted">Kitob yuklanmoqda...</p>
+                        <p className="text-muted mb-2">Kitob yuklanmoqda...</p>
+                        {loadingProgress > 0 && (
+                            <div className="progress" style={{ width: '200px', height: '6px' }}>
+                                <div
+                                    className="progress-bar"
+                                    style={{ width: `${loadingProgress}%` }}
+                                ></div>
+                            </div>
+                        )}
+                        <p className="small text-muted mt-2">{loadingProgress}%</p>
+                    </div>
+                ) : (
+                    <div className="d-flex flex-column align-items-center py-3 gap-3">
+                        {Array.from({ length: numPages }, (_, i) => i + 1).map(pageNum => (
+                            <div
+                                key={pageNum}
+                                id={`page-${pageNum}`}
+                                className="bg-white shadow-sm"
+                                style={{ maxWidth: '100%', width: 'fit-content' }}
+                            >
+                                <canvas
+                                    ref={el => canvasRefs.current[pageNum] = el}
+                                    style={{ display: 'block', maxWidth: '100%' }}
+                                />
+                                {!renderedPages[pageNum] && (
+                                    <div className="d-flex align-items-center justify-content-center p-5">
+                                        <div className="spinner-border spinner-border-sm text-primary"></div>
+                                    </div>
+                                )}
+                            </div>
+                        ))}
                     </div>
                 )}
-                <iframe
-                    src={`${PDF_PATH}#toolbar=0&navpanes=0`}
-                    className="w-100 h-100 border-0"
-                    style={{ display: loading ? 'none' : 'block' }}
-                    onLoad={() => setLoading(false)}
-                    title="Bolajon Darsligi"
-                />
             </div>
 
             {/* Buy Book Modal */}
@@ -110,7 +267,6 @@ export default function BookPage() {
                                 ></button>
                             </div>
                             <div className="modal-body">
-                                {/* Price */}
                                 <div className="bg-warning bg-opacity-10 rounded-4 p-4 mb-4 text-center">
                                     <p className="text-warning small fw-semibold mb-1">Bosmaxona varianti narxi</p>
                                     <h2 className="display-6 fw-bold text-warning mb-0">
@@ -118,15 +274,11 @@ export default function BookPage() {
                                     </h2>
                                 </div>
 
-                                {/* Payment Info */}
                                 <div className="bg-light rounded-3 p-3 mb-3">
                                     <p className="small text-muted mb-1">Karta raqami</p>
                                     <div className="d-flex align-items-center justify-content-between">
                                         <p className="fw-bold font-monospace mb-0 fs-5">{paymentInfo.cardNumber}</p>
-                                        <button
-                                            onClick={copyCardNumber}
-                                            className="btn btn-sm btn-outline-primary rounded-2"
-                                        >
+                                        <button onClick={copyCardNumber} className="btn btn-sm btn-outline-primary rounded-2">
                                             <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
                                                 {copied ? 'check' : 'content_copy'}
                                             </span>
@@ -149,7 +301,6 @@ export default function BookPage() {
                                     </div>
                                 </div>
 
-                                {/* Contact */}
                                 <p className="text-muted small mb-3 text-center">
                                     To'lovni amalga oshirgandan so'ng admin bilan bog'laning
                                 </p>

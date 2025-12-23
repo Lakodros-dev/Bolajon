@@ -27,13 +27,30 @@ const nextConfig = {
         removeConsole: process.env.NODE_ENV === 'production',
     },
 
-
-
     // Enable React strict mode for better performance
     reactStrictMode: false,
 
     // Reduce bundle size
     poweredByHeader: false,
+
+    // Cache headers for static files
+    async headers() {
+        return [
+            {
+                source: '/book/:path*',
+                headers: [
+                    {
+                        key: 'Cache-Control',
+                        value: 'public, max-age=31536000, immutable',
+                    },
+                    {
+                        key: 'Accept-Ranges',
+                        value: 'bytes',
+                    },
+                ],
+            },
+        ];
+    },
 };
 
 export default nextConfig;
