@@ -249,17 +249,15 @@ export default function Onboarding({ page = 'dashboard' }) {
         setShowNextPage(false);
 
         try {
-            // Mark all pages as completed
-            for (const flow of ONBOARDING_FLOW) {
-                await fetch('/api/onboarding', {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ page: flow.page })
-                });
-            }
+            // Mark all pages as completed in one request
+            await fetch('/api/onboarding', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ skipAll: true })
+            });
         } catch (error) {
             console.error('Skip all error:', error);
         }
@@ -332,9 +330,9 @@ export default function Onboarding({ page = 'dashboard' }) {
 
                             <button
                                 onClick={handleSkipAll}
-                                className="btn btn-link text-muted text-decoration-none"
-                                style={{ fontSize: '0.8rem' }}
+                                className="btn btn-outline-secondary rounded-pill py-2"
                             >
+                                <span className="material-symbols-outlined me-1" style={{ fontSize: '18px' }}>close</span>
                                 Qo'llanmani o'tkazib yuborish
                             </button>
                         </div>
@@ -413,9 +411,9 @@ export default function Onboarding({ page = 'dashboard' }) {
                 <div className="d-flex justify-content-between align-items-center">
                     <button
                         onClick={handleSkipAll}
-                        className="btn btn-link text-muted text-decoration-none p-0"
-                        style={{ fontSize: '0.8rem' }}
+                        className="btn btn-outline-danger btn-sm rounded-pill px-3 d-flex align-items-center gap-1"
                     >
+                        <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>close</span>
                         O'tkazish
                     </button>
 

@@ -39,7 +39,20 @@ export async function POST(request) {
 
         await dbConnect();
 
-        const { page } = await request.json();
+        const { page, skipAll } = await request.json();
+
+        if (skipAll) {
+            // Mark all pages as completed
+            const allPages = ['dashboard', 'lessons', 'students', 'games'];
+            await User.findByIdAndUpdate(
+                auth.user._id,
+                { $addToSet: { onboardingCompleted: { $each: allPages } } }
+            );
+            return successResponse({
+                message: 'All onboarding skipped',
+                completedPages: allPages
+            });
+        }
 
         if (!page) {
             return errorResponse('Sahifa nomi kerak', 400);
