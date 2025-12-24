@@ -176,95 +176,146 @@ export default function GamesPage() {
                     </div>
                 </div>
 
-                {/* Roadmap */}
-                <div className="roadmap-container">
+                {/* Snake Roadmap */}
+                <div className="roadmap-container px-2">
                     {lessons.length === 0 ? (
                         <div className="text-center py-5">
                             <p className="text-muted">Darslar topilmadi</p>
                         </div>
                     ) : (
-                        <div className="position-relative">
-                            {/* Connecting Line */}
-                            <div
-                                className="position-absolute"
-                                style={{
-                                    left: '50%',
-                                    top: 0,
-                                    bottom: 0,
-                                    width: 4,
-                                    backgroundColor: '#e0e0e0',
-                                    transform: 'translateX(-50%)',
-                                    zIndex: 0
-                                }}
-                            />
-
-                            {/* Lesson Steps */}
+                        <div className="snake-roadmap">
                             {lessons.map((lesson, index) => {
                                 const lessonCompleted = progress.completedLessons.includes(lesson._id);
                                 const gameWon = progress.wonGames.includes(lesson._id);
                                 const isLeft = index % 2 === 0;
+                                const isFirst = index === 0;
+                                const isLast = index === lessons.length - 1;
 
                                 return (
-                                    <div
-                                        key={lesson._id}
-                                        className="position-relative d-flex align-items-center mb-4"
-                                        style={{
-                                            flexDirection: isLeft ? 'row' : 'row-reverse'
-                                        }}
-                                    >
-                                        {/* Lesson Info Card */}
+                                    <div key={lesson._id} className="snake-step">
+                                        {/* Row with card and circle */}
                                         <div
-                                            className="card border-0 rounded-3 shadow-sm"
+                                            className="d-flex align-items-center"
                                             style={{
-                                                width: 'calc(50% - 50px)',
-                                                backgroundColor: lessonCompleted && gameWon ? '#DCFCE7' : '#fff'
+                                                flexDirection: isLeft ? 'row' : 'row-reverse'
                                             }}
                                         >
-                                            <div className="card-body p-3">
-                                                <div className="d-flex align-items-center gap-2 mb-2">
-                                                    <span className="badge bg-primary rounded-pill">
-                                                        {index + 1}-dars
-                                                    </span>
-                                                    {lessonCompleted && gameWon && (
-                                                        <span className="badge bg-success rounded-pill">
-                                                            ✓ Tugallangan
+                                            {/* Lesson Card */}
+                                            <div
+                                                className="card border-0 rounded-4 shadow-sm flex-grow-1"
+                                                style={{
+                                                    backgroundColor: lessonCompleted && gameWon ? '#DCFCE7' : '#fff',
+                                                    maxWidth: 'calc(100% - 100px)'
+                                                }}
+                                            >
+                                                <div className="card-body p-3">
+                                                    <div className="d-flex align-items-center gap-2 mb-2">
+                                                        <span className="badge bg-primary rounded-pill">
+                                                            {index + 1}-dars
                                                         </span>
-                                                    )}
+                                                        {lessonCompleted && gameWon && (
+                                                            <span className="badge bg-success rounded-pill">
+                                                                ✓ Tugallangan
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    <h6 className="fw-bold mb-1">{lesson.title}</h6>
+                                                    <p className="text-muted mb-2 small">
+                                                        {lesson.description?.substring(0, 50)}...
+                                                    </p>
+                                                    <Link
+                                                        href={`/games/vocabulary/${lesson._id}?student=${selectedStudent._id}`}
+                                                        className="btn btn-sm btn-primary d-inline-flex align-items-center gap-1"
+                                                    >
+                                                        <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>
+                                                            play_arrow
+                                                        </span>
+                                                        O'ynash
+                                                    </Link>
                                                 </div>
-                                                <h6 className="fw-bold mb-1 small">{lesson.title}</h6>
-                                                <p className="text-muted mb-2" style={{ fontSize: '0.75rem' }}>
-                                                    {lesson.description?.substring(0, 60)}...
-                                                </p>
-                                                <Link
-                                                    href={`/games/vocabulary/${lesson._id}?student=${selectedStudent._id}`}
-                                                    className="btn btn-sm btn-primary"
-                                                >
-                                                    <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>
-                                                        play_arrow
-                                                    </span>
-                                                    O'ynash
-                                                </Link>
+                                            </div>
+
+                                            {/* Horizontal connector line */}
+                                            <div
+                                                style={{
+                                                    width: 20,
+                                                    height: 4,
+                                                    backgroundColor: lessonCompleted ? '#16a34a' : '#e5e7eb',
+                                                    flexShrink: 0
+                                                }}
+                                            />
+
+                                            {/* YinYang Circle */}
+                                            <div style={{ flexShrink: 0 }}>
+                                                <YinYangProgress
+                                                    lessonCompleted={lessonCompleted}
+                                                    gameWon={gameWon}
+                                                    size={65}
+                                                />
                                             </div>
                                         </div>
 
-                                        {/* YinYang Progress Indicator */}
-                                        <div
-                                            className="position-absolute"
-                                            style={{
-                                                left: '50%',
-                                                transform: 'translateX(-50%)',
-                                                zIndex: 1
-                                            }}
-                                        >
-                                            <YinYangProgress
-                                                lessonCompleted={lessonCompleted}
-                                                gameWon={gameWon}
-                                                size={70}
-                                            />
-                                        </div>
+                                        {/* Vertical connector to next step (not for last item) */}
+                                        {!isLast && (
+                                            <div
+                                                className="d-flex"
+                                                style={{
+                                                    justifyContent: isLeft ? 'flex-end' : 'flex-start',
+                                                    paddingLeft: isLeft ? 0 : 30,
+                                                    paddingRight: isLeft ? 30 : 0
+                                                }}
+                                            >
+                                                <div
+                                                    style={{
+                                                        width: 4,
+                                                        height: 30,
+                                                        backgroundColor: lessonCompleted && gameWon ? '#22c55e' : '#e5e7eb',
+                                                        borderRadius: 2
+                                                    }}
+                                                />
+                                            </div>
+                                        )}
 
-                                        {/* Empty space for other side */}
-                                        <div style={{ width: 'calc(50% - 50px)' }} />
+                                        {/* Horizontal connector for zigzag (not for last item) */}
+                                        {!isLast && (
+                                            <div
+                                                className="d-flex align-items-center"
+                                                style={{
+                                                    justifyContent: 'center',
+                                                    padding: '0 30px'
+                                                }}
+                                            >
+                                                <div
+                                                    style={{
+                                                        height: 4,
+                                                        flex: 1,
+                                                        backgroundColor: lessonCompleted && gameWon ? '#22c55e' : '#e5e7eb',
+                                                        borderRadius: 2
+                                                    }}
+                                                />
+                                            </div>
+                                        )}
+
+                                        {/* Second vertical connector (not for last item) */}
+                                        {!isLast && (
+                                            <div
+                                                className="d-flex"
+                                                style={{
+                                                    justifyContent: isLeft ? 'flex-start' : 'flex-end',
+                                                    paddingLeft: isLeft ? 30 : 0,
+                                                    paddingRight: isLeft ? 0 : 30
+                                                }}
+                                            >
+                                                <div
+                                                    style={{
+                                                        width: 4,
+                                                        height: 30,
+                                                        backgroundColor: '#e5e7eb',
+                                                        borderRadius: 2
+                                                    }}
+                                                />
+                                            </div>
+                                        )}
                                     </div>
                                 );
                             })}
@@ -275,12 +326,14 @@ export default function GamesPage() {
 
             <style jsx>{`
                 .roadmap-container {
-                    padding: 20px 0;
+                    padding: 10px 0;
                 }
-                @media (max-width: 576px) {
-                    .roadmap-container .card {
-                        width: calc(100% - 90px) !important;
-                    }
+                .snake-roadmap {
+                    max-width: 500px;
+                    margin: 0 auto;
+                }
+                .snake-step {
+                    margin-bottom: 0;
                 }
             `}</style>
         </div>
