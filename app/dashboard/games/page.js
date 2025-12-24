@@ -30,7 +30,8 @@ export default function GamesPage() {
         try {
             const res = await fetch('/api/students');
             const data = await res.json();
-            if (data.students) {
+            console.log('Students API response:', data);
+            if (data.students && data.students.length > 0) {
                 setStudents(data.students);
             }
         } catch (error) {

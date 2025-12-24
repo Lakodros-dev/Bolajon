@@ -19,7 +19,10 @@ export async function GET(request) {
         await dbConnect();
 
         // Teachers see only their students, admins see all
-        const query = auth.user.role === 'admin' ? {} : { teacher: auth.user._id };
+        // Only show active students
+        const query = auth.user.role === 'admin'
+            ? { isActive: true }
+            : { teacher: auth.user._id, isActive: true };
 
         const students = await Student.find(query)
             .sort({ createdAt: -1 })
