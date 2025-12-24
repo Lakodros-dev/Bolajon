@@ -28,9 +28,8 @@ export default function GamesPage() {
 
     const fetchStudents = async () => {
         try {
-            const res = await fetch('/api/students');
+            const res = await fetch('/api/students', { credentials: 'include' });
             const data = await res.json();
-            console.log('Students API response:', data);
             if (data.students && data.students.length > 0) {
                 setStudents(data.students);
             }
@@ -43,7 +42,7 @@ export default function GamesPage() {
 
     const fetchLessons = async () => {
         try {
-            const res = await fetch('/api/lessons');
+            const res = await fetch('/api/lessons', { credentials: 'include' });
             const data = await res.json();
             if (data.lessons) {
                 setLessons(data.lessons.sort((a, b) => a.order - b.order || a.level - b.level));
@@ -55,7 +54,7 @@ export default function GamesPage() {
 
     const fetchProgress = async () => {
         try {
-            const res = await fetch(`/api/game-progress?studentId=${selectedStudent._id}`);
+            const res = await fetch(`/api/game-progress?studentId=${selectedStudent._id}`, { credentials: 'include' });
             const data = await res.json();
             setProgress(data);
         } catch (error) {
