@@ -4,59 +4,41 @@ import { useState, useEffect } from 'react';
 import Header from '@/components/dashboard/Header';
 import Link from 'next/link';
 import YinYangProgress from '@/components/YinYangProgress';
+import { useData } from '@/context/DataContext';
+import { useAuth } from '@/context/AuthContext';
 
 export default function GamesPage() {
-    const [students, setStudents] = useState([]);
+    const { students, lessons: allLessons, initialLoading } = useData();
+    const { getAuthHeader } = useAuth();
     const [selectedStudent, setSelectedStudent] = useState(null);
     const [lessons, setLessons] = useState([]);
     const [progress, setProgress] = useState({ completedLessons: [], wonGames: [] });
-    const [loading, setLoading] = useState(true);
     const [showStudentModal, setShowStudentModal] = useState(true);
 
-    // Fetch students
+    // Sort lessons when loaded
     useEffect(() => {
-        fetchStudents();
-    }, []);
+        if (allLessons && allLessons.length > 0) {
+            const sorted = [...allLessons].sort((a, b) => a.order - b.order || a.level - b.level);
+            setLessons(sorted);
+        }
+    }, [allLessons]);
 
-    // Fetch lessons and progress when student selected
+    // Fetch progress when student selected
     useEffect(() => {
         if (selectedStudent) {
-            fetchLessons();
             fetchProgress();
         }
     }, [selectedStudent]);
 
-    const fetchStudents = async () => {
-        try {
-            const res = await fetch('/api/students', { credentials: 'include' });
-            const data = await res.json();
-            if (data.students && data.students.length > 0) {
-                setStudents(data.students);
-            }
-        } catch (error) {
-            console.error('Error fetching students:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const fetchLessons = async () => {
-        try {
-            const res = await fetch('/api/lessons', { credentials: 'include' });
-            const data = await res.json();
-            if (data.lessons) {
-                setLessons(data.lessons.sort((a, b) => a.order - b.order || a.level - b.level));
-            }
-        } catch (error) {
-            console.error('Error fetching lessons:', error);
-        }
-    };
-
     const fetchProgress = async () => {
         try {
-            const res = await fetch(`/api/game-progress?studentId=${selectedStudent._id}`, { credentials: 'include' });
+            const res = await fetch(`/api/game-progress?studentId=${selectedStudent._id}`, {
+                headers: getAuthHeader()
+            });
             const data = await res.json();
-            setProgress(data);
+            if (data.completedLessons) {
+                setProgress(data);
+            }
         } catch (error) {
             console.error('Error fetching progress:', error);
         }
@@ -83,7 +65,7 @@ export default function GamesPage() {
                         <p className="text-muted">Qaysi farzandingiz uchun o'yin o'ynaysiz?</p>
                     </div>
 
-                    {loading ? (
+                    {initialLoading ? (
                         <div className="text-center py-5">
                             <div className="spinner-border text-primary" role="status">
                                 <span className="visually-hidden">Yuklanmoqda...</span>
