@@ -50,12 +50,20 @@ export default function DashboardPage() {
             const res = await fetch('/api/auth/me');
             const data = await res.json();
             if (data.success && data.user) {
-                setDaysRemaining(data.user.daysRemaining || 0);
+                const days = data.user.daysRemaining || 0;
+                setDaysRemaining(days);
+                // Auto-open payment modal if 0 days remaining
+                if (days <= 0 && data.user.role !== 'admin') {
+                    setShowPaymentModal(true);
+                }
             }
         } catch (error) {
             console.error('Failed to fetch subscription info:', error);
         }
     };
+
+    // Check if subscription expired
+    const isExpired = daysRemaining <= 0 && user?.role !== 'admin';
 
     const copyCardNumber = () => {
         if (paymentInfo?.cardNumber) {
@@ -75,7 +83,34 @@ export default function DashboardPage() {
                 onPaymentClick={() => setShowPaymentModal(true)}
             />
 
-            <main className="p-3">
+            <main className="p-3 position-relative">
+                {/* Expired Overlay */}
+                {isExpired && (
+                    <div
+                        className="position-absolute top-0 start-0 w-100 h-100 d-flex flex-column align-items-center justify-content-center"
+                        style={{
+                            backgroundColor: 'rgba(255,255,255,0.95)',
+                            zIndex: 100,
+                            borderRadius: '1rem'
+                        }}
+                    >
+                        <span className="material-symbols-outlined text-danger mb-3" style={{ fontSize: '64px' }}>
+                            lock
+                        </span>
+                        <h4 className="fw-bold text-danger mb-2">Obuna muddati tugadi</h4>
+                        <p className="text-muted mb-4 text-center px-4">
+                            Platformadan foydalanishni davom ettirish uchun obunani yangilang
+                        </p>
+                        <button
+                            onClick={() => setShowPaymentModal(true)}
+                            className="btn btn-danger rounded-pill px-4 py-2 d-flex align-items-center gap-2"
+                        >
+                            <span className="material-symbols-outlined">payments</span>
+                            To'lov qilish
+                        </button>
+                    </div>
+                )}
+
                 {/* Welcome Banner */}
                 <div data-tour="welcome" className="card border-0 rounded-4 mb-4 overflow-hidden" style={{ background: 'linear-gradient(135deg, #2b8cee 0%, #1e40af 100%)' }}>
                     <div className="card-body text-white p-4">
@@ -306,13 +341,16 @@ export default function DashboardPage() {
                             <div className="modal-header border-0 pb-0">
                                 <h5 className="modal-title fw-bold d-flex align-items-center gap-2">
                                     <span className="material-symbols-outlined text-primary">payments</span>
-                                    Obunani uzaytirish
+                                    {isExpired ? 'Obuna muddati tugadi' : 'Obunani uzaytirish'}
                                 </h5>
-                                <button
-                                    type="button"
-                                    className="btn-close"
-                                    onClick={() => setShowPaymentModal(false)}
-                                ></button>
+                                {/* Only show close button if not expired */}
+                                {!isExpired && (
+                                    <button
+                                        type="button"
+                                        className="btn-close"
+                                        onClick={() => setShowPaymentModal(false)}
+                                    ></button>
+                                )}
                             </div>
                             <div className="modal-body">
                                 {/* Current Status */}
@@ -376,15 +414,18 @@ export default function DashboardPage() {
                                     <span className="fw-bold">{paymentInfo.adminPhone}</span>
                                 </a>
                             </div>
-                            <div className="modal-footer border-0 pt-0">
-                                <button
-                                    type="button"
-                                    className="btn btn-light rounded-3 w-100"
-                                    onClick={() => setShowPaymentModal(false)}
-                                >
-                                    Yopish
-                                </button>
-                            </div>
+                            {/* Only show close button if not expired */}
+                            {!isExpired && (
+                                <div className="modal-footer border-0 pt-0">
+                                    <button
+                                        type="button"
+                                        className="btn btn-light rounded-3 w-100"
+                                        onClick={() => setShowPaymentModal(false)}
+                                    >
+                                        Yopish
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

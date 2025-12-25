@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -11,21 +10,15 @@ export default function Header({ title, showStars = false, stars = 0, showSubscr
     return (
         <header className="sticky-top bg-white border-bottom py-3 px-3">
             <div className="d-flex align-items-center justify-content-between">
-                {/* Logo */}
-                <div className="d-flex align-items-center gap-2">
-                    <Image
-                        src="/logo.png"
-                        alt="Bolajon"
-                        width={45}
-                        height={45}
-                        className="rounded-3"
-                        style={{ objectFit: 'contain' }}
-                    />
-                    <div>
-                        <h2 className="h6 mb-0 fw-bold text-primary">Bolajon</h2>
-                        <p className="text-muted small mb-0" style={{ fontSize: '11px' }}>Ingliz tili kursi</p>
-                    </div>
-                </div>
+                {/* Logo only */}
+                <Image
+                    src="/logo.png"
+                    alt="Bolajon"
+                    width={42}
+                    height={42}
+                    className="rounded-3"
+                    style={{ objectFit: 'contain' }}
+                />
 
                 <div className="d-flex align-items-center gap-2">
                     {/* Subscription Days */}
