@@ -21,6 +21,14 @@ export default function DashboardPage() {
     const [paymentInfo, setPaymentInfo] = useState(null);
     const [copied, setCopied] = useState(false);
     const [daysRemaining, setDaysRemaining] = useState(0);
+    const [selectedDays, setSelectedDays] = useState(30);
+
+    // Predefined packages
+    const packages = [
+        { days: 15, label: '15 kun' },
+        { days: 20, label: '20 kun' },
+        { days: 30, label: '30 kun' },
+    ];
 
     useEffect(() => {
         fetchPaymentInfo();
@@ -37,7 +45,7 @@ export default function DashboardPage() {
                     cardNumber: data.cardNumber,
                     cardHolder: data.cardHolder,
                     bookPrice: data.bookPrice || 50000,
-                    subscriptionPrice: data.subscriptionPrice || 100000
+                    dailyPrice: data.dailyPrice || 200
                 });
             }
         } catch (error) {
@@ -355,7 +363,7 @@ export default function DashboardPage() {
                             <div className="modal-body">
                                 {/* Current Status */}
                                 <div
-                                    className="rounded-4 p-4 mb-4 text-center"
+                                    className="rounded-4 p-3 mb-4 text-center"
                                     style={{
                                         backgroundColor: daysRemaining <= 3 ? '#fee2e2' : '#e0f2fe'
                                     }}
@@ -363,19 +371,72 @@ export default function DashboardPage() {
                                     <p className="small fw-semibold mb-1" style={{ color: daysRemaining <= 3 ? '#dc2626' : '#0284c7' }}>
                                         Qolgan muddat
                                     </p>
-                                    <h2 className="display-5 fw-bold mb-0" style={{ color: daysRemaining <= 3 ? '#dc2626' : '#0284c7' }}>
-                                        {daysRemaining} <span className="fs-4">kun</span>
+                                    <h2 className="h3 fw-bold mb-0" style={{ color: daysRemaining <= 3 ? '#dc2626' : '#0284c7' }}>
+                                        {daysRemaining} kun
                                     </h2>
                                 </div>
 
-                                {/* Price */}
-                                <div className="bg-primary bg-opacity-10 rounded-4 p-4 mb-4 text-center">
-                                    <p className="text-primary small fw-semibold mb-1">Oylik obuna narxi</p>
-                                    <h2 className="display-6 fw-bold text-primary mb-0">
-                                        {(paymentInfo.subscriptionPrice || 100000)?.toLocaleString()} <span className="fs-5">so'm</span>
-                                    </h2>
+                                {/* Package Selection */}
+                                <div className="mb-4">
+                                    <h6 className="fw-bold mb-3">Obuna paketlari</h6>
+                                    <div className="d-flex flex-column gap-2">
+                                        {packages.map(pkg => (
+                                            <div
+                                                key={pkg.days}
+                                                className={`d-flex align-items-center justify-content-between rounded-3 p-3 ${selectedDays === pkg.days ? 'bg-primary text-white' : 'bg-light'}`}
+                                                style={{ cursor: 'pointer', transition: 'all 0.2s' }}
+                                                onClick={() => setSelectedDays(pkg.days)}
+                                            >
+                                                <div className="d-flex align-items-center gap-2">
+                                                    <span className={`material-symbols-outlined ${selectedDays === pkg.days ? '' : 'text-muted'}`} style={{ fontSize: '20px' }}>
+                                                        {selectedDays === pkg.days ? 'radio_button_checked' : 'radio_button_unchecked'}
+                                                    </span>
+                                                    <span className="fw-semibold">{pkg.label}</span>
+                                                </div>
+                                                <span className="fw-bold">
+                                                    {(paymentInfo.dailyPrice * pkg.days).toLocaleString()} so'm
+                                                </span>
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
 
+                                {/* Calculator */}
+                                <div className="bg-light rounded-3 p-3 mb-4">
+                                    <div className="d-flex align-items-center justify-content-between mb-2">
+                                        <span className="small text-muted">Kunlik narx:</span>
+                                        <span className="fw-semibold">{paymentInfo.dailyPrice?.toLocaleString()} so'm</span>
+                                    </div>
+                                    <div className="d-flex align-items-center justify-content-between mb-2">
+                                        <span className="small text-muted">Tanlangan muddat:</span>
+                                        <span className="fw-semibold">{selectedDays} kun</span>
+                                    </div>
+                                    <hr className="my-2" />
+                                    <div className="d-flex align-items-center justify-content-between">
+                                        <span className="fw-bold">Jami to'lov:</span>
+                                        <span className="fw-bold text-primary fs-5">
+                                            {(paymentInfo.dailyPrice * selectedDays).toLocaleString()} so'm
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {/* Custom Days Input */}
+                                <div className="mb-4">
+                                    <label className="form-label small fw-semibold">Boshqa muddat (kun)</label>
+                                    <div className="input-group">
+                                        <input
+                                            type="number"
+                                            className="form-control rounded-start-3"
+                                            min="1"
+                                            max="365"
+                                            value={selectedDays}
+                                            onChange={(e) => setSelectedDays(Math.max(1, Math.min(365, parseInt(e.target.value) || 1)))}
+                                        />
+                                        <span className="input-group-text bg-light">kun</span>
+                                    </div>
+                                </div>
+
+                                {/* Payment Info */}
                                 <div className="bg-light rounded-3 p-3 mb-3">
                                     <p className="small text-muted mb-1">Karta raqami</p>
                                     <div className="d-flex align-items-center justify-content-between">
@@ -397,8 +458,8 @@ export default function DashboardPage() {
                                     </div>
                                     <div className="col-6">
                                         <div className="bg-light rounded-3 p-3">
-                                            <p className="small text-muted mb-1">Summa</p>
-                                            <p className="fw-semibold mb-0">{(paymentInfo.subscriptionPrice || 100000)?.toLocaleString()} so'm</p>
+                                            <p className="small text-muted mb-1">To'lov summasi</p>
+                                            <p className="fw-bold text-primary mb-0">{(paymentInfo.dailyPrice * selectedDays).toLocaleString()} so'm</p>
                                         </div>
                                     </div>
                                 </div>
