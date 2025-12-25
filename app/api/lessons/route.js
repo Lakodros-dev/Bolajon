@@ -24,7 +24,7 @@ export async function GET() {
         await dbConnect();
 
         const lessons = await Lesson.find({ isActive: true })
-            .select('title description videoUrl thumbnail level duration order')
+            .select('title description videoUrl thumbnail level duration order vocabulary gameType')
             .sort({ level: 1, order: 1 })
             .lean();
 
@@ -49,7 +49,7 @@ export async function POST(request) {
         await dbConnect();
 
         const body = await request.json();
-        const { title, description, videoUrl, thumbnail, level, duration, order, vocabulary } = body;
+        const { title, description, videoUrl, thumbnail, level, duration, order, vocabulary, gameType } = body;
 
         // Validation
         if (!title || !description || !videoUrl || !level) {
@@ -64,7 +64,8 @@ export async function POST(request) {
             level,
             duration: duration || 0,
             order: order || 0,
-            vocabulary: vocabulary || []
+            vocabulary: vocabulary || [],
+            gameType: gameType || 'vocabulary'
         });
 
         // Clear lessons cache
