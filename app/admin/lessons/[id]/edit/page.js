@@ -27,8 +27,17 @@ export default function EditLessonPage() {
         level: 1,
         duration: 0,
         order: 0,
-        vocabulary: []
+        vocabulary: [],
+        gameType: 'vocabulary'
     });
+
+    const gameTypes = [
+        { value: 'none', label: "O'yinsiz", icon: 'block', color: '#6b7280' },
+        { value: 'vocabulary', label: "Lug'at o'yini", icon: 'dictionary', color: '#2563eb' },
+        { value: 'pop-the-balloon', label: 'Sharni yorish', icon: '🎈', color: '#dc2626', isEmoji: true },
+        { value: 'drop-to-basket', label: 'Savatga tashlash', icon: '🧺', color: '#16a34a', isEmoji: true },
+        { value: 'movements', label: "Fe'llarni o'rganish", icon: '🏃', color: '#d97706', isEmoji: true }
+    ];
 
     useEffect(() => {
         fetchLesson();
@@ -48,7 +57,8 @@ export default function EditLessonPage() {
                     level: lesson.level || 1,
                     duration: lesson.duration || 0,
                     order: lesson.order || 0,
-                    vocabulary: lesson.vocabulary || []
+                    vocabulary: lesson.vocabulary || [],
+                    gameType: lesson.gameType || 'vocabulary'
                 });
                 // Set video source based on current URL
                 if (lesson.videoUrl?.startsWith('/api/video/')) {
@@ -392,6 +402,45 @@ export default function EditLessonPage() {
                                 value={formData.thumbnail}
                                 onChange={handleChange}
                             />
+                        </div>
+                    </div>
+                </div>
+
+                {/* Game Type Section */}
+                <div className="card border-0 rounded-4 shadow-sm mb-4">
+                    <div className="card-body p-4">
+                        <div className="mb-4">
+                            <h3 className="h6 fw-bold mb-1">O'yin turi</h3>
+                            <p className="text-muted small mb-0">Bu dars uchun qaysi o'yin ishlatilsin</p>
+                        </div>
+
+                        <div className="row g-3">
+                            {gameTypes.map((game) => (
+                                <div key={game.value} className="col-6 col-md-4">
+                                    <div
+                                        className={`card border-2 rounded-3 h-100 ${formData.gameType === game.value ? 'border-primary bg-primary bg-opacity-10' : 'border-light'}`}
+                                        style={{ cursor: 'pointer', transition: 'all 0.2s' }}
+                                        onClick={() => setFormData(prev => ({ ...prev, gameType: game.value }))}
+                                    >
+                                        <div className="card-body p-3 text-center">
+                                            {game.isEmoji ? (
+                                                <span style={{ fontSize: '32px' }}>{game.icon}</span>
+                                            ) : (
+                                                <span
+                                                    className="material-symbols-outlined mb-2"
+                                                    style={{ fontSize: '32px', color: game.color }}
+                                                >
+                                                    {game.icon}
+                                                </span>
+                                            )}
+                                            <p className="small fw-semibold mb-0 mt-2">{game.label}</p>
+                                            {formData.gameType === game.value && (
+                                                <span className="badge bg-primary rounded-pill mt-2">Tanlangan</span>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     </div>
                 </div>

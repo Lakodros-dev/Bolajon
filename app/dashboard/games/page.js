@@ -223,15 +223,19 @@ export default function GamesPage() {
                                                     <p className="text-muted mb-2 small">
                                                         {lesson.description?.substring(0, 50)}...
                                                     </p>
-                                                    <Link
-                                                        href={`/games/vocabulary/${lesson._id}?student=${selectedStudent._id}`}
-                                                        className="btn btn-sm btn-primary d-inline-flex align-items-center gap-1"
-                                                    >
-                                                        <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>
-                                                            play_arrow
-                                                        </span>
-                                                        O'ynash
-                                                    </Link>
+                                                    {lesson.gameType && lesson.gameType !== 'none' ? (
+                                                        <Link
+                                                            href={`/games/${lesson.gameType === 'vocabulary' ? 'vocabulary/' + lesson._id : lesson.gameType}?student=${selectedStudent._id}&lesson=${lesson._id}`}
+                                                            className="btn btn-sm btn-primary d-inline-flex align-items-center gap-1"
+                                                        >
+                                                            <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>
+                                                                play_arrow
+                                                            </span>
+                                                            O'ynash
+                                                        </Link>
+                                                    ) : (
+                                                        <span className="badge bg-secondary">O'yinsiz</span>
+                                                    )}
                                                 </div>
                                             </div>
 

@@ -62,6 +62,12 @@ const LessonSchema = new mongoose.Schema({
     vocabulary: {
         type: [VocabularySchema],
         default: []
+    },
+    // Game type for this lesson
+    gameType: {
+        type: String,
+        enum: ['none', 'vocabulary', 'pop-the-balloon', 'drop-to-basket', 'movements'],
+        default: 'vocabulary'
     }
 }, {
     timestamps: true
