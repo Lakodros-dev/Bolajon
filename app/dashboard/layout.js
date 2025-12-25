@@ -7,6 +7,7 @@ import ProtectedRoute from '@/components/ProtectedRoute';
 import Navbar from '@/components/dashboard/Navbar';
 import Sidebar from '@/components/dashboard/Sidebar';
 import Footer from '@/components/dashboard/Footer';
+import SubscriptionModal from '@/components/SubscriptionModal';
 
 export default function DashboardLayout({ children }) {
     const router = useRouter();
@@ -23,21 +24,7 @@ export default function DashboardLayout({ children }) {
                 return;
             }
 
-            try {
-                const res = await fetch('/api/subscription/check', {
-                    headers: getAuthHeader()
-                });
-                const data = await res.json();
-
-                if (data.success && !data.isValid) {
-                    router.replace('/blocked');
-                } else {
-                    setSubscriptionChecked(true);
-                }
-            } catch (error) {
-                console.error('Subscription check failed:', error);
-                setSubscriptionChecked(true);
-            }
+            setSubscriptionChecked(true);
         };
 
         checkSubscription();
@@ -64,6 +51,9 @@ export default function DashboardLayout({ children }) {
 
                 {/* Mobile Bottom Nav */}
                 <Navbar />
+
+                {/* Global Subscription Modal */}
+                <SubscriptionModal />
             </div>
         </ProtectedRoute>
     );

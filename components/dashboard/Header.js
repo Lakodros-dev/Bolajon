@@ -4,7 +4,7 @@ import { useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
 import Image from 'next/image';
 
-export default function Header({ title, showStars = false, stars = 0, showSubscription = false, daysRemaining = 0, onPaymentClick }) {
+export default function Header({ title, showStars = false, stars = 0, showSubscription = false, daysRemaining = 0 }) {
     const { user } = useAuth();
 
     return (
@@ -21,14 +21,12 @@ export default function Header({ title, showStars = false, stars = 0, showSubscr
                 />
 
                 <div className="d-flex align-items-center gap-2">
-                    {/* Subscription Days */}
+                    {/* Subscription Days - just display, modal is global */}
                     {showSubscription && (
-                        <button
-                            onClick={onPaymentClick}
-                            className="d-flex align-items-center gap-1 px-2 py-1 rounded-pill border-0"
+                        <div
+                            className="d-flex align-items-center gap-1 px-2 py-1 rounded-pill"
                             style={{
-                                backgroundColor: daysRemaining <= 3 ? '#fee2e2' : '#e0f2fe',
-                                cursor: 'pointer'
+                                backgroundColor: daysRemaining <= 3 ? '#fee2e2' : '#e0f2fe'
                             }}
                         >
                             <span
@@ -46,7 +44,7 @@ export default function Header({ title, showStars = false, stars = 0, showSubscr
                             >
                                 {daysRemaining} kun
                             </span>
-                        </button>
+                        </div>
                     )}
 
                     {/* Stars */}
