@@ -6,15 +6,16 @@ import Link from 'next/link';
 const COLORS = ['red', 'blue', 'yellow', 'green', 'black'];
 const TARGET_SCORE = 15;
 const GAME_DURATION = 180;
-const GAME_AREA_PADDING = 10; // % padding from edges
+const GAME_AREA_PADDING = 10;
+const MAX_TARGET_WAIT = 10000; // 10 sekund - maksimal kutish vaqti
+const RETRY_DELAY = 2000; // 2 sekund - qayta urinish orasidagi pauza
 
-// Rasmdagi ranglar - aniq va yorqin
 const colorStyles = {
-    red: { bg: '#E53935', shadow: '#B71C1C' },      // Qizil
-    blue: { bg: '#1E88E5', shadow: '#0D47A1' },     // Ko'k
-    yellow: { bg: '#FDD835', shadow: '#F9A825' },   // Sariq
-    green: { bg: '#43A047', shadow: '#1B5E20' },    // Yashil
-    black: { bg: '#212121', shadow: '#000000' },    // Qora
+    red: { bg: '#E53935', shadow: '#B71C1C' },
+    blue: { bg: '#1E88E5', shadow: '#0D47A1' },
+    yellow: { bg: '#FDD835', shadow: '#F9A825' },
+    green: { bg: '#43A047', shadow: '#1B5E20' },
+    black: { bg: '#212121', shadow: '#000000' },
 };
 
 const colorNames = {
@@ -42,9 +43,32 @@ export default function PopTheBalloonGame() {
     const [gameStarted, setGameStarted] = useState(false);
     const [showWarning, setShowWarning] = useState(false);
     const [timeTaken, setTimeTaken] = useState(0);
+    const [isSpeaking, setIsSpeaking] = useState(false);
+
     const balloonIdRef = useRef(0);
     const lastColorRef = useRef('');
     const gameAreaRef = useRef(null);
+    const targetColorSpawnedRef = useRef(false);
+    const lastTargetSpawnTimeRef = useRef(Date.now());
+
+    // Rangni talaffuz qilish
+    const speakColor = useCallback((color) => {
+        if ('speechSynthesis' in window) {
+            // Avvalgi talaffuzni to'xtatish
+            window.speechSynthesis.cancel();
+
+            const utterance = new SpeechSynthesisUtterance(color);
+            utterance.lang = 'en-US';
+            utterance.rate = 0.8;
+            utterance.pitch = 1;
+
+            utterance.onstart = () => setIsSpeaking(true);
+            utterance.onend = () => setIsSpeaking(false);
+            utterance.onerror = () => setIsSpeaking(false);
+
+            window.speechSynthesis.speak(utterance);
+        }
+    }, []);
 
     const selectNextColor = useCallback(() => {
         let newColor;
@@ -53,6 +77,8 @@ export default function PopTheBalloonGame() {
         } while (newColor === lastColorRef.current);
         lastColorRef.current = newColor;
         setTargetColor(newColor);
+        targetColorSpawnedRef.current = false;
+        lastTargetSpawnTimeRef.current = Date.now();
     }, []);
 
     // O'yinni boshlash
@@ -89,20 +115,36 @@ export default function PopTheBalloonGame() {
         return { spawnInterval, balloonCount };
     }, []);
 
-    // Sharlarni yaratish
+    // Sharlarni yaratish - garantiyalangan target rang bilan
     useEffect(() => {
-        if (!gameActive || !gameStarted) return;
+        if (!gameActive || !gameStarted || !targetColor) return;
 
         const config = getSpawnConfig(score);
 
         const spawnBalloon = () => {
-            const newBalloons = Array.from({ length: config.balloonCount }).map(() => {
-                const randomColor = COLORS[Math.floor(Math.random() * COLORS.length)];
-                // Faqat o'yin maydoni ichida (10% - 90%)
+            const now = Date.now();
+            const timeSinceLastTarget = now - lastTargetSpawnTimeRef.current;
+
+            const newBalloons = Array.from({ length: config.balloonCount }).map((_, index) => {
+                let balloonColor;
+
+                // Agar 10 sekunddan ko'p vaqt o'tgan bo'lsa va target rang chiqmagan bo'lsa
+                // yoki bu birinchi shar bo'lsa va target rang hali chiqmagan bo'lsa
+                if (!targetColorSpawnedRef.current && timeSinceLastTarget >= MAX_TARGET_WAIT - config.spawnInterval) {
+                    balloonColor = targetColor;
+                    targetColorSpawnedRef.current = true;
+                } else {
+                    // Tasodifiy rang, lekin target rang ham chiqishi mumkin
+                    balloonColor = COLORS[Math.floor(Math.random() * COLORS.length)];
+                    if (balloonColor === targetColor) {
+                        targetColorSpawnedRef.current = true;
+                    }
+                }
+
                 const randomX = GAME_AREA_PADDING + Math.random() * (100 - 2 * GAME_AREA_PADDING);
                 return {
                     id: balloonIdRef.current++,
-                    color: randomColor,
+                    color: balloonColor,
                     x: randomX,
                     createdAt: Date.now(),
                     popped: false,
@@ -112,36 +154,75 @@ export default function PopTheBalloonGame() {
             setBalloons((prev) => [...prev, ...newBalloons]);
         };
 
-        // Darhol birinchi sharni yaratish
         spawnBalloon();
-
         const intervalId = setInterval(spawnBalloon, config.spawnInterval);
         return () => clearInterval(intervalId);
-    }, [gameActive, gameStarted, score, getSpawnConfig]);
+    }, [gameActive, gameStarted, score, targetColor, getSpawnConfig]);
 
-    // Eski sharlarni tozalash (6 sekunddan keyin - animatsiya tugagandan so'ng)
+    // Garantiyalangan target rang - agar 10 sekund ichida chiqmasa, majburiy chiqarish
+    useEffect(() => {
+        if (!gameActive || !gameStarted || !targetColor) return;
+
+        const checkAndSpawnTarget = () => {
+            const now = Date.now();
+            const timeSinceLastTarget = now - lastTargetSpawnTimeRef.current;
+
+            // Agar 10 sekund o'tgan bo'lsa va target rang hali chiqmagan bo'lsa
+            if (!targetColorSpawnedRef.current && timeSinceLastTarget >= MAX_TARGET_WAIT) {
+                // Majburiy target rangdagi shar chiqarish
+                const randomX = GAME_AREA_PADDING + Math.random() * (100 - 2 * GAME_AREA_PADDING);
+                const forcedBalloon = {
+                    id: balloonIdRef.current++,
+                    color: targetColor,
+                    x: randomX,
+                    createdAt: Date.now(),
+                    popped: false,
+                };
+                setBalloons((prev) => [...prev, forcedBalloon]);
+                targetColorSpawnedRef.current = true;
+            }
+        };
+
+        const intervalId = setInterval(checkAndSpawnTarget, 1000);
+        return () => clearInterval(intervalId);
+    }, [gameActive, gameStarted, targetColor]);
+
+    // Eski sharlarni tozalash va target rang o'tib ketganini tekshirish
     useEffect(() => {
         const cleanupInterval = setInterval(() => {
             const now = Date.now();
-            setBalloons((prev) => prev.filter((b) => {
-                // 6 sekund o'tgan yoki yorilgan sharlarni o'chirish
-                return !b.popped && (now - b.createdAt) < 6000;
-            }));
+            setBalloons((prev) => {
+                const filtered = prev.filter((b) => {
+                    const age = now - b.createdAt;
+                    // 6 sekund o'tgan yoki yorilgan sharlarni o'chirish
+                    if (b.popped || age >= 6000) {
+                        // Agar target rangdagi shar o'tib ketgan bo'lsa
+                        if (b.color === targetColor && !b.popped && age >= 6000) {
+                            // 2 sekund kutib, qayta target rang chiqarish uchun flag'ni reset qilish
+                            setTimeout(() => {
+                                targetColorSpawnedRef.current = false;
+                                lastTargetSpawnTimeRef.current = Date.now();
+                            }, RETRY_DELAY);
+                        }
+                        return false;
+                    }
+                    return true;
+                });
+                return filtered;
+            });
         }, 500);
 
         return () => clearInterval(cleanupInterval);
-    }, []);
+    }, [targetColor]);
 
     // Sharni bosish
     const handleBalloonClick = useCallback((balloonId, balloonColor) => {
         if (!gameActive) return;
 
-        // Sharni yorilgan deb belgilash
         setBalloons((prev) => prev.map((b) =>
             b.id === balloonId ? { ...b, popped: true } : b
         ));
 
-        // Kichik delay bilan o'chirish (pop animatsiya uchun)
         setTimeout(() => {
             setBalloons((prev) => prev.filter((b) => b.id !== balloonId));
         }, 200);
@@ -172,6 +253,14 @@ export default function PopTheBalloonGame() {
         setShowWarning(false);
         lastColorRef.current = '';
         balloonIdRef.current = 0;
+        targetColorSpawnedRef.current = false;
+        lastTargetSpawnTimeRef.current = Date.now();
+    };
+
+    const handleSpeakColor = () => {
+        if (targetColor) {
+            speakColor(colorNames[targetColor]);
+        }
     };
 
     const minutes = Math.floor(timeLeft / 60);
@@ -195,31 +284,14 @@ export default function PopTheBalloonGame() {
         >
             <style jsx global>{`
                 @keyframes floatUp {
-                    0% { 
-                        bottom: -80px;
-                        opacity: 1;
-                    }
-                    90% {
-                        opacity: 1;
-                    }
-                    100% { 
-                        bottom: 100vh;
-                        opacity: 0;
-                    }
+                    0% { bottom: -80px; opacity: 1; }
+                    90% { opacity: 1; }
+                    100% { bottom: 100vh; opacity: 0; }
                 }
                 @keyframes pop {
-                    0% { 
-                        transform: scale(1);
-                        opacity: 1;
-                    }
-                    50% {
-                        transform: scale(1.3);
-                        opacity: 0.5;
-                    }
-                    100% { 
-                        transform: scale(0);
-                        opacity: 0;
-                    }
+                    0% { transform: scale(1); opacity: 1; }
+                    50% { transform: scale(1.3); opacity: 0.5; }
+                    100% { transform: scale(0); opacity: 0; }
                 }
                 @keyframes shake-anim {
                     0%, 100% { transform: translateX(0); }
@@ -235,6 +307,10 @@ export default function PopTheBalloonGame() {
                     0%, 100% { opacity: 1; transform: scale(1); }
                     50% { opacity: 0.8; transform: scale(1.05); }
                 }
+                @keyframes speakerPulse {
+                    0%, 100% { transform: scale(1); }
+                    50% { transform: scale(1.2); }
+                }
                 .balloon {
                     position: absolute;
                     animation: floatUp 5s linear forwards;
@@ -245,12 +321,11 @@ export default function PopTheBalloonGame() {
                     animation: pop 0.2s ease-out forwards !important;
                     pointer-events: none;
                 }
-                .balloon:hover:not(.popped) {
-                    transform: scale(1.15);
-                }
-                .balloon:active:not(.popped) {
-                    transform: scale(0.9);
-                }
+                .balloon:hover:not(.popped) { transform: scale(1.15); }
+                .balloon:active:not(.popped) { transform: scale(0.9); }
+                .speaker-btn { transition: all 0.2s; }
+                .speaker-btn:hover { background-color: rgba(0,0,0,0.1) !important; }
+                .speaker-btn.speaking { animation: speakerPulse 0.5s infinite; }
             `}</style>
 
             {/* Back Button */}
@@ -308,27 +383,57 @@ export default function PopTheBalloonGame() {
                 </div>
             </div>
 
-            {/* Target Color */}
+            {/* Target Color - with speaker button */}
             {targetColor && gameActive && (
-                <div style={{
-                    position: 'absolute',
-                    top: '100px',
-                    left: '50%',
-                    transform: 'translateX(-50%)',
-                    zIndex: 30,
-                    textAlign: 'center',
-                    backgroundColor: 'rgba(255,255,255,0.95)',
-                    padding: '20px 40px',
-                    borderRadius: '20px',
-                    boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
-                    border: `4px solid ${colorStyles[targetColor]?.bg}`,
-                }}>
+                <div
+                    onClick={handleSpeakColor}
+                    style={{
+                        position: 'absolute',
+                        top: '100px',
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        zIndex: 30,
+                        textAlign: 'center',
+                        backgroundColor: 'rgba(255,255,255,0.95)',
+                        padding: '20px 40px',
+                        borderRadius: '20px',
+                        boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
+                        border: `4px solid ${colorStyles[targetColor]?.bg}`,
+                        cursor: 'pointer',
+                    }}
+                >
+                    {/* Speaker icon */}
+                    <button
+                        className={`speaker-btn ${isSpeaking ? 'speaking' : ''}`}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            handleSpeakColor();
+                        }}
+                        style={{
+                            position: 'absolute',
+                            top: '10px',
+                            right: '10px',
+                            width: '36px',
+                            height: '36px',
+                            borderRadius: '50%',
+                            border: 'none',
+                            backgroundColor: 'rgba(0,0,0,0.05)',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                        }}
+                    >
+                        <span className="material-symbols-outlined" style={{ fontSize: '20px', color: isSpeaking ? '#2563eb' : '#6b7280' }}>
+                            {isSpeaking ? 'volume_up' : 'volume_up'}
+                        </span>
+                    </button>
+
                     <p style={{ fontSize: '14px', color: '#6b7280', marginBottom: '8px', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '1px' }}>Pop the</p>
                     <p style={{
                         fontSize: '48px',
                         fontWeight: 'bold',
-                        color: colorStyles[targetColor]?.bg,
-                        textShadow: `2px 2px 0px ${colorStyles[targetColor]?.shadow}`,
+                        color: '#6b7280', // Kulrang rang - o'sha rangda emas
                         animation: 'pulse 1.5s infinite',
                         margin: '4px 0',
                         lineHeight: 1,
@@ -337,6 +442,9 @@ export default function PopTheBalloonGame() {
                     </p>
                     <p style={{ fontSize: '13px', color: '#9ca3af', fontWeight: '500', marginTop: '4px' }}>
                         ({colorNamesUz[targetColor]})
+                    </p>
+                    <p style={{ fontSize: '11px', color: '#9ca3af', marginTop: '8px' }}>
+                        🔊 Bosib eshiting
                     </p>
                 </div>
             )}
@@ -352,7 +460,6 @@ export default function PopTheBalloonGame() {
                         transform: 'translateX(-50%)',
                     }}
                 >
-                    {/* Balloon body */}
                     <div style={{
                         width: '65px',
                         height: '78px',
@@ -362,7 +469,6 @@ export default function PopTheBalloonGame() {
                         boxShadow: `inset -10px -10px 25px ${colorStyles[balloon.color]?.shadow}, 0 6px 12px rgba(0,0,0,0.25)`,
                         transition: 'transform 0.1s ease-out',
                     }}>
-                        {/* Shine */}
                         <div style={{
                             position: 'absolute',
                             top: '14px',
@@ -372,7 +478,6 @@ export default function PopTheBalloonGame() {
                             backgroundColor: 'rgba(255,255,255,0.6)',
                             borderRadius: '50%',
                         }} />
-                        {/* Small shine */}
                         <div style={{
                             position: 'absolute',
                             top: '28px',
@@ -382,7 +487,6 @@ export default function PopTheBalloonGame() {
                             backgroundColor: 'rgba(255,255,255,0.4)',
                             borderRadius: '50%',
                         }} />
-                        {/* Knot */}
                         <div style={{
                             position: 'absolute',
                             bottom: '-8px',
@@ -395,7 +499,6 @@ export default function PopTheBalloonGame() {
                             borderTop: `12px solid ${colorStyles[balloon.color]?.shadow}`,
                         }} />
                     </div>
-                    {/* String */}
                     <div style={{
                         width: '2px',
                         height: '45px',
@@ -403,7 +506,6 @@ export default function PopTheBalloonGame() {
                         margin: '0 auto',
                         background: 'linear-gradient(to bottom, #9ca3af, #6b7280)',
                     }} />
-                    {/* Pop effect */}
                     {balloon.popped && (
                         <div style={{
                             position: 'absolute',
