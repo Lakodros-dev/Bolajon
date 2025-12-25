@@ -84,7 +84,7 @@ export default function HomePage() {
               </h1>
 
               <p className="text-muted mb-4 fs-5">
-                5-9 yoshli bolalarga ingliz tilini o'yinlar, qo'shiqlar va interaktiv video darslar orqali o'rgatamiz. Bolangiz o'ynab-kulgi o'rganadi!
+                5-9 yoshli bolalarga ingliz tilini o'yinlar, qo'shiqlar va interaktiv video darslar orqali o'rgatamiz. Bolangiz o'ynab-kulib o'rganadi!
               </p>
 
               {/* CTA Buttons */}
