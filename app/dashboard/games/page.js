@@ -23,6 +23,23 @@ export default function GamesPage() {
         }
     }, [allLessons]);
 
+    // Refresh lessons on mount to get latest gameType
+    useEffect(() => {
+        const fetchFreshLessons = async () => {
+            try {
+                const res = await fetch('/api/lessons');
+                const data = await res.json();
+                if (data.success && data.lessons) {
+                    const sorted = [...data.lessons].sort((a, b) => a.order - b.order || a.level - b.level);
+                    setLessons(sorted);
+                }
+            } catch (error) {
+                console.error('Error fetching lessons:', error);
+            }
+        };
+        fetchFreshLessons();
+    }, []);
+
     // Fetch progress when student selected
     useEffect(() => {
         if (selectedStudent) {

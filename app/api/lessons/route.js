@@ -10,7 +10,7 @@ import { successResponse, errorResponse, serverError } from '@/lib/apiResponse';
 import { getCached, setCache, clearCache } from '@/lib/cache';
 
 const LESSONS_CACHE_KEY = 'lessons:active';
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+const CACHE_TTL = 1 * 60 * 1000; // 1 minute (shorter for faster updates)
 
 // GET - Get all active lessons with caching
 export async function GET() {
