@@ -398,7 +398,7 @@ export default function PopTheBalloonGame() {
                         padding: '20px 40px',
                         borderRadius: '20px',
                         boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
-                        border: `4px solid ${colorStyles[targetColor]?.bg}`,
+                        border: '4px solid #9ca3af',
                         cursor: 'pointer',
                     }}
                 >
