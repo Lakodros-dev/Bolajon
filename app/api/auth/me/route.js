@@ -14,25 +14,48 @@ export async function GET(request) {
         return errorResponse(auth.error, auth.status);
     }
 
-    // Get fresh user data with methods
+    // Get fresh user data from database
     await dbConnect();
     const user = await User.findById(auth.user._id);
 
-    // Use model method for consistent calculation
-    const daysRemaining = user ? user.getDaysRemaining() : 0;
+    if (!user) {
+        return errorResponse('Foydalanuvchi topilmadi', 404);
+    }
+
+    // Calculate days remaining directly
+    let daysRemaining = 0;
+
+    if (user.role === 'admin') {
+        daysRemaining = 999;
+    } else {
+        const now = new Date();
+        let endDate = null;
+
+        if (user.subscriptionStatus === 'trial' && user.trialStartDate) {
+            endDate = new Date(user.trialStartDate);
+            endDate.setDate(endDate.getDate() + 7);
+        } else if (user.subscriptionStatus === 'active' && user.subscriptionEndDate) {
+            endDate = new Date(user.subscriptionEndDate);
+        }
+
+        if (endDate) {
+            const diff = endDate.getTime() - now.getTime();
+            daysRemaining = Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+        }
+    }
 
     return successResponse({
         user: {
-            _id: auth.user._id,
-            name: auth.user.name,
-            email: auth.user.email,
-            role: auth.user.role,
-            avatar: auth.user.avatar,
-            phone: auth.user.phone,
-            createdAt: auth.user.createdAt,
-            subscriptionStatus: auth.user.subscriptionStatus,
-            subscriptionEndDate: auth.user.subscriptionEndDate,
-            trialStartDate: auth.user.trialStartDate,
+            _id: user._id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            avatar: user.avatar,
+            phone: user.phone,
+            createdAt: user.createdAt,
+            subscriptionStatus: user.subscriptionStatus,
+            subscriptionEndDate: user.subscriptionEndDate,
+            trialStartDate: user.trialStartDate,
             daysRemaining
         }
     });
