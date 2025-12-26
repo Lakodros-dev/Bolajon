@@ -18,11 +18,22 @@ export async function GET(request) {
 
         await dbConnect();
 
-        // Teachers see only their students, admins see all
-        // Only show active students
-        const query = auth.user.role === 'admin'
-            ? { isActive: true }
-            : { teacher: auth.user._id, isActive: true };
+        // Check if admin wants to see all students (via query param)
+        const { searchParams } = new URL(request.url);
+        const showAll = searchParams.get('all') === 'true';
+
+        // Teachers see only their students
+        // Admins see only their own students in teacher mode (default)
+        // Admins can see all students only with ?all=true parameter
+        let query = { isActive: true };
+
+        if (auth.user.role === 'admin' && showAll) {
+            // Admin requesting all students (for admin panel)
+            query = { isActive: true };
+        } else {
+            // Teacher or Admin in teacher mode - only their students
+            query = { teacher: auth.user._id, isActive: true };
+        }
 
         const students = await Student.find(query)
             .sort({ createdAt: -1 })
