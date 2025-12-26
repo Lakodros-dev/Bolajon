@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import ConfirmModal from '@/components/ConfirmModal';
 import AlertModal from '@/components/AlertModal';
+import { formatPhone } from '@/lib/formatPhone';
 
 export default function TeachersPage() {
     const { getAuthHeader } = useAuth();
@@ -12,6 +13,7 @@ export default function TeachersPage() {
     const [searchQuery, setSearchQuery] = useState('');
     const [deleteModal, setDeleteModal] = useState({ show: false, teacher: null });
     const [subscriptionModal, setSubscriptionModal] = useState({ show: false, teacher: null });
+    const [studentsModal, setStudentsModal] = useState({ show: false, teacher: null, students: [], loading: false });
     const [deleting, setDeleting] = useState(false);
     const [alertModal, setAlertModal] = useState({ show: false, title: '', message: '', type: 'success' });
     const [activatingId, setActivatingId] = useState(null);
@@ -58,6 +60,24 @@ export default function TeachersPage() {
     const openSubscriptionModal = (teacher) => {
         setSelectedDays(30);
         setSubscriptionModal({ show: true, teacher });
+    };
+
+    const openStudentsModal = async (teacher) => {
+        setStudentsModal({ show: true, teacher, students: [], loading: true });
+        try {
+            const res = await fetch(`/api/teachers/${teacher._id}/students`, {
+                headers: getAuthHeader()
+            });
+            const data = await res.json();
+            if (data.success) {
+                setStudentsModal(prev => ({ ...prev, students: data.students || [], loading: false }));
+            } else {
+                setStudentsModal(prev => ({ ...prev, loading: false }));
+            }
+        } catch (error) {
+            console.error('Failed to fetch students:', error);
+            setStudentsModal(prev => ({ ...prev, loading: false }));
+        }
     };
 
     const handleActivateSubscription = async () => {
@@ -233,9 +253,15 @@ export default function TeachersPage() {
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td className="py-3">{teacher.phone}</td>
+                                            <td className="py-3">{formatPhone(teacher.phone)}</td>
                                             <td className="py-3">
-                                                <span className="badge bg-primary rounded-pill">{teacher.studentCount || 0}</span>
+                                                <button
+                                                    onClick={() => openStudentsModal(teacher)}
+                                                    className="btn btn-sm btn-link text-primary p-0 text-decoration-none"
+                                                >
+                                                    <span className="badge bg-primary rounded-pill">{teacher.studentCount || 0}</span>
+                                                    <span className="material-symbols-outlined ms-1" style={{ fontSize: '14px', verticalAlign: 'middle' }}>visibility</span>
+                                                </button>
                                             </td>
                                             <td className="py-3">
                                                 {getSubscriptionBadge(teacher)}
@@ -349,6 +375,106 @@ export default function TeachersPage() {
                                         <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>check</span>
                                     )}
                                     {selectedDays} kun faollashtirish
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Students Modal */}
+            {studentsModal.show && (
+                <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                    <div className="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+                        <div className="modal-content rounded-4 border-0">
+                            <div className="modal-header border-0 pb-0">
+                                <h5 className="modal-title fw-bold d-flex align-items-center gap-2">
+                                    <span className="material-symbols-outlined text-primary">school</span>
+                                    {studentsModal.teacher?.name} ning o'quvchilari
+                                </h5>
+                                <button
+                                    type="button"
+                                    className="btn-close"
+                                    onClick={() => setStudentsModal({ show: false, teacher: null, students: [], loading: false })}
+                                ></button>
+                            </div>
+                            <div className="modal-body">
+                                {studentsModal.loading ? (
+                                    <div className="text-center py-5">
+                                        <div className="spinner-border text-primary"></div>
+                                    </div>
+                                ) : studentsModal.students.length === 0 ? (
+                                    <div className="text-center py-5 text-muted">
+                                        <span className="material-symbols-outlined mb-2" style={{ fontSize: '48px' }}>person_off</span>
+                                        <p>Bu o'qituvchida o'quvchi yo'q</p>
+                                    </div>
+                                ) : (
+                                    <div className="row g-3">
+                                        {studentsModal.students.map((student) => (
+                                            <div key={student._id} className="col-12 col-md-6">
+                                                <div className="card border rounded-3 h-100">
+                                                    <div className="card-body p-3">
+                                                        <div className="d-flex align-items-center gap-3 mb-3">
+                                                            <div
+                                                                className="rounded-circle d-flex align-items-center justify-content-center"
+                                                                style={{
+                                                                    width: '50px',
+                                                                    height: '50px',
+                                                                    backgroundColor: '#E0F2FE',
+                                                                    fontSize: '24px'
+                                                                }}
+                                                            >
+                                                                {student.avatar || '👦'}
+                                                            </div>
+                                                            <div>
+                                                                <h6 className="fw-bold mb-0">{student.name}</h6>
+                                                                <small className="text-muted">{student.age} yosh</small>
+                                                            </div>
+                                                        </div>
+                                                        <div className="row g-2 text-center">
+                                                            <div className="col-3">
+                                                                <div className="bg-warning bg-opacity-10 rounded-3 p-2">
+                                                                    <span className="material-symbols-outlined filled text-warning" style={{ fontSize: '20px' }}>star</span>
+                                                                    <p className="fw-bold mb-0 small">{student.stars || 0}</p>
+                                                                    <p className="text-muted mb-0" style={{ fontSize: '10px' }}>Yulduz</p>
+                                                                </div>
+                                                            </div>
+                                                            <div className="col-3">
+                                                                <div className="bg-success bg-opacity-10 rounded-3 p-2">
+                                                                    <span className="material-symbols-outlined text-success" style={{ fontSize: '20px' }}>task_alt</span>
+                                                                    <p className="fw-bold mb-0 small">{student.completedLessons || 0}</p>
+                                                                    <p className="text-muted mb-0" style={{ fontSize: '10px' }}>Dars</p>
+                                                                </div>
+                                                            </div>
+                                                            <div className="col-3">
+                                                                <div className="bg-primary bg-opacity-10 rounded-3 p-2">
+                                                                    <span className="material-symbols-outlined text-primary" style={{ fontSize: '20px' }}>sports_esports</span>
+                                                                    <p className="fw-bold mb-0 small">{student.gamesWon || 0}</p>
+                                                                    <p className="text-muted mb-0" style={{ fontSize: '10px' }}>O'yin</p>
+                                                                </div>
+                                                            </div>
+                                                            <div className="col-3">
+                                                                <div className="bg-info bg-opacity-10 rounded-3 p-2">
+                                                                    <span className="material-symbols-outlined text-info" style={{ fontSize: '20px' }}>emoji_events</span>
+                                                                    <p className="fw-bold mb-0 small">{student.totalStarsEarned || 0}</p>
+                                                                    <p className="text-muted mb-0" style={{ fontSize: '10px' }}>Ball</p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                            <div className="modal-footer border-0 pt-0">
+                                <button
+                                    type="button"
+                                    className="btn btn-light rounded-3"
+                                    onClick={() => setStudentsModal({ show: false, teacher: null, students: [], loading: false })}
+                                >
+                                    Yopish
                                 </button>
                             </div>
                         </div>

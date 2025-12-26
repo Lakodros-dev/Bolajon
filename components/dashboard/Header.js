@@ -21,6 +21,18 @@ export default function Header({ title, showStars = false, stars = 0, showSubscr
                 />
 
                 <div className="d-flex align-items-center gap-2">
+                    {/* Admin Mode Button - only for admins on mobile */}
+                    {user?.role === 'admin' && (
+                        <Link
+                            href="/admin"
+                            className="btn btn-outline-primary rounded-pill px-2 py-1 d-lg-none d-flex align-items-center gap-1"
+                            style={{ fontSize: '12px' }}
+                        >
+                            <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>admin_panel_settings</span>
+                            <span className="d-none d-sm-inline">Admin</span>
+                        </Link>
+                    )}
+
                     {/* Subscription Days - just display, modal is global */}
                     {showSubscription && (
                         <div

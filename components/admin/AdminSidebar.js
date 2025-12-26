@@ -131,6 +131,14 @@ export default function AdminSidebar() {
                             <p className="small text-muted mb-0 text-truncate">{user?.phone}</p>
                         </div>
                     </div>
+                    {/* Switch to Teacher Mode */}
+                    <Link
+                        href="/dashboard"
+                        className="btn btn-outline-primary w-100 rounded-3 py-2 mb-2 d-flex align-items-center justify-content-center gap-2"
+                    >
+                        <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>swap_horiz</span>
+                        O'qituvchi rejimi
+                    </Link>
                     <button
                         onClick={logout}
                         className="btn btn-outline-danger w-100 rounded-3 py-2 d-flex align-items-center justify-content-center gap-2"

@@ -74,6 +74,16 @@ export default function Sidebar() {
                         <p className="small text-muted mb-0">{user?.phone}</p>
                     </div>
                 </div>
+                {/* Switch to Admin Mode - only for admins */}
+                {user?.role === 'admin' && (
+                    <Link
+                        href="/admin"
+                        className="btn btn-outline-primary w-100 rounded-3 mb-2 d-flex align-items-center justify-content-center gap-2"
+                    >
+                        <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>admin_panel_settings</span>
+                        Admin rejimi
+                    </Link>
+                )}
                 <button
                     onClick={logout}
                     className="btn btn-outline-danger w-100 rounded-3 d-flex align-items-center justify-content-center gap-2"
