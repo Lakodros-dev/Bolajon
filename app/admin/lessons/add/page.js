@@ -31,6 +31,8 @@ export default function AddLessonPage() {
     const gameTypes = [
         { value: 'none', label: "O'yinsiz", icon: 'block', color: '#6b7280' },
         { value: 'vocabulary', label: "Lug'at o'yini", icon: 'dictionary', color: '#2563eb' },
+        { value: 'catch-the-number', label: 'Catch the Number', icon: '🔢', color: '#f59e0b', isEmoji: true },
+        { value: 'shopping-basket', label: 'Shopping Basket', icon: '🛒', color: '#9333ea', isEmoji: true },
         { value: 'pop-the-balloon', label: 'Sharni yorish', icon: '🎈', color: '#dc2626', isEmoji: true },
         { value: 'drop-to-basket', label: 'Savatga tashlash', icon: '🧺', color: '#16a34a', isEmoji: true },
         { value: 'movements', label: "Fe'llarni o'rganish", icon: '🏃', color: '#d97706', isEmoji: true }
@@ -38,10 +40,10 @@ export default function AddLessonPage() {
 
     const handleChange = (e) => {
         const { name, value, type } = e.target;
-        setFormData({
-            ...formData,
-            [name]: type === 'number' ? parseInt(value) || 0 : value
-        });
+        setFormData(prev => ({
+            ...prev,
+            [name]: type === 'number' ? (value === '' ? 0 : parseInt(value) || 0) : (value || '')
+        }));
     };
 
     // Vocabulary functions
@@ -63,7 +65,7 @@ export default function AddLessonPage() {
         setFormData(prev => ({
             ...prev,
             vocabulary: prev.vocabulary.map((item, i) =>
-                i === index ? { ...item, [field]: value } : item
+                i === index ? { ...item, [field]: value || '' } : item
             )
         }));
     };
@@ -177,6 +179,15 @@ export default function AddLessonPage() {
         e.preventDefault();
         setLoading(true);
         setError('');
+
+        // Validate vocabulary for games that need it
+        const gamesNeedingVocabulary = ['vocabulary', 'shopping-basket', 'pop-the-balloon', 'drop-to-basket', 'movements'];
+        if (gamesNeedingVocabulary.includes(formData.gameType) && formData.vocabulary.length === 0) {
+            setError(`${formData.gameType === 'shopping-basket' ? 'Shopping Basket' : 'Bu'} o'yin uchun kamida bitta so'z qo'shish kerak!`);
+            setLoading(false);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            return;
+        }
 
         try {
             const res = await fetch('/api/lessons', {
@@ -418,6 +429,24 @@ export default function AddLessonPage() {
                             </div>
                         )}
 
+                        {formData.gameType === 'catch-the-number' && (
+                            <div className="alert alert-info mt-3 mb-0 rounded-3">
+                                <small>
+                                    <span className="material-symbols-outlined me-1" style={{ fontSize: '16px', verticalAlign: 'middle' }}>info</span>
+                                    Catch the Number o'yini 1-1000 gacha raqamlarni avtomatik ishlatadi
+                                </small>
+                            </div>
+                        )}
+
+                        {formData.gameType === 'shopping-basket' && (
+                            <div className="alert alert-warning mt-3 mb-0 rounded-3">
+                                <small>
+                                    <span className="material-symbols-outlined me-1" style={{ fontSize: '16px', verticalAlign: 'middle' }}>warning</span>
+                                    <strong>Diqqat!</strong> Shopping Basket o'yini uchun quyida lug'at qo'shish MAJBURIY
+                                </small>
+                            </div>
+                        )}
+
                         {(formData.gameType === 'pop-the-balloon' || formData.gameType === 'drop-to-basket' || formData.gameType === 'movements') && (
                             <div className="alert alert-warning mt-3 mb-0 rounded-3">
                                 <small>
@@ -463,7 +492,7 @@ export default function AddLessonPage() {
                                                     type="text"
                                                     className="form-control rounded-3"
                                                     placeholder="Apple"
-                                                    value={item.word}
+                                                    value={item.word || ''}
                                                     onChange={(e) => updateVocabularyItem(index, 'word', e.target.value)}
                                                 />
                                             </div>
@@ -473,7 +502,7 @@ export default function AddLessonPage() {
                                                     type="text"
                                                     className="form-control rounded-3"
                                                     placeholder="Olma"
-                                                    value={item.translation}
+                                                    value={item.translation || ''}
                                                     onChange={(e) => updateVocabularyItem(index, 'translation', e.target.value)}
                                                 />
                                             </div>

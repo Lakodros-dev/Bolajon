@@ -205,7 +205,6 @@ export default function GamesPage() {
                                 const lessonCompleted = progress.completedLessons.includes(lesson._id);
                                 const gameWon = progress.wonGames.includes(lesson._id);
                                 const isLeft = index % 2 === 0;
-                                const isFirst = index === 0;
                                 const isLast = index === lessons.length - 1;
 
                                 return (
@@ -242,7 +241,15 @@ export default function GamesPage() {
                                                     </p>
                                                     {lesson.gameType && lesson.gameType !== 'none' ? (
                                                         <Link
-                                                            href={`/games/${lesson.gameType === 'vocabulary' ? 'vocabulary/' + lesson._id : lesson.gameType}?student=${selectedStudent._id}&lesson=${lesson._id}`}
+                                                            href={`/games/${
+                                                                lesson.gameType === 'vocabulary' 
+                                                                    ? 'vocabulary/' + lesson._id 
+                                                                    : lesson.gameType === 'shopping-basket'
+                                                                    ? 'shopping-basket/' + lesson._id
+                                                                    : lesson.gameType === 'catch-the-number'
+                                                                    ? 'catch-the-number/' + lesson._id
+                                                                    : lesson.gameType
+                                                            }?student=${selectedStudent._id}&lesson=${lesson._id}`}
                                                             className="btn btn-sm btn-primary d-inline-flex align-items-center gap-1"
                                                         >
                                                             <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>

@@ -5,7 +5,7 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 
-const MONGODB_URI = 'mongodb+srv://Lakodros:Lakodros01@thebase.bx3mew2.mongodb.net/bolajon-uz?retryWrites=true&w=majority&appName=TheBase';
+const MONGODB_URI = 'mongodb+srv://Bolajon:mr.ozodbek2410@cluster0.dlopces.mongodb.net/bolajon-uz?retryWrites=true&w=majority';
 
 async function seed() {
     try {
