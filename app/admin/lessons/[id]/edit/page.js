@@ -36,6 +36,7 @@ export default function EditLessonPage() {
         { value: 'vocabulary', label: "Lug'at o'yini", icon: 'dictionary', color: '#2563eb' },
         { value: 'catch-the-number', label: 'Catch the Number', icon: '🔢', color: '#f59e0b', isEmoji: true },
         { value: 'shopping-basket', label: 'Shopping Basket', icon: '🛒', color: '#9333ea', isEmoji: true },
+        { value: 'build-the-body', label: 'Build the Body', icon: '🧍', color: '#ec4899', isEmoji: true },
         { value: 'pop-the-balloon', label: 'Sharni yorish', icon: '🎈', color: '#dc2626', isEmoji: true },
         { value: 'drop-to-basket', label: 'Savatga tashlash', icon: '🧺', color: '#16a34a', isEmoji: true },
         { value: 'movements', label: "Fe'llarni o'rganish", icon: '🏃', color: '#d97706', isEmoji: true }
@@ -215,9 +216,9 @@ export default function EditLessonPage() {
         setError('');
 
         // Validate vocabulary for games that need it
-        const gamesNeedingVocabulary = ['vocabulary', 'shopping-basket', 'pop-the-balloon', 'drop-to-basket', 'movements'];
+        const gamesNeedingVocabulary = ['vocabulary', 'shopping-basket', 'build-the-body', 'pop-the-balloon', 'drop-to-basket', 'movements'];
         if (gamesNeedingVocabulary.includes(formData.gameType) && formData.vocabulary.length === 0) {
-            setError(`${formData.gameType === 'shopping-basket' ? 'Shopping Basket' : 'Bu'} o'yin uchun kamida bitta so'z qo'shish kerak!`);
+            setError(`${formData.gameType === 'shopping-basket' ? 'Shopping Basket' : formData.gameType === 'build-the-body' ? 'Build the Body' : 'Bu'} o'yin uchun kamida bitta so'z qo'shish kerak!`);
             setLoading(false);
             window.scrollTo({ top: 0, behavior: 'smooth' });
             return;
@@ -468,6 +469,15 @@ export default function EditLessonPage() {
                                 <small>
                                     <span className="material-symbols-outlined me-1" style={{ fontSize: '16px', verticalAlign: 'middle' }}>warning</span>
                                     <strong>Diqqat!</strong> Shopping Basket o'yini uchun quyida lug'at qo'shish MAJBURIY
+                                </small>
+                            </div>
+                        )}
+
+                        {formData.gameType === 'build-the-body' && (
+                            <div className="alert alert-warning mt-3 mb-0 rounded-3">
+                                <small>
+                                    <span className="material-symbols-outlined me-1" style={{ fontSize: '16px', verticalAlign: 'middle' }}>warning</span>
+                                    <strong>Diqqat!</strong> Build the Body o'yini uchun tana a'zolari lug'atini qo'shish MAJBURIY
                                 </small>
                             </div>
                         )}
