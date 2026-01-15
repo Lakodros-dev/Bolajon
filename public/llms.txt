@@ -1,0 +1,35 @@
+# Bolajon.uz - AI Information
+
+## About
+Bolajon.uz is an educational platform designed to teach English to children aged 5-9 years old in Uzbekistan. The platform uses interactive games, video lessons, and a reward system to make learning fun and engaging.
+
+## Key Features
+- Interactive video lessons covering alphabet, numbers, colors, animals, and more
+- Educational games: "Pop the Balloon", "Drop to Basket", "Learn Verbs"
+- Star reward system - children earn stars for completing lessons
+- Gift shop - stars can be exchanged for rewards
+- Teacher dashboard for managing students and tracking progress
+- Uzbek language interface
+
+## Target Audience
+- Children aged 5-9 years old
+- Parents looking for English learning resources for their kids
+- Teachers and tutors in Uzbekistan
+- Educational institutions
+
+## Location
+Based in Uzbekistan, serving Uzbek-speaking families
+
+## Website
+https://bolajoon.uz
+
+## Contact
+For partnerships and inquiries, visit the website.
+
+## Topics
+- English language learning
+- Children's education
+- EdTech
+- Interactive learning
+- Gamification in education
+- Uzbekistan education
