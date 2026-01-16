@@ -250,6 +250,8 @@ export default function GamesPage() {
                                                                     ? 'catch-the-number/' + lesson._id
                                                                     : lesson.gameType === 'build-the-body'
                                                                     ? 'build-the-body/' + lesson._id
+                                                                    : lesson.gameType === 'drop-to-basket'
+                                                                    ? 'drop-to-basket/' + lesson._id
                                                                     : lesson.gameType
                                                             }?student=${selectedStudent._id}&lesson=${lesson._id}`}
                                                             className="btn btn-sm btn-primary d-inline-flex align-items-center gap-1"

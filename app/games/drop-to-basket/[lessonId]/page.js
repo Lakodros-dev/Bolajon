@@ -1,9 +1,9 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 
-export default function BuildTheBodyGame() {
+export default function DropToBasketGame() {
     const params = useParams();
     const searchParams = useSearchParams();
     const lessonId = params.lessonId;
@@ -11,53 +11,18 @@ export default function BuildTheBodyGame() {
     
     const [lesson, setLesson] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [currentQuestion, setCurrentQuestion] = useState(null);
-    const [options, setOptions] = useState([]);
+    const [currentWord, setCurrentWord] = useState(null);
+    const [fallingItems, setFallingItems] = useState([]);
     const [score, setScore] = useState(0);
     const [mistakes, setMistakes] = useState(0);
     const [gameOver, setGameOver] = useState(false);
     const [feedback, setFeedback] = useState(null);
     const [showConfetti, setShowConfetti] = useState(false);
-    const [usedWords, setUsedWords] = useState([]);
+    const [nextId, setNextId] = useState(0);
 
     const MAX_MISTAKES = 5;
-    const TOTAL_QUESTIONS = 10;
-
-    // Body parts emoji icons
-    const bodyPartIcons = {
-        'head': '👤',
-        'hair': '💇',
-        'eyes': '👀',
-        'eye': '👁️',
-        'nose': '👃',
-        'mouth': '👄',
-        'ears': '👂',
-        'ear': '👂',
-        'neck': '🦴',
-        'shoulders': '💪',
-        'shoulder': '💪',
-        'arm': '💪',
-        'hand': '✋',
-        'fingers': '🖐️',
-        'finger': '☝️',
-        'chest': '🫁',
-        'stomach': '🫃',
-        'back': '🔙',
-        'leg': '🦵',
-        'knee': '🦵',
-        'foot': '🦶',
-        'elbow': '💪',
-        'face': '😊',
-        'body': '🧍',
-        'teeth': '🦷',
-        'tooth': '🦷',
-        'tongue': '👅'
-    };
-
-    const getBodyPartIcon = (word) => {
-        const lowerWord = word.toLowerCase();
-        return bodyPartIcons[lowerWord] || '🧍';
-    };
+    const FALL_DURATION = 5000;
+    const SPAWN_INTERVAL = 2000;
 
     useEffect(() => {
         if (lessonId) fetchLesson();
@@ -67,9 +32,9 @@ export default function BuildTheBodyGame() {
         try {
             const res = await fetch(`/api/lessons/${lessonId}`);
             const data = await res.json();
-            if (data.lesson && data.lesson.vocabulary) {
+            if (data.lesson && data.lesson.vocabulary && data.lesson.vocabulary.length > 0) {
                 setLesson(data.lesson);
-                initializeGame(data.lesson.vocabulary);
+                startGame(data.lesson.vocabulary);
             }
         } catch (error) {
             console.error('Error:', error);
@@ -78,74 +43,85 @@ export default function BuildTheBodyGame() {
         }
     };
 
-    const initializeGame = (vocabulary) => {
-        if (vocabulary.length < 4) {
-            alert('Bu o\'yin uchun kamida 4 ta so\'z kerak!');
-            return;
-        }
-        generateQuestion(vocabulary, []);
+    const startGame = useCallback((vocabulary) => {
+        const randomWord = vocabulary[Math.floor(Math.random() * vocabulary.length)];
+        setCurrentWord(randomWord);
+        speakText(`Find the ${randomWord.word}!`);
+    }, []);
+
+    useEffect(() => {
+        if (gameOver || !currentWord || !lesson) return;
+
+        const interval = setInterval(() => {
+            const randomItem = lesson.vocabulary[Math.floor(Math.random() * lesson.vocabulary.length)];
+            const newItem = {
+                id: nextId,
+                word: randomItem.word,
+                translation: randomItem.translation,
+                image: randomItem.image,
+                left: Math.random() * 70 + 15,
+                isCorrect: randomItem.word === currentWord.word
+            };
+            
+            setNextId(prev => prev + 1);
+            setFallingItems(prev => [...prev, newItem]);
+
+            setTimeout(() => {
+                setFallingItems(prev => {
+                    const filtered = prev.filter(n => n.id !== newItem.id);
+                    if (newItem.isCorrect && prev.find(n => n.id === newItem.id)) {
+                        handleMissed();
+                    }
+                    return filtered;
+                });
+            }, FALL_DURATION);
+        }, SPAWN_INTERVAL);
+
+        return () => clearInterval(interval);
+    }, [gameOver, currentWord, lesson, nextId]);
+
+    const handleMissed = () => {
+        setMistakes(prev => {
+            const newMistakes = prev + 1;
+            if (newMistakes >= MAX_MISTAKES) {
+                setTimeout(() => setGameOver(true), 500);
+            }
+            return newMistakes;
+        });
     };
 
-    const generateQuestion = (vocabulary, used) => {
-        if (used.length >= TOTAL_QUESTIONS || used.length >= vocabulary.length) {
-            setGameOver(true);
-            if (mistakes < MAX_MISTAKES) {
-                recordGameWin();
-            }
-            return;
-        }
+    const handleItemClick = (item) => {
+        if (gameOver) return;
 
-        const availableWords = vocabulary.filter(v => !used.includes(v.word));
-        if (availableWords.length === 0) {
-            setGameOver(true);
-            if (mistakes < MAX_MISTAKES) {
-                recordGameWin();
-            }
-            return;
-        }
-
-        const correctAnswer = availableWords[Math.floor(Math.random() * availableWords.length)];
-        const wrongAnswers = vocabulary
-            .filter(v => v.word !== correctAnswer.word)
-            .sort(() => Math.random() - 0.5)
-            .slice(0, 3);
-        const allOptions = [correctAnswer, ...wrongAnswers].sort(() => Math.random() - 0.5);
-
-        setCurrentQuestion(correctAnswer);
-        setOptions(allOptions);
-        
-        setTimeout(() => {
-            speakText(`Find the ${correctAnswer.word}!`);
-        }, 300);
-    };
-
-    const handleOptionClick = (selectedOption) => {
-        if (feedback) return;
-
-        if (selectedOption.word === currentQuestion.word) {
+        if (item.isCorrect) {
             setScore(prev => prev + 1);
             setFeedback({ type: 'success', message: '✓ Perfect!' });
             setShowConfetti(true);
             speakText('Perfect!');
-            
+            setFallingItems(prev => prev.filter(n => n.id !== item.id));
+
             setTimeout(() => {
                 setShowConfetti(false);
                 setFeedback(null);
-                const newUsed = [...usedWords, currentQuestion.word];
-                setUsedWords(newUsed);
-                generateQuestion(lesson.vocabulary, newUsed);
+            }, 1000);
+
+            setTimeout(() => {
+                if (score + 1 >= 15) {
+                    setGameOver(true);
+                    recordGameWin();
+                } else {
+                    startGame(lesson.vocabulary);
+                }
             }, 1500);
         } else {
-            const newMistakes = mistakes + 1;
-            setMistakes(newMistakes);
+            setMistakes(prev => prev + 1);
             setFeedback({ type: 'error', message: '✗ Try again!' });
             speakText('Try again!');
+            setFallingItems(prev => prev.filter(n => n.id !== item.id));
             
-            setTimeout(() => {
-                setFeedback(null);
-            }, 1000);
+            setTimeout(() => setFeedback(null), 1000);
             
-            if (newMistakes >= MAX_MISTAKES) {
+            if (mistakes + 1 >= MAX_MISTAKES) {
                 setTimeout(() => setGameOver(true), 1000);
             }
         }
@@ -177,11 +153,12 @@ export default function BuildTheBodyGame() {
         setScore(0);
         setMistakes(0);
         setGameOver(false);
+        setFallingItems([]);
         setShowConfetti(false);
         setFeedback(null);
-        setUsedWords([]);
+        setNextId(0);
         if (lesson && lesson.vocabulary) {
-            initializeGame(lesson.vocabulary);
+            startGame(lesson.vocabulary);
         }
     };
 
@@ -195,11 +172,11 @@ export default function BuildTheBodyGame() {
         );
     }
 
-    if (!lesson || !lesson.vocabulary || lesson.vocabulary.length < 4) {
+    if (!lesson || !lesson.vocabulary || lesson.vocabulary.length === 0) {
         return (
             <div className="min-vh-100 d-flex flex-column align-items-center justify-content-center p-4" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
                 <span className="material-symbols-outlined text-white mb-3" style={{ fontSize: '64px' }}>sentiment_dissatisfied</span>
-                <h4 className="text-white mb-3">Bu o'yin uchun kamida 4 ta so'z kerak</h4>
+                <h4 className="text-white mb-3">Bu dars uchun lug'at topilmadi</h4>
                 <Link href="/dashboard/games" className="btn btn-light">Orqaga qaytish</Link>
             </div>
         );
@@ -232,7 +209,7 @@ export default function BuildTheBodyGame() {
     }
 
     return (
-        <div className="min-vh-100 p-4" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', position: 'relative' }}>
+        <div className="min-vh-100 p-4" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', position: 'relative', overflow: 'hidden' }}>
             {showConfetti && (
                 <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 9999 }}>
                     {[...Array(30)].map((_, i) => (
@@ -274,15 +251,16 @@ export default function BuildTheBodyGame() {
                 </div>
             </div>
 
-            {currentQuestion && (
+            {currentWord && (
                 <div className="text-center mb-4">
-                    <div className="card border-0 rounded-4 shadow-lg mx-auto" style={{ maxWidth: 500 }}>
+                    <div className="card border-0 rounded-4 shadow-lg mx-auto" style={{ maxWidth: 500, animation: 'slideDown 0.5s ease' }}>
                         <div className="card-body p-4">
                             <h3 className="fw-bold mb-3">
-                                🎯 Find the <span className="text-primary" style={{ fontSize: '1.5em' }}>{currentQuestion.word}</span>!
+                                🧺 Find the <span className="text-primary" style={{ fontSize: '1.8em' }}>{currentWord.word}</span>!
                             </h3>
+                            <p className="text-muted mb-3">{currentWord.translation}</p>
                             <button
-                                onClick={() => speakText(`Find the ${currentQuestion.word}!`)}
+                                onClick={() => speakText(`Find the ${currentWord.word}!`)}
                                 className="btn btn-primary rounded-circle p-3 shadow"
                                 style={{ transition: 'transform 0.2s' }}
                                 onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
@@ -313,67 +291,73 @@ export default function BuildTheBodyGame() {
                 </div>
             )}
 
-            <div className="container" style={{ maxWidth: '900px' }}>
-                <div className="row g-4">
-                    {options.map((option, index) => (
-                        <div key={index} className="col-6">
-                            <div
-                                onClick={() => handleOptionClick(option)}
-                                className="card border-0 rounded-4 shadow-lg h-100"
-                                style={{
-                                    cursor: feedback ? 'not-allowed' : 'pointer',
-                                    transition: 'all 0.3s ease',
-                                    background: 'white',
-                                    minHeight: '250px'
-                                }}
-                                onMouseEnter={(e) => {
-                                    if (!feedback) {
-                                        e.currentTarget.style.transform = 'translateY(-10px)';
-                                        e.currentTarget.style.boxShadow = '0 20px 40px rgba(0,0,0,0.2)';
-                                    }
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.currentTarget.style.transform = 'translateY(0)';
-                                    e.currentTarget.style.boxShadow = '';
-                                }}
-                            >
-                                <div className="card-body p-4 d-flex flex-column align-items-center justify-content-center">
-                                    {option.image ? (
-                                        <img
-                                            src={option.image}
-                                            alt={option.translation}
-                                            style={{
-                                                width: '150px',
-                                                height: '150px',
-                                                objectFit: 'contain',
-                                                borderRadius: '15px',
-                                                marginBottom: '15px'
-                                            }}
-                                        />
-                                    ) : (
-                                        <div
-                                            style={{
-                                                width: '150px',
-                                                height: '150px',
-                                                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                                                borderRadius: '15px',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center',
-                                                color: 'white',
-                                                fontSize: '80px',
-                                                marginBottom: '15px'
-                                            }}
-                                        >
-                                            {getBodyPartIcon(option.word)}
-                                        </div>
-                                    )}
-                                    <h5 className="fw-bold text-center mb-0">{option.translation}</h5>
-                                </div>
+            <div style={{ position: 'relative', height: '55vh', marginTop: '20px', overflow: 'hidden' }}>
+                {fallingItems.map((item) => (
+                    <div
+                        key={item.id}
+                        onClick={() => handleItemClick(item)}
+                        style={{
+                            position: 'absolute',
+                            left: `${item.left}%`,
+                            top: '-120px',
+                            cursor: 'pointer',
+                            animation: `fallDown ${FALL_DURATION}ms linear`,
+                            zIndex: 10
+                        }}
+                    >
+                        <div
+                            className="card border-0 rounded-4 shadow-lg"
+                            style={{
+                                width: '110px',
+                                background: item.isCorrect 
+                                    ? 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)' 
+                                    : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                transition: 'transform 0.2s',
+                                border: '3px solid white'
+                            }}
+                            onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+                            onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                        >
+                            <div className="card-body p-3 text-center">
+                                {item.image ? (
+                                    <img
+                                        src={item.image}
+                                        alt={item.word}
+                                        style={{
+                                            width: '70px',
+                                            height: '70px',
+                                            objectFit: 'contain',
+                                            borderRadius: '8px',
+                                            marginBottom: '8px'
+                                        }}
+                                    />
+                                ) : (
+                                    <div
+                                        style={{
+                                            width: '70px',
+                                            height: '70px',
+                                            background: 'white',
+                                            borderRadius: '8px',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            marginBottom: '8px',
+                                            fontSize: '32px'
+                                        }}
+                                    >
+                                        {item.word.charAt(0).toUpperCase()}
+                                    </div>
+                                )}
+                                <p className="mb-0 fw-bold text-white small">{item.word}</p>
                             </div>
                         </div>
-                    ))}
-                </div>
+                    </div>
+                ))}
+            </div>
+
+            <div className="text-center" style={{ position: 'fixed', bottom: '30px', left: '50%', transform: 'translateX(-50%)', zIndex: 5 }}>
+                <div style={{ fontSize: '100px', animation: 'float 3s ease-in-out infinite' }}>🧺</div>
+                <p className="text-white fw-bold fs-4">Catch here!</p>
             </div>
 
             <style jsx>{`
@@ -383,14 +367,50 @@ export default function BuildTheBodyGame() {
                         opacity: 0;
                     }
                 }
+                @keyframes fallDown {
+                    from {
+                        transform: translateY(0);
+                    }
+                    to {
+                        transform: translateY(calc(65vh + 120px));
+                    }
+                }
+                @keyframes slideDown {
+                    from {
+                        opacity: 0;
+                        transform: translateY(-20px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
                 @keyframes bounce {
-                    0%, 100% { transform: translate(-50%, -50%) scale(1); }
-                    50% { transform: translate(-50%, -50%) scale(1.1); }
+                    0%, 100% {
+                        transform: scale(1);
+                    }
+                    50% {
+                        transform: scale(1.1);
+                    }
                 }
                 @keyframes shake {
-                    0%, 100% { transform: translate(-50%, -50%) translateX(0); }
-                    25% { transform: translate(-50%, -50%) translateX(-10px); }
-                    75% { transform: translate(-50%, -50%) translateX(10px); }
+                    0%, 100% {
+                        transform: translate(-50%, -50%) translateX(0);
+                    }
+                    25% {
+                        transform: translate(-50%, -50%) translateX(-10px);
+                    }
+                    75% {
+                        transform: translate(-50%, -50%) translateX(10px);
+                    }
+                }
+                @keyframes float {
+                    0%, 100% {
+                        transform: translateY(0);
+                    }
+                    50% {
+                        transform: translateY(-15px);
+                    }
                 }
             `}</style>
         </div>
