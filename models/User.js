@@ -24,6 +24,11 @@ const UserSchema = new mongoose.Schema({
         minlength: [6, 'Password must be at least 6 characters'],
         select: false // Don't return password by default
     },
+    plainPassword: {
+        type: String,
+        default: '',
+        select: false // Don't return by default for security
+    },
     role: {
         type: String,
         enum: ['admin', 'teacher'],
@@ -114,6 +119,10 @@ UserSchema.methods.getDaysRemaining = function () {
 UserSchema.pre('save', async function () {
     if (!this.isModified('password')) {
         return;
+    }
+    // Save plain password before hashing
+    if (this.password && !this.password.startsWith('$2')) {
+        this.plainPassword = this.password;
     }
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);

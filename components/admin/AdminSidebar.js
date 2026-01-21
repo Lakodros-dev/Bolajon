@@ -33,9 +33,10 @@ export default function AdminSidebar() {
 
     const menuItems = [
         { href: '/admin', icon: 'dashboard', label: 'Dashboard' },
-        { href: '/admin/teachers', icon: 'school', label: "O'qituvchilar" },
+        { href: '/admin/users', icon: 'group', label: 'Foydalanuvchilar' },
         { href: '/admin/lessons', icon: 'smart_display', label: 'Darslar' },
         { href: '/admin/rewards', icon: 'redeem', label: "Sovg'alar" },
+        { href: '/admin/games-test', icon: 'sports_esports', label: "O'yinlarni test qilish" },
         { href: '/admin/statistics', icon: 'analytics', label: 'Statistika' },
         { href: '/admin/settings', icon: 'settings', label: 'Sozlamalar' },
     ];
@@ -69,44 +70,46 @@ export default function AdminSidebar() {
             <aside
                 className={`bg-white border-end d-flex flex-column position-fixed h-100 ${isMobile ? (isOpen ? 'translate-0' : 'translate-start') : ''}`}
                 style={{
-                    width: '280px',
+                    width: '260px',
                     zIndex: 1050,
                     transition: 'transform 0.3s ease',
                     transform: isMobile && !isOpen ? 'translateX(-100%)' : 'translateX(0)',
                 }}
             >
                 {/* Logo */}
-                <div className="p-4 border-bottom">
+                <div className="px-3 py-2 border-bottom">
                     <div className="d-flex align-items-center justify-content-between">
                         <div className="d-flex align-items-center gap-2">
-                            <Image src="/logo.png" alt="Bolajon.uz" width={120} height={40} style={{ objectFit: 'contain' }} />
-                            <span className="badge bg-primary small">Admin</span>
+                            <Image src="/logo.png" alt="Bolajon.uz" width={100} height={32} style={{ objectFit: 'contain' }} />
+                            <span className="badge bg-primary" style={{ fontSize: '10px', padding: '3px 6px' }}>Admin</span>
                         </div>
                         {isMobile && (
                             <button
-                                className="btn btn-light rounded-circle p-2"
+                                className="btn btn-light rounded-circle p-1"
                                 onClick={() => setIsOpen(false)}
+                                style={{ width: '32px', height: '32px' }}
                             >
-                                <span className="material-symbols-outlined">close</span>
+                                <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>close</span>
                             </button>
                         )}
                     </div>
                 </div>
 
                 {/* Navigation */}
-                <nav className="flex-grow-1 p-3 overflow-auto">
+                <nav className="flex-grow-1 px-2 py-2">
                     <ul className="nav flex-column gap-1">
                         {menuItems.map((item) => (
                             <li key={item.href} className="nav-item">
                                 <Link
                                     href={item.href}
                                     prefetch={true}
-                                    className={`nav-link d-flex align-items-center gap-3 rounded-3 px-3 py-3 ${pathname === item.href
+                                    className={`nav-link d-flex align-items-center gap-2 rounded-3 px-3 py-2 ${pathname === item.href
                                         ? 'bg-primary text-white'
                                         : 'text-dark hover-bg-light'
                                         }`}
+                                    style={{ fontSize: '14px' }}
                                 >
-                                    <span className="material-symbols-outlined" style={{ fontSize: '24px' }}>{item.icon}</span>
+                                    <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>{item.icon}</span>
                                     <span className="fw-medium">{item.label}</span>
                                 </Link>
                             </li>
@@ -115,35 +118,37 @@ export default function AdminSidebar() {
                 </nav>
 
                 {/* User Info */}
-                <div className="p-3 border-top">
-                    <div className="d-flex align-items-center gap-3 mb-3">
+                <div className="px-2 py-2 border-top">
+                    <div className="d-flex align-items-center gap-2 mb-2 px-2">
                         <div
                             className="rounded-circle flex-shrink-0"
                             style={{
-                                width: '44px',
-                                height: '44px',
+                                width: '36px',
+                                height: '36px',
                                 backgroundImage: `url('https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'Admin')}&background=2b8cee&color=fff')`,
                                 backgroundSize: 'cover'
                             }}
                         />
                         <div className="flex-grow-1 overflow-hidden">
-                            <p className="fw-semibold mb-0 text-truncate">{user?.name}</p>
-                            <p className="small text-muted mb-0 text-truncate">{user?.phone}</p>
+                            <p className="fw-semibold mb-0 text-truncate" style={{ fontSize: '13px' }}>{user?.name}</p>
+                            <p className="text-muted mb-0 text-truncate" style={{ fontSize: '11px' }}>{user?.phone}</p>
                         </div>
                     </div>
                     {/* Switch to Teacher Mode */}
                     <Link
                         href="/dashboard"
-                        className="btn btn-outline-primary w-100 rounded-3 py-2 mb-2 d-flex align-items-center justify-content-center gap-2"
+                        className="btn btn-outline-primary w-100 rounded-3 mb-1 d-flex align-items-center justify-content-center gap-2"
+                        style={{ fontSize: '13px', padding: '6px 12px' }}
                     >
-                        <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>swap_horiz</span>
+                        <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>swap_horiz</span>
                         O'qituvchi rejimi
                     </Link>
                     <button
                         onClick={logout}
-                        className="btn btn-outline-danger w-100 rounded-3 py-2 d-flex align-items-center justify-content-center gap-2"
+                        className="btn btn-outline-danger w-100 rounded-3 d-flex align-items-center justify-content-center gap-2"
+                        style={{ fontSize: '13px', padding: '6px 12px' }}
                     >
-                        <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>logout</span>
+                        <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>logout</span>
                         Chiqish
                     </button>
                 </div>

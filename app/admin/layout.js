@@ -30,7 +30,7 @@ export default function AdminLayout({ children }) {
                     <style jsx global>{`
                         @media (min-width: 992px) {
                             main {
-                                margin-left: 280px !important;
+                                margin-left: 260px !important;
                                 padding-top: 0 !important;
                             }
                         }

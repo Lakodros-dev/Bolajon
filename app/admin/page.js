@@ -45,7 +45,7 @@ export default function AdminDashboard() {
     };
 
     const statCards = [
-        { label: "O'qituvchilar", value: stats.teachers, icon: 'school', color: '#2b8cee', bg: '#dbeafe', href: '/admin/teachers' },
+        { label: "Foydalanuvchilar", value: stats.teachers, icon: 'group', color: '#2b8cee', bg: '#dbeafe', href: '/admin/users' },
         { label: 'Darslar', value: stats.lessons, icon: 'smart_display', color: '#16a34a', bg: '#dcfce7', href: '/admin/lessons' },
         { label: "Sovg'alar", value: stats.rewards, icon: 'redeem', color: '#9333ea', bg: '#f3e8ff', href: '/admin/rewards' },
         { label: 'Statistika', value: '—', icon: 'analytics', color: '#d97706', bg: '#fef3c7', href: '/admin/statistics' },
@@ -102,9 +102,9 @@ export default function AdminDashboard() {
                             </Link>
                         </div>
                         <div className="col-md-4">
-                            <Link href="/admin/teachers" className="btn btn-outline-secondary w-100 rounded-3 py-3 d-flex align-items-center justify-content-center gap-2">
+                            <Link href="/admin/users" className="btn btn-outline-secondary w-100 rounded-3 py-3 d-flex align-items-center justify-content-center gap-2">
                                 <span className="material-symbols-outlined">group</span>
-                                O'qituvchilarni ko'rish
+                                Foydalanuvchilarni ko'rish
                             </Link>
                         </div>
                     </div>

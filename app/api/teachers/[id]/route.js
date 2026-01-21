@@ -57,34 +57,37 @@ export async function PUT(request, { params }) {
 
         await dbConnect();
 
-        const teacher = await User.findOne({ _id: params.id, role: 'teacher' });
+        const teacher = await User.findById(params.id);
         if (!teacher) {
-            return notFoundResponse('Teacher');
+            return notFoundResponse('User');
         }
 
         const body = await request.json();
-        const { name, email, phone, isActive } = body;
+        const { name, phone, password, role } = body;
 
         if (name) teacher.name = name;
-        if (email) teacher.email = email.toLowerCase();
         if (phone !== undefined) teacher.phone = phone;
-        if (isActive !== undefined) teacher.isActive = isActive;
+        if (role) teacher.role = role;
+        if (password) {
+            teacher.plainPassword = password; // Save plain password
+            teacher.password = password; // This will be hashed by pre-save hook
+        }
 
         await teacher.save();
 
         return successResponse({
-            message: 'Teacher updated successfully',
-            teacher: {
+            message: 'User updated successfully',
+            user: {
                 _id: teacher._id,
                 name: teacher.name,
-                email: teacher.email,
                 phone: teacher.phone,
-                isActive: teacher.isActive
+                role: teacher.role,
+                plainPassword: teacher.plainPassword
             }
         });
     } catch (error) {
-        console.error('Update teacher error:', error);
-        return serverError('Failed to update teacher');
+        console.error('Update user error:', error);
+        return serverError('Failed to update user');
     }
 }
 
@@ -98,29 +101,31 @@ export async function DELETE(request, { params }) {
 
         await dbConnect();
 
-        const teacher = await User.findOne({ _id: params.id, role: 'teacher' });
-        if (!teacher) {
-            return notFoundResponse('Teacher');
+        const user = await User.findById(params.id);
+        if (!user) {
+            return notFoundResponse('User');
         }
 
-        // Get all students of this teacher
-        const students = await Student.find({ teacherId: params.id });
-        const studentIds = students.map(s => s._id);
+        // Get all students of this user if they are a teacher
+        if (user.role === 'teacher') {
+            const students = await Student.find({ teacherId: params.id });
+            const studentIds = students.map(s => s._id);
 
-        // Delete all progress records for these students
-        await Progress.deleteMany({ studentId: { $in: studentIds } });
+            // Delete all progress records for these students
+            await Progress.deleteMany({ studentId: { $in: studentIds } });
 
-        // Delete all students
-        await Student.deleteMany({ teacherId: params.id });
+            // Delete all students
+            await Student.deleteMany({ teacherId: params.id });
+        }
 
-        // Delete teacher
+        // Delete user
         await User.findByIdAndDelete(params.id);
 
         return successResponse({
-            message: 'Teacher and all related data deleted successfully'
+            message: 'User and all related data deleted successfully'
         });
     } catch (error) {
-        console.error('Delete teacher error:', error);
-        return serverError('Failed to delete teacher');
+        console.error('Delete user error:', error);
+        return serverError('Failed to delete user');
     }
 }

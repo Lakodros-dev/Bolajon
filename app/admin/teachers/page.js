@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import Link from 'next/link';
 import ConfirmModal from '@/components/ConfirmModal';
 import AlertModal from '@/components/AlertModal';
 import { formatPhone } from '@/lib/formatPhone';
@@ -185,9 +186,13 @@ export default function TeachersPage() {
         <div>
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <div>
-                    <h1 className="h3 fw-bold mb-1">O'qituvchilar</h1>
-                    <p className="text-muted mb-0">{teachers.length} ta o'qituvchi</p>
+                    <h1 className="h3 fw-bold mb-1">Foydalanuvchilar</h1>
+                    <p className="text-muted mb-0">{teachers.length} ta foydalanuvchi</p>
                 </div>
+                <Link href="/admin/teachers/add" className="btn btn-primary rounded-3 d-flex align-items-center gap-2">
+                    <span className="material-symbols-outlined">add</span>
+                    Yangi qo'shish
+                </Link>
             </div>
 
             {/* Search */}
@@ -223,8 +228,9 @@ export default function TeachersPage() {
                             <table className="table table-hover mb-0">
                                 <thead className="bg-light">
                                     <tr>
-                                        <th className="border-0 ps-4 py-3">O'qituvchi</th>
+                                        <th className="border-0 ps-4 py-3">Foydalanuvchi</th>
                                         <th className="border-0 py-3">Telefon</th>
+                                        <th className="border-0 py-3">Rol</th>
                                         <th className="border-0 py-3">O'quvchilar</th>
                                         <th className="border-0 py-3">Obuna</th>
                                         <th className="border-0 py-3">Holat</th>
@@ -254,6 +260,11 @@ export default function TeachersPage() {
                                                 </div>
                                             </td>
                                             <td className="py-3">{formatPhone(teacher.phone)}</td>
+                                            <td className="py-3">
+                                                <span className={`badge rounded-pill ${teacher.role === 'admin' ? 'bg-danger' : 'bg-primary'}`}>
+                                                    {teacher.role === 'admin' ? 'Admin' : 'O\'qituvchi'}
+                                                </span>
+                                            </td>
                                             <td className="py-3">
                                                 <button
                                                     onClick={() => openStudentsModal(teacher)}

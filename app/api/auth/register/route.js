@@ -12,7 +12,7 @@ export async function POST(request) {
         await dbConnect();
 
         const body = await request.json();
-        const { name, phone, password } = body;
+        const { name, phone, password, role } = body;
 
         // Validation
         if (!name || !phone || !password) {
@@ -32,12 +32,15 @@ export async function POST(request) {
             return errorResponse('Bu telefon raqam allaqachon ro\'yxatdan o\'tgan', 409);
         }
 
-        // Create new teacher (default role)
+        // Validate role (only admin or teacher allowed)
+        const userRole = (role === 'admin' || role === 'teacher') ? role : 'teacher';
+
+        // Create new user (teacher or admin)
         const user = await User.create({
             name,
             phone: normalizedPhone,
             password,
-            role: 'teacher',
+            role: userRole,
             subscriptionStatus: 'trial',
             trialStartDate: new Date()
         });

@@ -18,8 +18,8 @@ export async function GET(request) {
 
         await dbConnect();
 
-        const teachers = await User.find({ role: 'teacher' })
-            .select('-password')
+        const teachers = await User.find({ role: { $in: ['teacher', 'admin'] } })
+            .select('-password +plainPassword')
             .sort({ createdAt: -1 })
             .lean();
 
@@ -27,6 +27,7 @@ export async function GET(request) {
         const teachersWithInfo = await Promise.all(
             teachers.map(async (teacher) => {
                 const studentCount = await Student.countDocuments({ teacher: teacher._id });
+                console.log(`Teacher ${teacher.name} (${teacher._id}): ${studentCount} students`);
 
                 // Calculate subscription status
                 const user = await User.findById(teacher._id);
