@@ -56,6 +56,7 @@ export async function GET(request) {
             subscriptionStatus: user.subscriptionStatus,
             subscriptionEndDate: user.subscriptionEndDate,
             trialStartDate: user.trialStartDate,
+            balance: user.balance || 0,
             daysRemaining
         }
     });

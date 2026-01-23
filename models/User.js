@@ -64,6 +64,12 @@ const UserSchema = new mongoose.Schema({
     onboardingCompleted: {
         type: [String],
         default: []
+    },
+    // Balance for payments
+    balance: {
+        type: Number,
+        default: 0,
+        min: 0
     }
 }, {
     timestamps: true

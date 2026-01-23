@@ -59,9 +59,9 @@ export default function Header({ title, showStars = false, stars = 0, showSubscr
                         </div>
                     )}
 
-                    {/* Settings */}
+                    {/* Profile */}
                     <Link href="/dashboard/profile" className="btn btn-light rounded-circle p-2" style={{ width: 38, height: 38 }}>
-                        <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>settings</span>
+                        <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>person</span>
                     </Link>
                 </div>
             </div>

@@ -16,11 +16,14 @@ export default function UsersPage() {
     const [viewModal, setViewModal] = useState({ show: false, user: null });
     const [editModal, setEditModal] = useState({ show: false, user: null, loading: false });
     const [subscriptionModal, setSubscriptionModal] = useState({ show: false, user: null });
+    const [balanceModal, setBalanceModal] = useState({ show: false, user: null });
     const [studentsModal, setStudentsModal] = useState({ show: false, user: null, students: [], loading: false });
     const [deleting, setDeleting] = useState(false);
     const [alertModal, setAlertModal] = useState({ show: false, title: '', message: '', type: 'success' });
     const [activatingId, setActivatingId] = useState(null);
+    const [addingBalanceId, setAddingBalanceId] = useState(null);
     const [selectedDays, setSelectedDays] = useState(30);
+    const [balanceAmount, setBalanceAmount] = useState(10000);
     const [editForm, setEditForm] = useState({
         name: '',
         phone: '',
@@ -212,6 +215,54 @@ export default function UsersPage() {
             });
         } finally {
             setActivatingId(null);
+        }
+    };
+
+    const openBalanceModal = (user) => {
+        setBalanceAmount(10000);
+        setBalanceModal({ show: true, user });
+    };
+
+    const handleAddBalance = async () => {
+        const user = balanceModal.user;
+        if (!user) return;
+
+        setAddingBalanceId(user._id);
+        try {
+            const res = await fetch('/api/admin/balance', {
+                method: 'POST',
+                headers: getAuthHeader(),
+                body: JSON.stringify({ userId: user._id, amount: balanceAmount })
+            });
+            const data = await res.json();
+            if (data.success) {
+                // Refresh users to get updated balance
+                await fetchUsers();
+                setAlertModal({
+                    show: true,
+                    title: 'Muvaffaqiyatli',
+                    message: data.message || `${user.name} ga ${balanceAmount.toLocaleString()} so'm qo'shildi`,
+                    type: 'success'
+                });
+                setBalanceModal({ show: false, user: null });
+            } else {
+                setAlertModal({
+                    show: true,
+                    title: 'Xatolik',
+                    message: data.error || 'Balans qo\'shishda xatolik',
+                    type: 'danger'
+                });
+            }
+        } catch (error) {
+            console.error('Failed to add balance:', error);
+            setAlertModal({
+                show: true,
+                title: 'Xatolik',
+                message: 'Balans qo\'shishda xatolik',
+                type: 'danger'
+            });
+        } finally {
+            setAddingBalanceId(null);
         }
     };
 
@@ -520,6 +571,19 @@ export default function UsersPage() {
                                                 >
                                                     <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>visibility</span>
                                                     <span className="d-none d-lg-inline">Ko'rish</span>
+                                                </button>
+                                                <button
+                                                    onClick={() => openBalanceModal(user)}
+                                                    className="btn btn-sm rounded-3"
+                                                    style={{ 
+                                                        backgroundColor: '#ff9500',
+                                                        border: 'none',
+                                                        color: 'white',
+                                                        padding: '6px 10px'
+                                                    }}
+                                                    title="Balans"
+                                                >
+                                                    <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>account_balance_wallet</span>
                                                 </button>
                                                 <button
                                                     onClick={() => openSubscriptionModal(user)}
@@ -846,6 +910,100 @@ export default function UsersPage() {
                                         <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>check</span>
                                     )}
                                     {selectedDays} kun faollashtirish
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Balance Modal */}
+            {balanceModal.show && (
+                <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                    <div className="modal-dialog modal-dialog-centered">
+                        <div className="modal-content rounded-4 border-0">
+                            <div className="modal-header border-0 pb-0">
+                                <h5 className="modal-title fw-bold d-flex align-items-center gap-2">
+                                    <span className="material-symbols-outlined text-warning">account_balance_wallet</span>
+                                    Balans qo'shish
+                                </h5>
+                                <button
+                                    type="button"
+                                    className="btn-close"
+                                    onClick={() => setBalanceModal({ show: false, user: null })}
+                                ></button>
+                            </div>
+                            <div className="modal-body">
+                                <p className="text-muted mb-3">
+                                    <strong>{balanceModal.user?.name}</strong> ga balans qo'shish:
+                                </p>
+
+                                {/* Current Balance */}
+                                <div className="bg-light rounded-3 p-3 mb-4 text-center">
+                                    <p className="small text-muted mb-1">Joriy balans</p>
+                                    <h4 className="fw-bold text-warning mb-0">
+                                        {(balanceModal.user?.balance || 0).toLocaleString()} so'm
+                                    </h4>
+                                </div>
+
+                                {/* Amount Input */}
+                                <div className="mb-4">
+                                    <label className="form-label small fw-semibold">Qo'shiladigan summa</label>
+                                    <div className="input-group input-group-lg">
+                                        <input
+                                            type="number"
+                                            className="form-control border-0 bg-light text-center fw-bold"
+                                            value={balanceAmount}
+                                            onChange={(e) => setBalanceAmount(Math.max(1000, parseInt(e.target.value) || 1000))}
+                                            min={1000}
+                                            step={1000}
+                                        />
+                                        <span className="input-group-text bg-light border-0">so'm</span>
+                                    </div>
+                                </div>
+
+                                {/* Quick Amounts */}
+                                <p className="small text-muted mb-2">Tezkor tanlash:</p>
+                                <div className="d-flex flex-wrap gap-2 mb-4">
+                                    {[5000, 10000, 20000, 50000, 100000].map(amount => (
+                                        <button
+                                            key={amount}
+                                            onClick={() => setBalanceAmount(amount)}
+                                            className={`btn btn-sm rounded-pill px-3 ${balanceAmount === amount ? 'btn-warning' : 'btn-outline-secondary'}`}
+                                        >
+                                            {(amount / 1000).toLocaleString()} ming
+                                        </button>
+                                    ))}
+                                </div>
+
+                                {/* New Balance Preview */}
+                                <div className="bg-success bg-opacity-10 rounded-3 p-3 mb-3 text-center">
+                                    <p className="small text-success mb-1">Yangi balans</p>
+                                    <h4 className="fw-bold text-success mb-0">
+                                        {((balanceModal.user?.balance || 0) + balanceAmount).toLocaleString()} so'm
+                                    </h4>
+                                </div>
+                            </div>
+                            <div className="modal-footer border-0 pt-0">
+                                <button
+                                    type="button"
+                                    className="btn btn-light rounded-3"
+                                    onClick={() => setBalanceModal({ show: false, user: null })}
+                                >
+                                    Bekor qilish
+                                </button>
+                                <button
+                                    type="button"
+                                    className="btn btn-warning rounded-3 d-flex align-items-center gap-2"
+                                    onClick={handleAddBalance}
+                                    disabled={addingBalanceId || balanceAmount < 1000}
+                                >
+                                    {addingBalanceId ? (
+                                        <span className="spinner-border spinner-border-sm"></span>
+                                    ) : (
+                                        <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>add</span>
+                                    )}
+                                    {balanceAmount.toLocaleString()} so'm qo'shish
                                 </button>
                             </div>
                         </div>

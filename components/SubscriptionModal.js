@@ -162,13 +162,11 @@ export default function SubscriptionModal() {
                             <span className="material-symbols-outlined text-primary">payments</span>
                             {isExpired ? 'Obuna muddati tugadi' : 'Obunani uzaytirish'}
                         </h5>
-                        {!isExpired && (
-                            <button
-                                type="button"
-                                className="btn-close"
-                                onClick={() => setShowModal(false)}
-                            ></button>
-                        )}
+                        <button
+                            type="button"
+                            className="btn-close"
+                            onClick={() => setShowModal(false)}
+                        ></button>
                     </div>
                     <div className="modal-body">
                         {/* Current Status */}
