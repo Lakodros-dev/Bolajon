@@ -68,6 +68,12 @@ export default function CatchTheNumberGame() {
     const generateRandomNumber = () => Math.floor(Math.random() * maxNumber) + 1;
 
     const startGame = useCallback(() => {
+        // Clear previous interval
+        if (window.currentSpeechInterval) {
+            clearInterval(window.currentSpeechInterval);
+            window.currentSpeechInterval = null;
+        }
+        
         const value = generateRandomNumber();
         const target = { value, word: numberToWord(value) };
         setCurrentNumber(target);
@@ -79,9 +85,6 @@ export default function CatchTheNumberGame() {
         }, 3000);
         
         // Store interval ID to clear it later
-        if (window.currentSpeechInterval) {
-            clearInterval(window.currentSpeechInterval);
-        }
         window.currentSpeechInterval = repeatInterval;
     }, [maxNumber]);
 

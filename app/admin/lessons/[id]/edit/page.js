@@ -48,7 +48,9 @@ export default function EditLessonPage() {
 
     const fetchLesson = async () => {
         try {
-            const res = await fetch(`/api/lessons/${params.id}`);
+            const res = await fetch(`/api/lessons/${params.id}`, {
+                headers: getAuthHeader()
+            });
             const data = await res.json();
             if (data.success) {
                 const lesson = data.lesson;

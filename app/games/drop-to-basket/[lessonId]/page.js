@@ -2,10 +2,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { useAuth } from '@/context/AuthContext';
 
 export default function DropToBasketGame() {
     const params = useParams();
     const searchParams = useSearchParams();
+    const { getAuthHeader } = useAuth();
     const lessonId = params.lessonId;
     const studentId = searchParams.get('student');
     
@@ -39,7 +41,9 @@ export default function DropToBasketGame() {
 
     const fetchLesson = async () => {
         try {
-            const res = await fetch(`/api/lessons/${lessonId}`);
+            const res = await fetch(`/api/lessons/${lessonId}`, {
+                headers: getAuthHeader()
+            });
             const data = await res.json();
             if (data.lesson && data.lesson.vocabulary && data.lesson.vocabulary.length > 0) {
                 setLesson(data.lesson);
