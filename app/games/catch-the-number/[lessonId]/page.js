@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
+import { useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
 
 const numberToWord = (num) => {
@@ -18,6 +19,7 @@ const numberToWord = (num) => {
 export default function CatchTheNumberGame() {
     const params = useParams();
     const searchParams = useSearchParams();
+    const { getAuthHeader } = useAuth();
     const lessonId = params.lessonId;
     const studentId = searchParams.get('student');
     const [lesson, setLesson] = useState(null);
@@ -54,7 +56,9 @@ export default function CatchTheNumberGame() {
 
     const fetchLesson = async () => {
         try {
-            const res = await fetch(`/api/lessons/${lessonId}`);
+            const res = await fetch(`/api/lessons/${lessonId}`, {
+                headers: getAuthHeader()
+            });
             const data = await res.json();
             if (data.lesson) { setLesson(data.lesson); startGame(); }
         } catch (error) { console.error('Error:', error); }

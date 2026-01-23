@@ -2,12 +2,14 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
+import { useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
 
 export default function VocabularyGamePage() {
     const params = useParams();
     const searchParams = useSearchParams();
     const router = useRouter();
+    const { getAuthHeader } = useAuth();
     const lessonId = params.lessonId;
     const studentId = searchParams.get('student');
 
@@ -29,7 +31,9 @@ export default function VocabularyGamePage() {
 
     const fetchLesson = async () => {
         try {
-            const res = await fetch(`/api/lessons/${lessonId}`);
+            const res = await fetch(`/api/lessons/${lessonId}`, {
+                headers: getAuthHeader()
+            });
             const data = await res.json();
             if (data.lesson) {
                 setLesson(data.lesson);
