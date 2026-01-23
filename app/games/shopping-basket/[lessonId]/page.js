@@ -234,6 +234,21 @@ export default function ShoppingBasketGame() {
         }
     };
 
+    const recordGameWin = async () => {
+        try {
+            await fetch('/api/game-progress', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    ...getAuthHeader()
+                },
+                body: JSON.stringify({ studentId, lessonId })
+            });
+        } catch (error) {
+            console.error('Error recording game progress:', error);
+        }
+    };
+
     const speakText = (text) => {
         if ('speechSynthesis' in window) {
             window.speechSynthesis.cancel(); // Cancel any ongoing speech
@@ -247,18 +262,6 @@ export default function ShoppingBasketGame() {
     const speakTask = () => {
         if (currentTask) {
             speakWord(currentTask.word);
-        }
-    };
-
-    const recordGameWin = async () => {
-        try {
-            await fetch('/api/game-progress', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ studentId, lessonId })
-            });
-        } catch (error) {
-            console.error('Error recording game win:', error);
         }
     };
 

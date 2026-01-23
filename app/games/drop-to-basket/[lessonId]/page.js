@@ -28,8 +28,8 @@ export default function DropToBasketGame() {
     const [nextId, setNextId] = useState(0);
 
     const MAX_MISTAKES = 5;
-    const FALL_DURATION = 5000;
-    const SPAWN_INTERVAL = 2000;
+    const FALL_DURATION = 6000; // 6 soniya - biroz sekinroq
+    const SPAWN_INTERVAL = 1200; // 1.2 soniya - tezroq spawn
 
     useEffect(() => {
         if (lessonId) fetchLesson();
@@ -89,29 +89,27 @@ export default function DropToBasketGame() {
         if (gameOver || !currentWord || !lesson) return;
 
         const interval = setInterval(() => {
-            const randomItem = lesson.vocabulary[Math.floor(Math.random() * lesson.vocabulary.length)];
-            const newItem = {
-                id: nextId,
-                word: randomItem.word,
-                translation: randomItem.translation,
-                image: randomItem.image,
-                left: Math.random() * 70 + 15,
-                isCorrect: randomItem.word === currentWord.word
-            };
+            // Har safar 1-2 ta item spawn qilish
+            const spawnCount = Math.random() > 0.5 ? 2 : 1;
             
-            setNextId(prev => prev + 1);
-            setFallingItems(prev => [...prev, newItem]);
+            for (let i = 0; i < spawnCount; i++) {
+                const randomItem = lesson.vocabulary[Math.floor(Math.random() * lesson.vocabulary.length)];
+                const newItem = {
+                    id: nextId + i,
+                    word: randomItem.word,
+                    translation: randomItem.translation,
+                    image: randomItem.image,
+                    left: Math.random() * 70 + 15,
+                    isCorrect: randomItem.word === currentWord.word
+                };
+                
+                setNextId(prev => prev + 1);
+                setFallingItems(prev => [...prev, newItem]);
 
-            setTimeout(() => {
-                setFallingItems(prev => {
-                    const filtered = prev.filter(n => n.id !== newItem.id);
-                    // O'tkazib yuborish xato hisoblanmaydi - faqat noto'g'ri so'zni bosish xato
-                    // if (newItem.isCorrect && prev.find(n => n.id === newItem.id)) {
-                    //     handleMissed();
-                    // }
-                    return filtered;
-                });
-            }, FALL_DURATION);
+                setTimeout(() => {
+                    setFallingItems(prev => prev.filter(n => n.id !== newItem.id));
+                }, FALL_DURATION);
+            }
         }, SPAWN_INTERVAL);
 
         return () => clearInterval(interval);

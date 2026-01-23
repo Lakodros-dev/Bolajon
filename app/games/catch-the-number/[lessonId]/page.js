@@ -35,8 +35,8 @@ export default function CatchTheNumberGame() {
     const [nextId, setNextId] = useState(0);
     const [maxNumber, setMaxNumber] = useState(10);
     const MAX_MISTAKES = 5;
-    const FALL_DURATION = 4000;
-    const SPAWN_INTERVAL = 1000;
+    const FALL_DURATION = 5000; // 5 soniya
+    const SPAWN_INTERVAL = 800; // 0.8 soniya - tezroq
 
     useEffect(() => { if (lessonId) fetchLesson(); }, [lessonId]);
 
@@ -92,19 +92,26 @@ export default function CatchTheNumberGame() {
     useEffect(() => {
         if (gameOver || !currentNumber) return;
         const interval = setInterval(() => {
-            const value = generateRandomNumber();
-            const randomNum = { value, word: numberToWord(value) };
-            const newNumber = { id: nextId, word: randomNum.word, value: randomNum.value, left: Math.random() * 80 + 10, isCorrect: randomNum.value === currentNumber.value };
-            setNextId(prev => prev + 1);
-            setFallingNumbers(prev => [...prev, newNumber]);
-            setTimeout(() => {
-                setFallingNumbers(prev => {
-                    const filtered = prev.filter(n => n.id !== newNumber.id);
-                    // O'tkazib yuborish xato hisoblanmaydi
-                    // if (newNumber.isCorrect && prev.find(n => n.id !== newNumber.id)) handleMissed();
-                    return filtered;
-                });
-            }, FALL_DURATION);
+            // Har safar 1-2 ta raqam spawn qilish
+            const spawnCount = Math.random() > 0.6 ? 2 : 1;
+            
+            for (let i = 0; i < spawnCount; i++) {
+                const value = generateRandomNumber();
+                const randomNum = { value, word: numberToWord(value) };
+                const newNumber = { 
+                    id: nextId + i, 
+                    word: randomNum.word, 
+                    value: randomNum.value, 
+                    left: Math.random() * 80 + 10, 
+                    isCorrect: randomNum.value === currentNumber.value 
+                };
+                setNextId(prev => prev + 1);
+                setFallingNumbers(prev => [...prev, newNumber]);
+                
+                setTimeout(() => {
+                    setFallingNumbers(prev => prev.filter(n => n.id !== newNumber.id));
+                }, FALL_DURATION);
+            }
         }, SPAWN_INTERVAL);
         return () => clearInterval(interval);
     }, [gameOver, currentNumber, nextId, maxNumber]);

@@ -23,7 +23,7 @@ export default function GameOverModal({ won, score, total, onRestart }) {
                             <RotateCcw size={20} />
                             {won ? "Qayta o'ynash" : "Qayta urinish"}
                         </button>
-                        <Link href="/dashboard/lessons" className="btn btn-primary rounded-3 px-4">
+                        <Link href="/dashboard/games" className="btn btn-primary rounded-3 px-4">
                             Keyingisi
                         </Link>
                     </div>

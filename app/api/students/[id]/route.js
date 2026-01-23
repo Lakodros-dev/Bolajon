@@ -9,6 +9,7 @@ import Student from '@/models/Student';
 import Progress from '@/models/Progress';
 import { authenticate } from '@/middleware/authMiddleware';
 import { successResponse, errorResponse, serverError, notFoundResponse } from '@/lib/apiResponse';
+import { clearCache } from '@/lib/cache';
 
 // GET - Get single student with progress
 export async function GET(request, { params }) {
@@ -80,6 +81,11 @@ export async function PUT(request, { params }) {
 
         await student.save();
 
+        // Clear cache for this teacher's students
+        clearCache(`students:${student.teacher}`);
+        clearCache(`students:${student.teacher}:false`);
+        clearCache(`students:${student.teacher}:true`);
+
         return successResponse({
             message: 'Student updated successfully',
             student
@@ -115,6 +121,11 @@ export async function DELETE(request, { params }) {
         // Delete student and their progress (use 'student' field)
         await Progress.deleteMany({ student: params.id });
         await Student.findByIdAndDelete(params.id);
+
+        // Clear cache for this teacher's students
+        clearCache(`students:${student.teacher}`);
+        clearCache(`students:${student.teacher}:false`);
+        clearCache(`students:${student.teacher}:true`);
 
         return successResponse({
             message: 'Student deleted successfully'

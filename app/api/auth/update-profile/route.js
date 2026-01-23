@@ -4,13 +4,13 @@
  */
 import dbConnect from '@/lib/mongodb';
 import User from '@/models/User';
-import { authMiddleware } from '@/middleware/authMiddleware';
+import { authenticate } from '@/middleware/authMiddleware';
 import { successResponse, errorResponse, serverError } from '@/lib/apiResponse';
 import bcrypt from 'bcryptjs';
 
 export async function PUT(request) {
     try {
-        const auth = await authMiddleware(request);
+        const auth = await authenticate(request);
         if (!auth.success) {
             return errorResponse(auth.error, auth.status);
         }

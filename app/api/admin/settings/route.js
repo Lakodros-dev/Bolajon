@@ -5,7 +5,7 @@
  */
 import dbConnect from '@/lib/mongodb';
 import Settings from '@/models/Settings';
-import { authenticate, requireAdmin } from '@/middleware/authMiddleware';
+import { authenticate, adminOnly } from '@/middleware/authMiddleware';
 import { successResponse, errorResponse, serverError } from '@/lib/apiResponse';
 
 // GET - Get all settings
@@ -45,9 +45,9 @@ export async function PUT(request) {
             return errorResponse(auth.error, auth.status);
         }
 
-        const adminCheck = requireAdmin(auth.user);
-        if (!adminCheck.success) {
-            return errorResponse(adminCheck.error, adminCheck.status);
+        // Check if user is admin
+        if (auth.user.role !== 'admin') {
+            return errorResponse('Access denied. Admin only.', 403);
         }
 
         await dbConnect();

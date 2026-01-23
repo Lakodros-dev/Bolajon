@@ -9,6 +9,7 @@ import Reward from '@/models/Reward';
 import Redemption from '@/models/Redemption';
 import { adminOnly } from '@/middleware/authMiddleware';
 import { successResponse, errorResponse, serverError, notFoundResponse } from '@/lib/apiResponse';
+import { clearCache } from '@/lib/cache';
 
 // GET - Get single reward
 export async function GET(request, { params }) {
@@ -63,6 +64,9 @@ export async function PUT(request, { params }) {
 
         await reward.save();
 
+        // Clear rewards cache
+        clearCache('rewards');
+
         return successResponse({
             message: 'Reward updated successfully',
             reward
@@ -90,6 +94,9 @@ export async function DELETE(request, { params }) {
 
         // Delete reward (keep redemption history)
         await Reward.findByIdAndDelete(params.id);
+
+        // Clear rewards cache
+        clearCache('rewards');
 
         return successResponse({
             message: 'Reward deleted successfully'

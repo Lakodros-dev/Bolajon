@@ -6,6 +6,7 @@ import dbConnect from '@/lib/mongodb';
 import Student from '@/models/Student';
 import { authenticate } from '@/middleware/authMiddleware';
 import { successResponse, errorResponse, serverError, notFoundResponse } from '@/lib/apiResponse';
+import { clearCache } from '@/lib/cache';
 
 export async function POST(request, { params }) {
     try {
@@ -39,6 +40,11 @@ export async function POST(request, { params }) {
         const newStars = Math.max(0, student.stars + amount);
         student.stars = newStars;
         await student.save();
+
+        // Clear cache for this teacher's students
+        clearCache(`students:${student.teacher}`);
+        clearCache(`students:${student.teacher}:false`);
+        clearCache(`students:${student.teacher}:true`);
 
         return successResponse({
             message: amount > 0 ? 'Stars added successfully' : 'Stars removed successfully',

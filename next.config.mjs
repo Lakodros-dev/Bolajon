@@ -5,6 +5,7 @@ const nextConfig = {
         serverActions: {
             bodySizeLimit: '500mb',
         },
+        optimizePackageImports: ['lucide-react'], // Optimize icon imports
     },
 
     // Image optimization
@@ -19,7 +20,8 @@ const nextConfig = {
                 hostname: 'images.unsplash.com',
             },
         ],
-        minimumCacheTTL: 60,
+        minimumCacheTTL: 3600, // 1 hour cache
+        formats: ['image/webp'], // Use WebP format
     },
 
     // Compiler optimizations
@@ -32,6 +34,9 @@ const nextConfig = {
 
     // Reduce bundle size
     poweredByHeader: false,
+
+    // Optimize production builds
+    swcMinify: true,
 
     // Cache headers for static files
     async headers() {
@@ -46,6 +51,24 @@ const nextConfig = {
                     {
                         key: 'Accept-Ranges',
                         value: 'bytes',
+                    },
+                ],
+            },
+            {
+                source: '/api/:path*',
+                headers: [
+                    {
+                        key: 'Cache-Control',
+                        value: 'no-store, must-revalidate',
+                    },
+                ],
+            },
+            {
+                source: '/_next/static/:path*',
+                headers: [
+                    {
+                        key: 'Cache-Control',
+                        value: 'public, max-age=31536000, immutable',
                     },
                 ],
             },
