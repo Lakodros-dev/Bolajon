@@ -5,7 +5,7 @@
  */
 import dbConnect from '@/lib/mongodb';
 import Student from '@/models/Student';
-import { authenticate, requireSubscription } from '@/middleware/authMiddleware';
+import { authenticate } from '@/middleware/authMiddleware';
 import { successResponse, errorResponse, serverError } from '@/lib/apiResponse';
 
 // GET - Get all students for the authenticated teacher
@@ -46,11 +46,11 @@ export async function GET(request) {
     }
 }
 
-// POST - Create new student
+// POST - Create new student (no subscription check - client handles this)
 export async function POST(request) {
     try {
-        // Check subscription for creating students
-        const auth = await requireSubscription(request);
+        // Only check authentication
+        const auth = await authenticate(request);
         if (!auth.success) {
             return errorResponse(auth.error, auth.status);
         }

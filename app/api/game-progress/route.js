@@ -2,14 +2,14 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import GameProgress from '@/models/GameProgress';
 import Progress from '@/models/Progress';
-import { requireSubscription } from '@/middleware/authMiddleware';
+import { authenticate } from '@/middleware/authMiddleware';
 import { errorResponse } from '@/lib/apiResponse';
 
-// GET - Get game progress for a student
+// GET - Get game progress for a student (no subscription check - just viewing data)
 export async function GET(request) {
     try {
-        // Check subscription
-        const auth = await requireSubscription(request);
+        // Only check authentication
+        const auth = await authenticate(request);
         if (!auth.success) {
             return errorResponse(auth.error, auth.status);
         }
@@ -48,11 +48,11 @@ export async function GET(request) {
     }
 }
 
-// POST - Record game win
+// POST - Record game win (no subscription check - client-side handles this)
 export async function POST(request) {
     try {
-        // Check subscription
-        const auth = await requireSubscription(request);
+        // Only check authentication
+        const auth = await authenticate(request);
         if (!auth.success) {
             return errorResponse(auth.error, auth.status);
         }

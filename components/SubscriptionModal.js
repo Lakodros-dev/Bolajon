@@ -6,7 +6,7 @@ import { useAuth } from '@/context/AuthContext';
 const SubscriptionContext = createContext();
 
 export function SubscriptionProvider({ children }) {
-    const { user } = useAuth();
+    const { user, getAuthHeader } = useAuth();
     const [showModal, setShowModal] = useState(false);
     const [isSubscriptionValid, setIsSubscriptionValid] = useState(true);
     const [daysRemaining, setDaysRemaining] = useState(999);
@@ -24,23 +24,9 @@ export function SubscriptionProvider({ children }) {
         try {
             console.log('Checking subscription...');
             
-            // Get token from cookie
-            const token = document.cookie
-                .split('; ')
-                .find(row => row.startsWith('token='))
-                ?.split('=')[1];
-            
-            console.log('Token found:', !!token);
-            
-            const headers = {
-                'Content-Type': 'application/json'
-            };
-            
-            if (token) {
-                headers['Authorization'] = `Bearer ${token}`;
-            }
-            
-            const res = await fetch('/api/auth/me', { headers });
+            const res = await fetch('/api/auth/me', {
+                headers: getAuthHeader()
+            });
             const data = await res.json();
             
             console.log('Subscription check response:', data);
@@ -53,7 +39,7 @@ export function SubscriptionProvider({ children }) {
                 setSubscriptionChecked(true);
             } else {
                 console.error('Failed to get user data:', data);
-                // If no token, assume valid to avoid blocking
+                // If API fails, assume valid to avoid blocking
                 setIsSubscriptionValid(true);
                 setSubscriptionChecked(true);
             }

@@ -46,7 +46,9 @@ export default function LessonDetailPage() {
 
     const fetchLesson = async () => {
         try {
-            const res = await fetch(`/api/lessons/${params.id}`);
+            const res = await fetch(`/api/lessons/${params.id}`, {
+                headers: getAuthHeader()
+            });
             
             // Handle subscription expired
             if (res.status === 402) {

@@ -7,15 +7,15 @@
 import dbConnect from '@/lib/mongodb';
 import Lesson from '@/models/Lesson';
 import Progress from '@/models/Progress';
-import { adminOnly, requireSubscription } from '@/middleware/authMiddleware';
+import { adminOnly, authenticate } from '@/middleware/authMiddleware';
 import { successResponse, errorResponse, serverError, notFoundResponse } from '@/lib/apiResponse';
 import { clearCache } from '@/lib/cache';
 
-// GET - Get single lesson
+// GET - Get single lesson (authentication required but no subscription check)
 export async function GET(request, { params }) {
     try {
-        // Check subscription
-        const auth = await requireSubscription(request);
+        // Only check authentication, not subscription
+        const auth = await authenticate(request);
         if (!auth.success) {
             return errorResponse(auth.error, auth.status);
         }
