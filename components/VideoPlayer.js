@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
+import { VideoOff, AlertCircle } from 'lucide-react';
 
 /**
  * Universal Video Player Component
@@ -15,7 +16,7 @@ export default function VideoPlayer({ url, title = 'Video' }) {
         return (
             <div className="ratio ratio-16x9 bg-dark rounded-4 d-flex align-items-center justify-content-center">
                 <div className="text-center text-white">
-                    <span className="material-symbols-outlined mb-2" style={{ fontSize: '48px', opacity: 0.5 }}>videocam_off</span>
+                    <VideoOff size={48} style={{ opacity: 0.5 }} className="mb-2" />
                     <p className="mb-0 small">Video mavjud emas</p>
                 </div>
             </div>
@@ -65,7 +66,7 @@ export default function VideoPlayer({ url, title = 'Video' }) {
             {error ? (
                 <div className="d-flex align-items-center justify-content-center text-white">
                     <div className="text-center">
-                        <span className="material-symbols-outlined mb-2" style={{ fontSize: '48px', opacity: 0.5 }}>error</span>
+                        <AlertCircle size={48} style={{ opacity: 0.5 }} className="mb-2" />
                         <p className="mb-0 small">Video yuklanmadi</p>
                         <a href={url} target="_blank" rel="noopener noreferrer" className="btn btn-sm btn-outline-light mt-2">
                             Havolani ochish

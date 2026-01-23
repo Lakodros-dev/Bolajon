@@ -6,6 +6,7 @@ import { useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
 import Image from 'next/image';
 import PhoneInput from '@/components/PhoneInput';
+import { GraduationCap, Star, User, Lock } from 'lucide-react';
 
 export default function RegisterPage() {
     const router = useRouter();
@@ -77,10 +78,10 @@ export default function RegisterPage() {
                 }}>
                 {/* Background decoration */}
                 <div className="position-absolute" style={{ top: '-10%', right: '-10%', opacity: 0.1 }}>
-                    <span className="material-symbols-outlined" style={{ fontSize: '400px', color: 'white' }}>school</span>
+                    <GraduationCap size={400} color="white" />
                 </div>
                 <div className="position-absolute" style={{ bottom: '-5%', left: '-5%', opacity: 0.1 }}>
-                    <span className="material-symbols-outlined" style={{ fontSize: '300px', color: 'white' }}>star</span>
+                    <Star size={300} color="white" />
                 </div>
 
                 <div className="text-center text-white position-relative" style={{ zIndex: 1 }}>
@@ -148,7 +149,7 @@ export default function RegisterPage() {
                             <div className="mb-3">
                                 <label className="form-label small fw-semibold">To'liq ism</label>
                                 <div className="position-relative">
-                                    <span className="material-symbols-outlined position-absolute top-50 start-0 translate-middle-y ms-3 text-muted">person</span>
+                                    <User size={20} className="position-absolute top-50 start-0 translate-middle-y ms-3 text-muted" />
                                     <input
                                         type="text"
                                         name="name"
@@ -176,7 +177,7 @@ export default function RegisterPage() {
                                 <div className="col-12 col-md-6">
                                     <label className="form-label small fw-semibold">Parol</label>
                                     <div className="position-relative">
-                                        <span className="material-symbols-outlined position-absolute top-50 start-0 translate-middle-y ms-3 text-muted">lock</span>
+                                        <Lock size={20} className="position-absolute top-50 start-0 translate-middle-y ms-3 text-muted" />
                                         <input
                                             type="password"
                                             name="password"
@@ -191,7 +192,7 @@ export default function RegisterPage() {
                                 <div className="col-12 col-md-6">
                                     <label className="form-label small fw-semibold">Parolni tasdiqlang</label>
                                     <div className="position-relative">
-                                        <span className="material-symbols-outlined position-absolute top-50 start-0 translate-middle-y ms-3 text-muted">lock</span>
+                                        <Lock size={20} className="position-absolute top-50 start-0 translate-middle-y ms-3 text-muted" />
                                         <input
                                             type="password"
                                             name="confirmPassword"

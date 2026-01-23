@@ -8,6 +8,7 @@ import YinYangProgress from '@/components/YinYangProgress';
 import { useData } from '@/context/DataContext';
 import { useAuth } from '@/context/AuthContext';
 import { useSubscription } from '@/components/SubscriptionModal';
+import { UserX, Repeat, Play } from 'lucide-react';
 
 export default function GamesPage() {
     const router = useRouter();
@@ -102,9 +103,7 @@ export default function GamesPage() {
                         </div>
                     ) : students.length === 0 ? (
                         <div className="text-center py-5">
-                            <span className="material-symbols-outlined text-muted" style={{ fontSize: '64px' }}>
-                                person_off
-                            </span>
+                            <UserX size={64} className="text-muted mb-3" />
                             <p className="text-muted mt-3">Hali bolalar qo'shilmagan</p>
                             <Link href="/dashboard/students" className="btn btn-primary">
                                 Bola qo'shish
@@ -176,11 +175,9 @@ export default function GamesPage() {
                     </div>
                     <button
                         onClick={handleChangeStudent}
-                        className="btn btn-outline-secondary btn-sm"
+                        className="btn btn-outline-secondary btn-sm d-flex align-items-center gap-2"
                     >
-                        <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
-                            swap_horiz
-                        </span>
+                        <Repeat size={18} />
                         Almashtirish
                     </button>
                 </div>
@@ -271,9 +268,7 @@ export default function GamesPage() {
                                                             })}
                                                             className="btn btn-sm btn-primary d-inline-flex align-items-center gap-1"
                                                         >
-                                                            <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>
-                                                                play_arrow
-                                                            </span>
+                                                            <Play size={16} />
                                                             O'ynash
                                                         </button>
                                                     ) : (

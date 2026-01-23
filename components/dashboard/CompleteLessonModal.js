@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import { X, Check } from 'lucide-react';
 
 export default function CompleteLessonModal({ show, onClose, student, lesson, onComplete }) {
     const { getAuthHeader } = useAuth();
@@ -76,7 +77,7 @@ export default function CompleteLessonModal({ show, onClose, student, lesson, on
                             onClick={onClose}
                             style={{ opacity: 0.8 }}
                         >
-                            <span className="material-symbols-outlined" style={{ fontSize: '24px' }}>close</span>
+                            <X size={24} />
                         </button>
                     </div>
 
@@ -183,7 +184,7 @@ export default function CompleteLessonModal({ show, onClose, student, lesson, on
                                     <span className="spinner-border spinner-border-sm"></span>
                                 ) : (
                                     <>
-                                        <span className="material-symbols-outlined" style={{ fontSize: '22px' }}>check</span>
+                                        <Check size={22} />
                                         Yakunlash (+{stars} yulduz)
                                     </>
                                 )}

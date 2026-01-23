@@ -7,6 +7,7 @@ import { useData } from '@/context/DataContext';
 import Link from 'next/link';
 import CompleteLessonModal from '@/components/dashboard/CompleteLessonModal';
 import QuickStarsModal from '@/components/dashboard/QuickStarsModal';
+import { ArrowLeft, Star, CheckCircle, Plus, PlayCircle, Video, Check, GraduationCap, TrendingUp, Users } from 'lucide-react';
 
 export default function StudentDetailPage() {
     const params = useParams();
@@ -112,7 +113,7 @@ export default function StudentDetailPage() {
             <header className="sticky-top bg-white border-bottom py-3 px-3">
                 <div className="d-flex align-items-center gap-3">
                     <Link href="/dashboard/students" className="btn btn-light rounded-circle p-2">
-                        <span className="material-symbols-outlined">arrow_back</span>
+                        <ArrowLeft size={20} />
                     </Link>
                     <h1 className="h5 fw-bold mb-0">O'quvchi profili</h1>
                 </div>
@@ -136,7 +137,7 @@ export default function StudentDetailPage() {
 
                         <div className="d-flex justify-content-center gap-2">
                             <div className="px-4 py-2 rounded-pill bg-white shadow-sm d-flex align-items-center gap-2">
-                                <span className="material-symbols-outlined filled text-warning">star</span>
+                                <Star size={20} fill="#fbbf24" className="text-warning" />
                                 <span className="fw-bold">{student.stars}</span>
                                 <span className="text-muted small">yulduz</span>
                             </div>
@@ -144,7 +145,7 @@ export default function StudentDetailPage() {
                                 className="btn btn-primary rounded-pill px-3"
                                 onClick={() => setShowStarsModal(true)}
                             >
-                                <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>add</span>
+                                <Plus size={20} />
                             </button>
                         </div>
                     </div>
@@ -155,7 +156,7 @@ export default function StudentDetailPage() {
                     <div className="col-4">
                         <div className="card border-0 rounded-4 h-100 card-pastel-green">
                             <div className="card-body text-center p-3">
-                                <span className="material-symbols-outlined mb-1" style={{ fontSize: '28px', color: '#16a34a' }}>task_alt</span>
+                                <CheckCircle size={28} style={{ color: '#16a34a' }} className="mb-1" />
                                 <h3 className="h5 fw-bold mb-0">{progress.length}</h3>
                                 <p className="small text-muted mb-0">Darslar</p>
                             </div>
@@ -164,7 +165,7 @@ export default function StudentDetailPage() {
                     <div className="col-4">
                         <div className="card border-0 rounded-4 h-100 card-pastel-yellow">
                             <div className="card-body text-center p-3">
-                                <span className="material-symbols-outlined filled mb-1" style={{ fontSize: '28px', color: '#d97706' }}>star</span>
+                                <Star size={28} fill="#d97706" style={{ color: '#d97706' }} className="mb-1" />
                                 <h3 className="h5 fw-bold mb-0">{student.stars}</h3>
                                 <p className="small text-muted mb-0">Yulduzlar</p>
                             </div>
@@ -173,7 +174,7 @@ export default function StudentDetailPage() {
                     <div className="col-4">
                         <div className="card border-0 rounded-4 h-100 card-pastel-purple">
                             <div className="card-body text-center p-3">
-                                <span className="material-symbols-outlined mb-1" style={{ fontSize: '28px', color: '#9333ea' }}>trending_up</span>
+                                <TrendingUp size={28} style={{ color: '#9333ea' }} className="mb-1" />
                                 <h3 className="h5 fw-bold mb-0">
                                     {progress.length > 0
                                         ? (progress.reduce((sum, p) => sum + (p.starsEarned || 0), 0) / progress.length).toFixed(1)
@@ -190,7 +191,7 @@ export default function StudentDetailPage() {
                 {incompleteLessons.length > 0 && (
                     <div className="mb-4">
                         <h3 className="h6 fw-bold mb-3 d-flex align-items-center gap-2">
-                            <span className="material-symbols-outlined text-primary">play_lesson</span>
+                            <PlayCircle size={20} className="text-primary" />
                             Bajarilmagan darslar
                         </h3>
 
@@ -200,7 +201,7 @@ export default function StudentDetailPage() {
                                     <div className="card-body p-3 d-flex align-items-center justify-content-between">
                                         <div className="d-flex align-items-center gap-3">
                                             <div className="rounded-3 d-flex align-items-center justify-content-center" style={{ width: '40px', height: '40px', backgroundColor: '#dbeafe' }}>
-                                                <span className="material-symbols-outlined text-primary" style={{ fontSize: '20px' }}>smart_display</span>
+                                                <Video size={20} className="text-primary" />
                                             </div>
                                             <div>
                                                 <h4 className="fw-semibold mb-0" style={{ fontSize: '14px' }}>{lesson.title}</h4>
@@ -211,7 +212,7 @@ export default function StudentDetailPage() {
                                             className="btn btn-primary btn-sm rounded-pill px-3"
                                             onClick={() => handleCompleteLesson(lesson)}
                                         >
-                                            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>check</span>
+                                            <Check size={18} />
                                         </button>
                                     </div>
                                 </div>
@@ -223,14 +224,14 @@ export default function StudentDetailPage() {
                 {/* Completed Lessons */}
                 <div className="mb-4">
                     <h3 className="h6 fw-bold mb-3 d-flex align-items-center gap-2">
-                        <span className="material-symbols-outlined text-success">verified</span>
+                        <CheckCircle size={20} className="text-success" />
                         Bajarilgan darslar ({progress.length})
                     </h3>
 
                     {progress.length === 0 ? (
                         <div className="card border rounded-4">
                             <div className="card-body p-4 text-center text-muted">
-                                <span className="material-symbols-outlined mb-2" style={{ fontSize: '48px', opacity: 0.5 }}>school</span>
+                                <GraduationCap size={48} style={{ opacity: 0.5 }} className="mb-2" />
                                 <p className="mb-0">Hali dars bajarilmagan</p>
                             </div>
                         </div>
@@ -241,7 +242,7 @@ export default function StudentDetailPage() {
                                     <div className="card-body p-3 d-flex align-items-center justify-content-between">
                                         <div className="d-flex align-items-center gap-3">
                                             <div className="rounded-3 d-flex align-items-center justify-content-center" style={{ width: '40px', height: '40px', backgroundColor: '#dcfce7' }}>
-                                                <span className="material-symbols-outlined text-success" style={{ fontSize: '20px' }}>check_circle</span>
+                                                <CheckCircle size={20} className="text-success" />
                                             </div>
                                             <div>
                                                 <h4 className="fw-semibold mb-0" style={{ fontSize: '14px' }}>
@@ -254,7 +255,7 @@ export default function StudentDetailPage() {
                                         </div>
                                         <div className="d-flex align-items-center gap-1 px-2 py-1 rounded-pill" style={{ backgroundColor: '#fef3c7' }}>
                                             {[...Array(item.starsEarned || 0)].map((_, i) => (
-                                                <span key={i} className="material-symbols-outlined filled text-warning" style={{ fontSize: '16px' }}>star</span>
+                                                <Star key={i} size={16} fill="#fbbf24" className="text-warning" />
                                             ))}
                                         </div>
                                     </div>
@@ -269,7 +270,7 @@ export default function StudentDetailPage() {
                     <div className="card border-0 rounded-4 shadow-sm">
                         <div className="card-body p-4">
                             <h3 className="h6 fw-bold mb-3 d-flex align-items-center gap-2">
-                                <span className="material-symbols-outlined text-primary">family_restroom</span>
+                                <Users size={20} className="text-primary" />
                                 Ota-ona ma'lumotlari
                             </h3>
                             {student.parentName && (

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
+import { ArrowLeft, Volume2 } from 'lucide-react';
 
 const COLORS = ['red', 'blue', 'yellow', 'green', 'black'];
 const TARGET_SCORE = 15;
@@ -409,7 +410,7 @@ export default function PopTheBalloonGame() {
                 onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
                 onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
             >
-                <span className="material-symbols-outlined" style={{ fontSize: '24px', color: '#374151' }}>arrow_back</span>
+                <ArrowLeft size={24} style={{ color: '#374151' }} />
             </Link>
 
             {/* Score Board - Responsive */}
@@ -500,9 +501,7 @@ export default function PopTheBalloonGame() {
                             transition: 'all 0.2s',
                         }}
                     >
-                        <span className="material-symbols-outlined" style={{ fontSize: '22px', color: isSpeaking ? '#2563eb' : '#6b7280' }}>
-                            volume_up
-                        </span>
+                        <Volume2 size={22} style={{ color: isSpeaking ? '#2563eb' : '#6b7280' }} />
                     </button>
 
                     <div style={{ textAlign: 'center', paddingRight: '40px' }}>

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
 import ConfirmModal from '@/components/ConfirmModal';
+import { Plus, PlayCircle, Eye, EyeOff, Edit2, Trash2, Video } from 'lucide-react';
 
 export default function AdminLessonsPage() {
     const { getAuthHeader } = useAuth();
@@ -89,7 +90,7 @@ export default function AdminLessonsPage() {
                     <p className="text-muted mb-0">{lessons.length} ta dars</p>
                 </div>
                 <Link href="/admin/lessons/add" className="btn btn-primary rounded-3 d-flex align-items-center gap-2">
-                    <span className="material-symbols-outlined">add</span>
+                    <Plus size={20} />
                     Yangi dars
                 </Link>
             </div>
@@ -101,7 +102,7 @@ export default function AdminLessonsPage() {
             ) : lessons.length === 0 ? (
                 <div className="card border-0 rounded-4 shadow-sm">
                     <div className="card-body text-center py-5">
-                        <span className="material-symbols-outlined mb-2 text-muted" style={{ fontSize: '48px' }}>smart_display</span>
+                        <Video size={48} className="mb-2 text-muted" />
                         <p className="text-muted mb-3">Hali dars qo'shilmagan</p>
                         <Link href="/admin/lessons/add" className="btn btn-primary rounded-3">
                             Birinchi darsni qo'shish
@@ -143,7 +144,7 @@ export default function AdminLessonsPage() {
                                                     </td>
                                                     <td className="py-3">
                                                         <a href={lesson.videoUrl} target="_blank" rel="noopener noreferrer" className="text-primary small">
-                                                            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>play_circle</span>
+                                                            <PlayCircle size={18} />
                                                         </a>
                                                     </td>
                                                     <td className="py-3">{lesson.duration || 0} daq</td>
@@ -159,21 +160,19 @@ export default function AdminLessonsPage() {
                                                                 href={`/admin/lessons/${lesson._id}/edit`}
                                                                 className="btn btn-sm btn-outline-primary rounded-2"
                                                             >
-                                                                <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>edit</span>
+                                                                <Edit2 size={18} />
                                                             </Link>
                                                             <button
                                                                 onClick={() => handleToggleStatus(lesson)}
                                                                 className={`btn btn-sm rounded-2 ${lesson.isActive ? 'btn-outline-warning' : 'btn-outline-success'}`}
                                                             >
-                                                                <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
-                                                                    {lesson.isActive ? 'visibility_off' : 'visibility'}
-                                                                </span>
+                                                                {lesson.isActive ? <EyeOff size={18} /> : <Eye size={18} />}
                                                             </button>
                                                             <button
                                                                 onClick={() => setDeleteModal({ show: true, lesson })}
                                                                 className="btn btn-sm btn-outline-danger rounded-2"
                                                             >
-                                                                <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>delete</span>
+                                                                <Trash2 size={18} />
                                                             </button>
                                                         </div>
                                                     </td>

@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
+import { ArrowLeft, Volume2, CheckCircle, XCircle, RotateCcw, Frown } from 'lucide-react';
 
 export default function BuildTheBodyGame() {
     const params = useParams();
@@ -211,7 +212,7 @@ export default function BuildTheBodyGame() {
     if (!lesson || !lesson.vocabulary || lesson.vocabulary.length < 4) {
         return (
             <div className="min-vh-100 d-flex flex-column align-items-center justify-content-center p-4" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
-                <span className="material-symbols-outlined text-white mb-3" style={{ fontSize: '64px' }}>sentiment_dissatisfied</span>
+                <Frown size={64} className="text-white mb-3" />
                 <h4 className="text-white mb-3">Bu o'yin uchun kamida 4 ta so'z kerak</h4>
                 <Link href="/dashboard/games" className="btn btn-light">Orqaga qaytish</Link>
             </div>
@@ -230,8 +231,8 @@ export default function BuildTheBodyGame() {
                         <h2 className="fw-bold mb-2">{won ? 'Ajoyib!' : 'Yaxshi harakat!'}</h2>
                         <p className="text-muted mb-4">{score} ta to'g'ri, {mistakes} ta xato</p>
                         <div className="d-flex gap-3 justify-content-center">
-                            <button onClick={restartGame} className="btn btn-primary rounded-3 px-4">
-                                <span className="material-symbols-outlined me-2" style={{ fontSize: '20px' }}>replay</span>
+                            <button onClick={restartGame} className="btn btn-primary rounded-3 px-4 d-flex align-items-center gap-2">
+                                <RotateCcw size={20} />
                                 Qayta o'ynash
                             </button>
                             <Link href="/dashboard/games" className="btn btn-outline-secondary rounded-3 px-4">
@@ -269,18 +270,18 @@ export default function BuildTheBodyGame() {
 
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <Link href="/dashboard/games" className="btn btn-light rounded-circle p-2 shadow">
-                    <span className="material-symbols-outlined">arrow_back</span>
+                    <ArrowLeft size={20} />
                 </Link>
                 <div className="d-flex gap-3">
                     <div className="bg-white rounded-3 px-4 py-2 shadow-sm">
                         <span className="fw-bold text-success d-flex align-items-center gap-1">
-                            <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>check_circle</span>
+                            <CheckCircle size={20} />
                             {score}
                         </span>
                     </div>
                     <div className="bg-white rounded-3 px-4 py-2 shadow-sm">
                         <span className="fw-bold text-danger d-flex align-items-center gap-1">
-                            <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>cancel</span>
+                            <XCircle size={20} />
                             {mistakes}/{MAX_MISTAKES}
                         </span>
                     </div>
@@ -301,7 +302,7 @@ export default function BuildTheBodyGame() {
                                 onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
                                 onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
                             >
-                                <span className="material-symbols-outlined">volume_up</span>
+                                <Volume2 size={20} />
                             </button>
                         </div>
                     </div>

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
+import { ArrowLeft } from 'lucide-react';
 
 // Number words in English (1-100)
 const NUMBER_WORDS = {
@@ -364,7 +365,7 @@ export default function DropToBasketGame() {
                         textDecoration: 'none',
                     }}
                 >
-                    <span className="material-symbols-outlined" style={{ fontSize: '22px', color: '#374151' }}>arrow_back</span>
+                    <ArrowLeft size={22} style={{ color: '#374151' }} />
                 </Link>
 
                 <div style={{
@@ -513,7 +514,7 @@ export default function DropToBasketGame() {
                     textDecoration: 'none',
                 }}
             >
-                <span className="material-symbols-outlined" style={{ fontSize: '22px', color: '#374151' }}>arrow_back</span>
+                <ArrowLeft size={22} style={{ color: '#374151' }} />
             </Link>
 
             {/* Top Bar */}

@@ -6,6 +6,7 @@ import { useData } from '@/context/DataContext';
 import { useSubscription } from '@/components/SubscriptionModal';
 import Header from '@/components/dashboard/Header';
 import Link from 'next/link';
+import { GraduationCap, Trophy, BarChart3, ArrowRight, ChevronRight, Plus } from 'lucide-react';
 
 const cardColors = [
     { bg: 'student-card-blue', text: 'text-primary', progress: 'bg-primary' },
@@ -21,9 +22,9 @@ export default function StudentsPage() {
     const tabsRef = useRef(null);
 
     const tabs = [
-        { id: 'students', label: "O'quvchilarim", icon: 'school', href: null },
-        { id: 'leaderboard', label: 'Umumiy reyting', icon: 'emoji_events', href: '/dashboard/leaderboard' },
-        { id: 'results', label: 'Natijalar', icon: 'analytics', href: '/dashboard/statistics' },
+        { id: 'students', label: "O'quvchilarim", icon: GraduationCap, href: null },
+        { id: 'leaderboard', label: 'Umumiy reyting', icon: Trophy, href: '/dashboard/leaderboard' },
+        { id: 'results', label: 'Natijalar', icon: BarChart3, href: '/dashboard/statistics' },
     ];
 
     const scrollTabs = (direction) => {
@@ -44,27 +45,28 @@ export default function StudentsPage() {
                         className="d-flex gap-2 overflow-auto pb-2"
                         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                     >
-                        {tabs.map(tab => (
-                            tab.href ? (
+                        {tabs.map(tab => {
+                            const IconComponent = tab.icon;
+                            return tab.href ? (
                                 <Link
                                     key={tab.id}
                                     href={tab.href}
                                     className="btn btn-light text-muted rounded-pill px-3 py-2 d-flex align-items-center gap-2 flex-shrink-0 text-decoration-none"
                                 >
-                                    <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>{tab.icon}</span>
+                                    <IconComponent size={18} />
                                     <span className="small fw-semibold">{tab.label}</span>
-                                    <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>arrow_forward</span>
+                                    <ArrowRight size={16} />
                                 </Link>
                             ) : (
                                 <button
                                     key={tab.id}
                                     className="btn btn-primary rounded-pill px-3 py-2 d-flex align-items-center gap-2 flex-shrink-0"
                                 >
-                                    <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>{tab.icon}</span>
+                                    <IconComponent size={18} />
                                     <span className="small fw-semibold">{tab.label}</span>
                                 </button>
-                            )
-                        ))}
+                            );
+                        })}
                     </div>
 
                     {/* Scroll indicator - fade effect on right */}
@@ -76,12 +78,7 @@ export default function StudentsPage() {
                             pointerEvents: 'none'
                         }}
                     >
-                        <span
-                            className="material-symbols-outlined text-muted"
-                            style={{ fontSize: '20px', marginLeft: 'auto' }}
-                        >
-                            chevron_right
-                        </span>
+                        <ChevronRight size={20} className="text-muted" style={{ marginLeft: 'auto' }} />
                     </div>
                 </div>
 
@@ -118,7 +115,7 @@ export default function StudentsPage() {
                                                             <p className={`small fw-medium mb-0 ${colorScheme.text}`}>{student.age} yosh</p>
                                                         </div>
                                                     </div>
-                                                    <span className="material-symbols-outlined text-muted" style={{ fontSize: '20px' }}>chevron_right</span>
+                                                    <ChevronRight size={20} className="text-muted" />
                                                 </div>
                                                 <div className="d-flex align-items-center justify-content-between mb-2">
                                                     <span className="small text-muted fw-semibold">Yulduzlar</span>
@@ -145,7 +142,7 @@ export default function StudentsPage() {
                                     <div className="card-body p-4 text-center d-flex align-items-center justify-content-center">
                                         <div className="d-flex flex-column align-items-center gap-2">
                                             <div className="rounded-circle d-flex align-items-center justify-content-center" style={{ width: '48px', height: '48px', backgroundColor: 'rgba(43, 140, 238, 0.1)' }}>
-                                                <span className="material-symbols-outlined text-primary" style={{ fontSize: '28px' }}>add</span>
+                                                <Plus size={28} className="text-primary" />
                                             </div>
                                             <span className="fw-semibold text-muted">Yangi o'quvchi qo'shish</span>
                                         </div>
@@ -157,7 +154,7 @@ export default function StudentsPage() {
                         {students.length === 0 && (
                             <div className="col-12">
                                 <div className="text-center py-4">
-                                    <span className="material-symbols-outlined text-muted mb-2" style={{ fontSize: '48px' }}>school</span>
+                                    <GraduationCap size={48} className="text-muted mb-2" />
                                     <p className="text-muted mb-0">Hozircha o'quvchilar yo'q</p>
                                 </div>
                             </div>

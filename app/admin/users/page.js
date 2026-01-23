@@ -5,6 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 import ConfirmModal from '@/components/ConfirmModal';
 import AlertModal from '@/components/AlertModal';
 import { formatPhone } from '@/lib/formatPhone';
+import { Users, UserPlus, Eye, Edit2, Trash2, Copy, Check, Calendar, Shield, GraduationCap, Search, Phone, CreditCard, UserCheck, CheckCircle, Star } from 'lucide-react';
 
 export default function UsersPage() {
     const { getAuthHeader } = useAuth();
@@ -387,7 +388,7 @@ export default function UsersPage() {
                         <div className="card-body p-3">
                             <div className="d-flex align-items-center gap-2">
                                 <div className="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style={{ width: '44px', height: '44px', backgroundColor: '#007aff' }}>
-                                    <span className="material-symbols-outlined text-white" style={{ fontSize: '22px' }}>group</span>
+                                    <Users className="text-white" size={22} />
                                 </div>
                                 <div>
                                     <h3 className="h4 fw-bold mb-0" style={{ color: '#1d1d1f' }}>{stats.total}</h3>
@@ -402,7 +403,7 @@ export default function UsersPage() {
                         <div className="card-body p-3">
                             <div className="d-flex align-items-center gap-2">
                                 <div className="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style={{ width: '44px', height: '44px', backgroundColor: '#ff3b30' }}>
-                                    <span className="material-symbols-outlined text-white" style={{ fontSize: '22px' }}>admin_panel_settings</span>
+                                    <Shield className="text-white" size={22} />
                                 </div>
                                 <div>
                                     <h3 className="h4 fw-bold mb-0" style={{ color: '#1d1d1f' }}>{stats.admins}</h3>
@@ -417,7 +418,7 @@ export default function UsersPage() {
                         <div className="card-body p-3">
                             <div className="d-flex align-items-center gap-2">
                                 <div className="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style={{ width: '44px', height: '44px', backgroundColor: '#007aff' }}>
-                                    <span className="material-symbols-outlined text-white" style={{ fontSize: '22px' }}>school</span>
+                                    <GraduationCap className="text-white" size={22} />
                                 </div>
                                 <div>
                                     <h3 className="h4 fw-bold mb-0" style={{ color: '#1d1d1f' }}>{stats.teachers}</h3>
@@ -436,7 +437,7 @@ export default function UsersPage() {
                         <div className="col-md-8">
                             <label className="form-label small fw-semibold mb-1" style={{ color: '#86868b', fontSize: '11px' }}>Qidirish</label>
                             <div className="position-relative">
-                                <span className="material-symbols-outlined position-absolute top-50 start-0 translate-middle-y ms-2" style={{ fontSize: '18px', color: '#86868b' }}>search</span>
+                                <Search className="position-absolute top-50 start-0 translate-middle-y ms-2" size={18} style={{ color: '#86868b' }} />
                                 <input
                                     type="text"
                                     className="form-control form-control-sm rounded-3 ps-4 border-0"
@@ -532,7 +533,7 @@ export default function UsersPage() {
                                                     style={{ width: '32px', height: '32px', backgroundColor: '#e3f2fd' }}
                                                     title="O'quvchilarni ko'rish"
                                                 >
-                                                    <span className="material-symbols-outlined" style={{ fontSize: '16px', color: '#2196f3' }}>school</span>
+                                                    <GraduationCap size={16} style={{ color: '#2196f3' }} />
                                                 </button>
                                                 <div>
                                                     <p className="fw-bold mb-0" style={{ fontSize: '14px', color: '#1d1d1f' }}>{user.studentCount || 0}</p>
@@ -545,7 +546,7 @@ export default function UsersPage() {
                                         <div className="col-6 col-md-2">
                                             <div className="d-flex align-items-center justify-content-center justify-content-md-start gap-2">
                                                 <div className="rounded-circle d-flex align-items-center justify-content-center" style={{ width: '32px', height: '32px', backgroundColor: getSubscriptionBgColor(user) }}>
-                                                    <span className="material-symbols-outlined" style={{ fontSize: '16px', color: getSubscriptionColor(user) }}>calendar_today</span>
+                                                    <Calendar size={16} style={{ color: getSubscriptionColor(user) }} />
                                                 </div>
                                                 <div>
                                                     <p className="fw-bold mb-0" style={{ fontSize: '14px', color: '#1d1d1f' }}>{user.daysRemaining || 0}</p>
@@ -569,7 +570,7 @@ export default function UsersPage() {
                                                     }}
                                                     title="Ko'rish"
                                                 >
-                                                    <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>visibility</span>
+                                                    <Eye size={16} />
                                                     <span className="d-none d-lg-inline">Ko'rish</span>
                                                 </button>
                                                 <button
@@ -583,7 +584,7 @@ export default function UsersPage() {
                                                     }}
                                                     title="Balans"
                                                 >
-                                                    <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>account_balance_wallet</span>
+                                                    <CreditCard size={16} />
                                                 </button>
                                                 <button
                                                     onClick={() => openSubscriptionModal(user)}
@@ -596,7 +597,7 @@ export default function UsersPage() {
                                                     }}
                                                     title="Obuna"
                                                 >
-                                                    <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>add_card</span>
+                                                    <CreditCard size={16} />
                                                 </button>
                                                 <button
                                                     onClick={() => setDeleteModal({ show: true, user })}
@@ -609,7 +610,7 @@ export default function UsersPage() {
                                                     }}
                                                     title="O'chirish"
                                                 >
-                                                    <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>delete</span>
+                                                    <Trash2 size={16} />
                                                 </button>
                                             </div>
                                         </div>
@@ -653,7 +654,7 @@ export default function UsersPage() {
                                     <div className="col-6">
                                         <div className="p-2 rounded-3" style={{ backgroundColor: '#f5f5f7' }}>
                                             <div className="d-flex align-items-center gap-1 mb-1">
-                                                <span className="material-symbols-outlined" style={{ fontSize: '16px', color: '#007aff' }}>phone</span>
+                                                <Phone size={16} style={{ color: '#007aff' }} />
                                                 <small className="text-muted" style={{ fontSize: '10px' }}>Telefon</small>
                                             </div>
                                             <p className="fw-semibold mb-0" style={{ fontSize: '12px' }}>{formatPhone(viewModal.user.phone)}</p>
@@ -662,7 +663,7 @@ export default function UsersPage() {
                                     <div className="col-6">
                                         <div className="p-2 rounded-3" style={{ backgroundColor: '#f5f5f7' }}>
                                             <div className="d-flex align-items-center gap-1 mb-1">
-                                                <span className="material-symbols-outlined" style={{ fontSize: '16px', color: '#007aff' }}>badge</span>
+                                                <Shield size={16} style={{ color: '#007aff' }} />
                                                 <small className="text-muted" style={{ fontSize: '10px' }}>Rol</small>
                                             </div>
                                             <p className="fw-semibold mb-0" style={{ fontSize: '12px' }}>{viewModal.user.role === 'admin' ? 'Administrator' : 'O\'qituvchi'}</p>
@@ -671,7 +672,7 @@ export default function UsersPage() {
                                     <div className="col-6">
                                         <div className="p-2 rounded-3" style={{ backgroundColor: '#f5f5f7' }}>
                                             <div className="d-flex align-items-center gap-1 mb-1">
-                                                <span className="material-symbols-outlined" style={{ fontSize: '16px', color: '#007aff' }}>school</span>
+                                                <GraduationCap size={16} style={{ color: '#007aff' }} />
                                                 <small className="text-muted" style={{ fontSize: '10px' }}>O'quvchilar</small>
                                             </div>
                                             <p className="fw-semibold mb-0" style={{ fontSize: '12px' }}>{viewModal.user.studentCount || 0} ta</p>
@@ -680,7 +681,7 @@ export default function UsersPage() {
                                     <div className="col-6">
                                         <div className="p-2 rounded-3" style={{ backgroundColor: '#f5f5f7' }}>
                                             <div className="d-flex align-items-center gap-1 mb-1">
-                                                <span className="material-symbols-outlined" style={{ fontSize: '16px', color: '#007aff' }}>calendar_today</span>
+                                                <Calendar size={16} style={{ color: '#007aff' }} />
                                                 <small className="text-muted" style={{ fontSize: '10px' }}>Ro'yxatdan o'tgan</small>
                                             </div>
                                             <p className="fw-semibold mb-0" style={{ fontSize: '12px' }}>{new Date(viewModal.user.createdAt).toLocaleDateString('uz-UZ')}</p>
@@ -690,7 +691,7 @@ export default function UsersPage() {
                                         <div className="p-2 rounded-3 position-relative" style={{ backgroundColor: '#fff3e0' }}>
                                             <div className="d-flex align-items-center justify-content-between mb-1">
                                                 <div className="d-flex align-items-center gap-1">
-                                                    <span className="material-symbols-outlined" style={{ fontSize: '16px', color: '#ff9500' }}>lock</span>
+                                                    <Shield size={16} style={{ color: '#ff9500' }} />
                                                     <small className="text-muted" style={{ fontSize: '10px' }}>Parol</small>
                                                 </div>
                                                 <button
@@ -699,9 +700,11 @@ export default function UsersPage() {
                                                     title="Parolni nusxalash"
                                                     style={{ backgroundColor: 'transparent' }}
                                                 >
-                                                    <span className="material-symbols-outlined" style={{ fontSize: '16px', color: copiedPassword ? '#34c759' : '#ff9500' }}>
-                                                        {copiedPassword ? 'check' : 'content_copy'}
-                                                    </span>
+                                                    {copiedPassword ? (
+                                                        <Check size={16} style={{ color: '#34c759' }} />
+                                                    ) : (
+                                                        <Copy size={16} style={{ color: '#ff9500' }} />
+                                                    )}
                                                 </button>
                                             </div>
                                             <p className="fw-semibold mb-0" style={{ fontSize: '12px', fontFamily: 'monospace', wordBreak: 'break-all' }}>
@@ -732,7 +735,7 @@ export default function UsersPage() {
                                     }}
                                     style={{ fontSize: '12px' }}
                                 >
-                                    <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>edit</span>
+                                    <Edit2 size={16} />
                                     Tahrirlash
                                 </button>
                             </div>
@@ -806,9 +809,7 @@ export default function UsersPage() {
                                             style={{ backgroundColor: '#f5f5f7' }}
                                             onClick={() => setShowPassword(!showPassword)}
                                         >
-                                            <span className="material-symbols-outlined" style={{ fontSize: '16px', color: '#86868b' }}>
-                                                {showPassword ? 'visibility_off' : 'visibility'}
-                                            </span>
+                                            {showPassword ? <Eye size={16} style={{ color: '#86868b' }} /> : <Eye size={16} style={{ color: '#86868b' }} />}
                                         </button>
                                     </div>
                                     <small className="text-muted" style={{ fontSize: '10px' }}>Parolni o'zgartirmaslik uchun bo'sh qoldiring</small>
@@ -834,7 +835,7 @@ export default function UsersPage() {
                                     {editModal.loading ? (
                                         <span className="spinner-border spinner-border-sm"></span>
                                     ) : (
-                                        <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>check</span>
+                                        <Check size={16} />
                                     )}
                                     Saqlash
                                 </button>
@@ -907,7 +908,7 @@ export default function UsersPage() {
                                     {activatingId ? (
                                         <span className="spinner-border spinner-border-sm"></span>
                                     ) : (
-                                        <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>check</span>
+                                        <Check size={18} />
                                     )}
                                     {selectedDays} kun faollashtirish
                                 </button>
@@ -924,7 +925,7 @@ export default function UsersPage() {
                         <div className="modal-content rounded-4 border-0">
                             <div className="modal-header border-0 pb-0">
                                 <h5 className="modal-title fw-bold d-flex align-items-center gap-2">
-                                    <span className="material-symbols-outlined text-warning">account_balance_wallet</span>
+                                    <CreditCard className="text-warning" size={20} />
                                     Balans qo'shish
                                 </h5>
                                 <button
@@ -1001,7 +1002,7 @@ export default function UsersPage() {
                                     {addingBalanceId ? (
                                         <span className="spinner-border spinner-border-sm"></span>
                                     ) : (
-                                        <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>add</span>
+                                        <UserPlus size={18} />
                                     )}
                                     {balanceAmount.toLocaleString()} so'm qo'shish
                                 </button>
@@ -1018,7 +1019,7 @@ export default function UsersPage() {
                         <div className="modal-content rounded-4 border-0">
                             <div className="modal-header border-0 pb-0">
                                 <h5 className="modal-title fw-bold d-flex align-items-center gap-2">
-                                    <span className="material-symbols-outlined text-primary">school</span>
+                                    <GraduationCap className="text-primary" size={20} />
                                     {studentsModal.user?.name} ning o'quvchilari
                                 </h5>
                                 <button
@@ -1034,7 +1035,7 @@ export default function UsersPage() {
                                     </div>
                                 ) : studentsModal.students.length === 0 ? (
                                     <div className="text-center py-5 text-muted">
-                                        <span className="material-symbols-outlined mb-2" style={{ fontSize: '48px' }}>person_off</span>
+                                        <UserCheck size={48} className="mb-2" />
                                         <p>Bu o'qituvchida o'quvchi yo'q</p>
                                     </div>
                                 ) : (
@@ -1063,14 +1064,14 @@ export default function UsersPage() {
                                                         <div className="row g-2 text-center">
                                                             <div className="col-6">
                                                                 <div className="bg-warning bg-opacity-10 rounded-3 p-2">
-                                                                    <span className="material-symbols-outlined filled text-warning" style={{ fontSize: '20px' }}>star</span>
+                                                                    <Star className="text-warning" fill="currentColor" size={20} />
                                                                     <p className="fw-bold mb-0 small">{student.stars || 0}</p>
                                                                     <p className="text-muted mb-0" style={{ fontSize: '10px' }}>Yulduz</p>
                                                                 </div>
                                                             </div>
                                                             <div className="col-6">
                                                                 <div className="bg-success bg-opacity-10 rounded-3 p-2">
-                                                                    <span className="material-symbols-outlined text-success" style={{ fontSize: '20px' }}>task_alt</span>
+                                                                    <CheckCircle className="text-success" size={20} />
                                                                     <p className="fw-bold mb-0 small">{student.completedLessons || 0}</p>
                                                                     <p className="text-muted mb-0" style={{ fontSize: '10px' }}>Dars</p>
                                                                 </div>

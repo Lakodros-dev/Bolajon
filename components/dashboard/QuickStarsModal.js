@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import { Star, Minus, Plus } from 'lucide-react';
 
 export default function QuickStarsModal({ show, onClose, student, onUpdate }) {
     const { getAuthHeader } = useAuth();
@@ -72,7 +73,7 @@ export default function QuickStarsModal({ show, onClose, student, onUpdate }) {
                                 <div>
                                     <h6 className="fw-bold mb-1">{student?.name}</h6>
                                     <p className="small mb-0 d-flex align-items-center gap-1">
-                                        <span className="material-symbols-outlined filled text-warning" style={{ fontSize: '16px' }}>star</span>
+                                        <Star size={16} fill="#fbbf24" className="text-warning" />
                                         <span className="fw-semibold">{student?.stars || 0}</span>
                                         <span className="text-muted">yulduz</span>
                                     </p>
@@ -106,7 +107,7 @@ export default function QuickStarsModal({ show, onClose, student, onUpdate }) {
                                         className="btn btn-outline-secondary"
                                         onClick={() => setAmount(Math.max(-100, amount - 1))}
                                     >
-                                        <span className="material-symbols-outlined">remove</span>
+                                        <Minus size={20} />
                                     </button>
                                     <input
                                         type="number"
@@ -121,7 +122,7 @@ export default function QuickStarsModal({ show, onClose, student, onUpdate }) {
                                         className="btn btn-outline-secondary"
                                         onClick={() => setAmount(Math.min(100, amount + 1))}
                                     >
-                                        <span className="material-symbols-outlined">add</span>
+                                        <Plus size={20} />
                                     </button>
                                 </div>
                                 {amount < 0 && (
@@ -145,7 +146,7 @@ export default function QuickStarsModal({ show, onClose, student, onUpdate }) {
                             <div className="p-3 rounded-4 text-center" style={{ backgroundColor: amount >= 0 ? '#dcfce7' : '#fee2e2' }}>
                                 <p className="small mb-1 text-muted">Yangi balans:</p>
                                 <h4 className="fw-bold mb-0 d-flex align-items-center justify-content-center gap-2">
-                                    <span className="material-symbols-outlined filled text-warning">star</span>
+                                    <Star size={24} fill="#fbbf24" className="text-warning" />
                                     {Math.max(0, (student?.stars || 0) + amount)}
                                 </h4>
                             </div>
@@ -165,9 +166,7 @@ export default function QuickStarsModal({ show, onClose, student, onUpdate }) {
                                     <span className="spinner-border spinner-border-sm"></span>
                                 ) : (
                                     <>
-                                        <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>
-                                            {amount >= 0 ? 'add' : 'remove'}
-                                        </span>
+                                        {amount >= 0 ? <Plus size={20} /> : <Minus size={20} />}
                                         {amount >= 0 ? `+${amount} yulduz` : `${amount} yulduz`}
                                     </>
                                 )}

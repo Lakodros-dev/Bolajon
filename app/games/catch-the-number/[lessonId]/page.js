@@ -166,10 +166,10 @@ export default function CatchTheNumberGame() {
     };
 
     if (loading) return (<div className="min-vh-100 d-flex align-items-center justify-content-center" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}><div className="spinner-border text-white"><span className="visually-hidden">Yuklanmoqda...</span></div></div>);
-    if (!lesson) return (<div className="min-vh-100 d-flex flex-column align-items-center justify-content-center p-4" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}><span className="material-symbols-outlined text-white mb-3" style={{ fontSize: '64px' }}>sentiment_dissatisfied</span><h4 className="text-white mb-3">Dars topilmadi</h4><Link href="/dashboard/games" className="btn btn-light">Orqaga qaytish</Link></div>);
+    if (!lesson) return (<div className="min-vh-100 d-flex flex-column align-items-center justify-content-center p-4" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}><Frown size={64} className="text-white mb-3" /><h4 className="text-white mb-3">Dars topilmadi</h4><Link href="/dashboard/games" className="btn btn-light">Orqaga qaytish</Link></div>);
     if (gameOver) {
         const won = mistakes < MAX_MISTAKES;
-        return (<div className="min-vh-100 d-flex flex-column align-items-center justify-content-center p-4" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}><div className="card border-0 rounded-4 shadow-lg text-center" style={{ maxWidth: 400 }}><div className="card-body p-5"><div className="mb-4"><span style={{ fontSize: '80px' }}>{won ? '🎉' : '😊'}</span></div><h2 className="fw-bold mb-2">{won ? 'Ajoyib!' : 'Yaxshi harakat!'}</h2><p className="text-muted mb-4">{score} ta to'g'ri, {mistakes} ta xato</p><div className="d-flex gap-3 justify-content-center"><button onClick={restartGame} className="btn btn-primary rounded-3 px-4"><span className="material-symbols-outlined me-2" style={{ fontSize: '20px' }}>replay</span>Qayta o'ynash</button><Link href="/dashboard/games" className="btn btn-outline-secondary rounded-3 px-4">Chiqish</Link></div></div></div></div>);
+        return (<div className="min-vh-100 d-flex flex-column align-items-center justify-content-center p-4" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}><div className="card border-0 rounded-4 shadow-lg text-center" style={{ maxWidth: 400 }}><div className="card-body p-5"><div className="mb-4"><span style={{ fontSize: '80px' }}>{won ? '🎉' : '😊'}</span></div><h2 className="fw-bold mb-2">{won ? 'Ajoyib!' : 'Yaxshi harakat!'}</h2><p className="text-muted mb-4">{score} ta to'g'ri, {mistakes} ta xato</p><div className="d-flex gap-3 justify-content-center"><button onClick={restartGame} className="btn btn-primary rounded-3 px-4 d-flex align-items-center gap-2"><RotateCcw size={20} />Qayta o'ynash</button><Link href="/dashboard/games" className="btn btn-outline-secondary rounded-3 px-4">Chiqish</Link></div></div></div></div>);
     }
 
     return (
@@ -182,7 +182,7 @@ export default function CatchTheNumberGame() {
                     {/* Desktop Layout */}
                     <div className="d-none d-lg-flex justify-content-between align-items-center">
                         <Link href="/dashboard/games" className="btn btn-light rounded-circle shadow-sm" style={{ width: '45px', height: '45px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <span className="material-symbols-outlined">arrow_back</span>
+                            <ArrowLeft size={20} />
                         </Link>
                         
                         {currentNumber && (
@@ -212,7 +212,7 @@ export default function CatchTheNumberGame() {
                                             e.currentTarget.style.boxShadow = '';
                                         }}
                                     >
-                                        <span className="material-symbols-outlined">volume_up</span>
+                                        <Volume2 size={20} />
                                     </button>
                                 </div>
                             </div>
@@ -221,13 +221,13 @@ export default function CatchTheNumberGame() {
                         <div className="d-flex gap-2">
                             <div className="bg-white bg-opacity-25 rounded-3 px-3 py-2 border border-white border-opacity-50 shadow-sm">
                                 <span className="fw-bold text-white d-flex align-items-center gap-1">
-                                    <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>check_circle</span>
+                                    <CheckCircle size={18} />
                                     {score}
                                 </span>
                             </div>
                             <div className="bg-white bg-opacity-25 rounded-3 px-3 py-2 border border-white border-opacity-50 shadow-sm">
                                 <span className="fw-bold text-white d-flex align-items-center gap-1">
-                                    <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>cancel</span>
+                                    <XCircle size={18} />
                                     {mistakes}/{MAX_MISTAKES}
                                 </span>
                             </div>
@@ -238,19 +238,19 @@ export default function CatchTheNumberGame() {
                     <div className="d-lg-none">
                         <div className="d-flex justify-content-between align-items-center mb-2">
                             <Link href="/dashboard/games" className="btn btn-light rounded-circle shadow-sm" style={{ width: '40px', height: '40px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>arrow_back</span>
+                                <ArrowLeft size={20} />
                             </Link>
                             
                             <div className="d-flex gap-2">
                                 <div className="bg-white bg-opacity-25 rounded-3 px-2 py-1 border border-white border-opacity-50 shadow-sm">
                                     <span className="fw-bold text-white d-flex align-items-center gap-1" style={{ fontSize: '14px' }}>
-                                        <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>check_circle</span>
+                                        <CheckCircle size={16} />
                                         {score}
                                     </span>
                                 </div>
                                 <div className="bg-white bg-opacity-25 rounded-3 px-2 py-1 border border-white border-opacity-50 shadow-sm">
                                     <span className="fw-bold text-white d-flex align-items-center gap-1" style={{ fontSize: '14px' }}>
-                                        <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>cancel</span>
+                                        <XCircle size={16} />
                                         {mistakes}/{MAX_MISTAKES}
                                     </span>
                                 </div>
@@ -276,7 +276,7 @@ export default function CatchTheNumberGame() {
                                             justifyContent: 'center'
                                         }}
                                     >
-                                        <span className="material-symbols-outlined" style={{ fontSize: '24px' }}>volume_up</span>
+                                        <Volume2 size={24} />
                                     </button>
                                 </div>
                             </div>

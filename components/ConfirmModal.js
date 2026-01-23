@@ -1,5 +1,7 @@
 'use client';
 
+import { Trash2, AlertTriangle, CheckCircle, Info } from 'lucide-react';
+
 export default function ConfirmModal({
     show,
     onClose,
@@ -13,14 +15,15 @@ export default function ConfirmModal({
 }) {
     if (!show) return null;
 
-    const typeStyles = {
-        danger: { bg: '#fee2e2', color: 'text-danger', icon: 'delete', btnClass: 'btn-danger' },
-        warning: { bg: '#fef3c7', color: 'text-warning', icon: 'warning', btnClass: 'btn-warning' },
-        success: { bg: '#dcfce7', color: 'text-success', icon: 'check_circle', btnClass: 'btn-success' },
-        info: { bg: '#dbeafe', color: 'text-primary', icon: 'info', btnClass: 'btn-primary' }
+    const typeConfig = {
+        danger: { bg: '#fee2e2', color: 'text-danger', Icon: Trash2, btnClass: 'btn-danger' },
+        warning: { bg: '#fef3c7', color: 'text-warning', Icon: AlertTriangle, btnClass: 'btn-warning' },
+        success: { bg: '#dcfce7', color: 'text-success', Icon: CheckCircle, btnClass: 'btn-success' },
+        info: { bg: '#dbeafe', color: 'text-primary', Icon: Info, btnClass: 'btn-primary' }
     };
 
-    const style = typeStyles[type] || typeStyles.info;
+    const config = typeConfig[type] || typeConfig.info;
+    const IconComponent = config.Icon;
 
     return (
         <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1050 }}>
@@ -29,11 +32,9 @@ export default function ConfirmModal({
                     <div className="modal-body p-4 text-center">
                         <div
                             className="rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center"
-                            style={{ width: '64px', height: '64px', backgroundColor: style.bg }}
+                            style={{ width: '64px', height: '64px', backgroundColor: config.bg }}
                         >
-                            <span className={`material-symbols-outlined ${style.color}`} style={{ fontSize: '32px' }}>
-                                {style.icon}
-                            </span>
+                            <IconComponent size={32} className={config.color} />
                         </div>
                         <h5 className="fw-bold mb-2">{title}</h5>
                         <p className="text-muted mb-4">{message}</p>
@@ -47,7 +48,7 @@ export default function ConfirmModal({
                             </button>
                             <button
                                 onClick={onConfirm}
-                                className={`btn ${style.btnClass} rounded-3 px-4 py-2 d-flex align-items-center gap-2`}
+                                className={`btn ${config.btnClass} rounded-3 px-4 py-2 d-flex align-items-center gap-2`}
                                 disabled={loading}
                             >
                                 {loading && <span className="spinner-border spinner-border-sm"></span>}

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
+import { ArrowLeft, Volume2, CheckCircle, XCircle, RotateCcw, Frown, ShoppingCart, ArrowDown, X as CloseIcon } from 'lucide-react';
 
 export default function ShoppingBasketGame() {
     const params = useParams();
@@ -190,9 +191,7 @@ export default function ShoppingBasketGame() {
     if (!lesson || vocabulary.length === 0) {
         return (
             <div className="min-vh-100 d-flex flex-column align-items-center justify-content-center p-4" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
-                <span className="material-symbols-outlined text-white mb-3" style={{ fontSize: '64px' }}>
-                    sentiment_dissatisfied
-                </span>
+                <Frown size={64} className="text-white mb-3" />
                 <h4 className="text-white mb-3">Bu dars uchun lug'at topilmadi</h4>
                 <Link href="/dashboard/games" className="btn btn-light">
                     Orqaga qaytish
@@ -221,8 +220,8 @@ export default function ShoppingBasketGame() {
                             {score} / {vocabulary.length} to'g'ri
                         </p>
                         <div className="d-flex gap-3 justify-content-center">
-                            <button onClick={restartGame} className="btn btn-primary rounded-3 px-4">
-                                <span className="material-symbols-outlined me-2" style={{ fontSize: '20px' }}>replay</span>
+                            <button onClick={restartGame} className="btn btn-primary rounded-3 px-4 d-flex align-items-center gap-2">
+                                <RotateCcw size={20} />
                                 Qayta o'ynash
                             </button>
                             <Link href="/dashboard/games" className="btn btn-outline-secondary rounded-3 px-4">
@@ -262,18 +261,18 @@ export default function ShoppingBasketGame() {
             {/* Header */}
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <Link href="/dashboard/games" className="btn btn-light rounded-circle p-2 shadow">
-                    <span className="material-symbols-outlined">arrow_back</span>
+                    <ArrowLeft size={20} />
                 </Link>
                 <div className="d-flex gap-3">
                     <div className="bg-white rounded-3 px-4 py-2 shadow-sm">
                         <span className="fw-bold text-success d-flex align-items-center gap-1">
-                            <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>check_circle</span>
+                            <CheckCircle size={20} />
                             {score}
                         </span>
                     </div>
                     <div className="bg-white rounded-3 px-4 py-2 shadow-sm">
                         <span className="fw-bold text-danger d-flex align-items-center gap-1">
-                            <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>cancel</span>
+                            <XCircle size={20} />
                             {mistakes}/{MAX_MISTAKES}
                         </span>
                     </div>
@@ -313,7 +312,7 @@ export default function ShoppingBasketGame() {
                                 onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
                                 onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
                             >
-                                <span className="material-symbols-outlined">volume_up</span>
+                                <Volume2 size={20} />
                             </button>
                         </div>
                     </div>
@@ -341,7 +340,7 @@ export default function ShoppingBasketGame() {
                     <div className="card border-0 rounded-4 shadow-lg">
                         <div className="card-body p-4">
                             <h5 className="fw-bold mb-4 d-flex align-items-center gap-2">
-                                <span className="material-symbols-outlined text-primary">shopping_bag</span>
+                                <ShoppingBag size={20} className="text-primary" />
                                 Available Items:
                             </h5>
                             <div className="row g-3">
@@ -401,7 +400,7 @@ export default function ShoppingBasketGame() {
                             <h5 className="fw-bold mb-3">Shopping Basket</h5>
                             {basket.length === 0 ? (
                                 <p className="text-center opacity-75">
-                                    <span className="material-symbols-outlined mb-2" style={{ fontSize: '40px' }}>arrow_downward</span>
+                                    <ArrowDown size={40} className="mb-2" />
                                     <br />
                                     Drag items here
                                 </p>

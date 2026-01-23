@@ -6,6 +6,7 @@ import { useSubscription } from '@/components/SubscriptionModal';
 import Header from '@/components/dashboard/Header';
 import AlertModal from '@/components/AlertModal';
 import ConfirmModal from '@/components/ConfirmModal';
+import { Wallet, Calendar, CreditCard, Edit, LogOut, User, Phone, BadgeCheck, Save, Copy, Check, PhoneCall } from 'lucide-react';
 
 export default function ProfilePage() {
     const { user, logout, getAuthHeader } = useAuth();
@@ -171,9 +172,7 @@ export default function ProfilePage() {
                                 <div className="card border shadow-sm rounded-3 h-100" style={{ backgroundColor: '#fff' }}>
                                     <div className="card-body p-3 text-center">
                                         <div className="d-flex align-items-center justify-content-center mb-2">
-                                            <span className="material-symbols-outlined text-success" style={{ fontSize: '24px' }}>
-                                                account_balance_wallet
-                                            </span>
+                                            <Wallet size={24} className="text-success" />
                                         </div>
                                         <p className="small text-muted mb-1">Balans</p>
                                         <h5 className="fw-bold mb-0 text-success">{balance.toLocaleString()}</h5>
@@ -185,9 +184,7 @@ export default function ProfilePage() {
                                 <div className="card border shadow-sm rounded-3 h-100" style={{ backgroundColor: '#fff' }}>
                                     <div className="card-body p-3 text-center">
                                         <div className="d-flex align-items-center justify-content-center mb-2">
-                                            <span className="material-symbols-outlined text-primary" style={{ fontSize: '24px' }}>
-                                                event_available
-                                            </span>
+                                            <Calendar size={24} className="text-primary" />
                                         </div>
                                         <p className="small text-muted mb-1">Obuna</p>
                                         <h5 className="fw-bold mb-0 text-primary">{daysRemaining}</h5>
@@ -202,7 +199,7 @@ export default function ProfilePage() {
                             onClick={() => setShowTopUpModal(true)}
                             className="btn btn-primary rounded-3 w-100 py-3 fw-semibold d-flex align-items-center justify-content-center gap-2 shadow-sm"
                         >
-                            <span className="material-symbols-outlined">add_card</span>
+                            <CreditCard size={20} />
                             Balansni to'ldirish
                         </button>
                     </div>
@@ -236,9 +233,7 @@ export default function ProfilePage() {
                                             backgroundColor: '#e0f2fe'
                                         }}
                                     >
-                                        <span className="material-symbols-outlined text-primary" style={{ fontSize: '24px' }}>
-                                            edit
-                                        </span>
+                                        <Edit size={24} className="text-primary" />
                                     </div>
                                     <div>
                                         <p className="fw-semibold mb-0 small">Tahrirlash</p>
@@ -266,9 +261,7 @@ export default function ProfilePage() {
                                             backgroundColor: '#fee2e2'
                                         }}
                                     >
-                                        <span className="material-symbols-outlined text-danger" style={{ fontSize: '24px' }}>
-                                            logout
-                                        </span>
+                                        <LogOut size={24} className="text-danger" />
                                     </div>
                                     <div>
                                         <p className="fw-semibold mb-0 small">Chiqish</p>
@@ -293,9 +286,7 @@ export default function ProfilePage() {
                                         backgroundColor: '#f3f4f6'
                                     }}
                                 >
-                                    <span className="material-symbols-outlined text-secondary" style={{ fontSize: '20px' }}>
-                                        person
-                                    </span>
+                                    <User size={20} className="text-secondary" />
                                 </div>
                                 <div className="flex-grow-1">
                                     <p className="text-muted mb-0 small">Ism</p>
@@ -313,9 +304,7 @@ export default function ProfilePage() {
                                         backgroundColor: '#f3f4f6'
                                     }}
                                 >
-                                    <span className="material-symbols-outlined text-secondary" style={{ fontSize: '20px' }}>
-                                        phone
-                                    </span>
+                                    <Phone size={20} className="text-secondary" />
                                 </div>
                                 <div className="flex-grow-1">
                                     <p className="text-muted mb-0 small">Telefon</p>
@@ -333,9 +322,7 @@ export default function ProfilePage() {
                                         backgroundColor: '#f3f4f6'
                                     }}
                                 >
-                                    <span className="material-symbols-outlined text-secondary" style={{ fontSize: '20px' }}>
-                                        badge
-                                    </span>
+                                    <BadgeCheck size={20} className="text-secondary" />
                                 </div>
                                 <div className="flex-grow-1">
                                     <p className="text-muted mb-0 small">Rol</p>
@@ -356,7 +343,7 @@ export default function ProfilePage() {
                         <div className="modal-content rounded-4 border-0">
                             <div className="modal-header border-0 pb-0">
                                 <h5 className="modal-title fw-bold d-flex align-items-center gap-2">
-                                    <span className="material-symbols-outlined text-primary">edit</span>
+                                    <Edit size={20} className="text-primary" />
                                     Profilni tahrirlash
                                 </h5>
                                 <button
@@ -416,13 +403,13 @@ export default function ProfilePage() {
 
                                     <button
                                         type="submit"
-                                        className="btn btn-primary rounded-3 w-100 py-2 fw-semibold"
+                                        className="btn btn-primary rounded-3 w-100 py-2 fw-semibold d-flex align-items-center justify-content-center gap-2"
                                         disabled={saving}
                                     >
                                         {saving ? (
-                                            <span className="spinner-border spinner-border-sm me-2"></span>
+                                            <span className="spinner-border spinner-border-sm"></span>
                                         ) : (
-                                            <span className="material-symbols-outlined me-2" style={{ fontSize: '18px' }}>save</span>
+                                            <Save size={18} />
                                         )}
                                         Saqlash
                                     </button>
@@ -440,7 +427,7 @@ export default function ProfilePage() {
                         <div className="modal-content rounded-4 border-0">
                             <div className="modal-header border-0 pb-0">
                                 <h5 className="modal-title fw-bold d-flex align-items-center gap-2">
-                                    <span className="material-symbols-outlined text-success">account_balance_wallet</span>
+                                    <Wallet size={20} className="text-success" />
                                     Balansni to'ldirish
                                 </h5>
                                 <button
@@ -492,9 +479,7 @@ export default function ProfilePage() {
                                     <div className="d-flex align-items-center justify-content-between">
                                         <p className="fw-bold font-monospace mb-0">{paymentInfo.cardNumber}</p>
                                         <button onClick={copyCardNumber} className="btn btn-sm btn-outline-success rounded-2">
-                                            <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>
-                                                {copied ? 'check' : 'content_copy'}
-                                            </span>
+                                            {copied ? <Check size={16} /> : <Copy size={16} />}
                                         </button>
                                     </div>
                                 </div>
@@ -521,7 +506,7 @@ export default function ProfilePage() {
                                     href={`tel:${paymentInfo.adminPhone}`}
                                     className="btn btn-success w-100 rounded-3 py-3 d-flex align-items-center justify-content-center gap-2"
                                 >
-                                    <span className="material-symbols-outlined">call</span>
+                                    <PhoneCall size={20} />
                                     <span className="fw-bold">{paymentInfo.adminPhone}</span>
                                 </a>
                             </div>

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { useData } from '@/context/DataContext';
 import Link from 'next/link';
+import { ArrowLeft, User, Plus } from 'lucide-react';
 
 export default function AddStudentPage() {
     const router = useRouter();
@@ -61,7 +62,7 @@ export default function AddStudentPage() {
             <header className="sticky-top bg-white border-bottom py-3 px-3">
                 <div className="d-flex align-items-center gap-3">
                     <Link href="/dashboard/students" className="btn btn-light rounded-circle p-2">
-                        <span className="material-symbols-outlined">arrow_back</span>
+                        <ArrowLeft size={20} />
                     </Link>
                     <h1 className="h5 fw-bold mb-0">Yangi o'quvchi</h1>
                 </div>
@@ -76,7 +77,7 @@ export default function AddStudentPage() {
                     <div className="card border-0 rounded-4 shadow-sm mb-4">
                         <div className="card-body p-4">
                             <h3 className="h6 fw-bold mb-4 d-flex align-items-center gap-2">
-                                <span className="material-symbols-outlined text-primary">person</span>
+                                <User size={20} className="text-primary" />
                                 O'quvchi ma'lumotlari
                             </h3>
 
@@ -119,7 +120,7 @@ export default function AddStudentPage() {
                         {loading ? (
                             <span className="spinner-border spinner-border-sm me-2" role="status"></span>
                         ) : (
-                            <span className="material-symbols-outlined me-2" style={{ fontSize: '20px' }}>add</span>
+                            <Plus size={20} className="me-2" />
                         )}
                         O'quvchi qo'shish
                     </button>

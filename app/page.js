@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { useAuth } from '@/context/AuthContext';
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { UserPlus, BookOpen, PlayCircle, TrendingUp, Gamepad2, Trophy, BarChart3, Menu, Hand, Rocket, LogIn, CheckCircle, Star, Play, Globe, MapPin, Code, Heart, Home, Video, Users } from 'lucide-react';
 
 export default function HomePage() {
   const { isAuthenticated, user } = useAuth();
@@ -21,17 +22,17 @@ export default function HomePage() {
   }, [isAuthenticated, user, router]);
 
   const steps = [
-    { icon: 'how_to_reg', title: "1. Bepul a'zo bo'ling", desc: "Ota-ona yoki o'qituvchi hisobini soniyalar ichida yarating.", color: '#E0F2FE', iconColor: '#0284c7' },
-    { icon: 'auto_stories', title: '2. Darajani tanlang', desc: "Bolaning yoshi va qobiliyatiga qarab darslarni tanlang.", color: '#FEF3C7', iconColor: '#d97706' },
-    { icon: 'play_lesson', title: "3. O'qishni boshlang", desc: "Interaktiv videolarni tomosha qiling va qiziqarli o'yinlar o'ynang.", color: '#DCFCE7', iconColor: '#16a34a' },
-    { icon: 'monitoring', title: '4. Natijani kuzating', desc: "O'zlashtirish darajasini real vaqtda kuzatib boring!", color: '#F3E8FF', iconColor: '#9333ea' },
+    { icon: UserPlus, title: "1. Bepul a'zo bo'ling", desc: "Ota-ona yoki o'qituvchi hisobini soniyalar ichida yarating.", color: '#E0F2FE', iconColor: '#0284c7' },
+    { icon: BookOpen, title: '2. Darajani tanlang', desc: "Bolaning yoshi va qobiliyatiga qarab darslarni tanlang.", color: '#FEF3C7', iconColor: '#d97706' },
+    { icon: PlayCircle, title: "3. O'qishni boshlang", desc: "Interaktiv videolarni tomosha qiling va qiziqarli o'yinlar o'ynang.", color: '#DCFCE7', iconColor: '#16a34a' },
+    { icon: TrendingUp, title: '4. Natijani kuzating', desc: "O'zlashtirish darajasini real vaqtda kuzatib boring!", color: '#F3E8FF', iconColor: '#9333ea' },
   ];
 
   const features = [
-    { icon: 'play_circle', title: 'Video darslar', desc: "Professional o'qituvchilar tomonidan tayyorlangan", color: '#E0F2FE', iconColor: '#0284c7' },
-    { icon: 'sports_esports', title: "Interaktiv o'yinlar", desc: "O'yin orqali o'rganish metodikasi", color: '#DCFCE7', iconColor: '#16a34a' },
-    { icon: 'emoji_events', title: 'Mukofotlar', desc: "Yulduzlar va sovg'alar tizimi", color: '#FEF3C7', iconColor: '#d97706' },
-    { icon: 'analytics', title: 'Statistika', desc: "Bolaning rivojlanishini kuzating", color: '#F3E8FF', iconColor: '#9333ea' },
+    { icon: PlayCircle, title: 'Video darslar', desc: "Professional o'qituvchilar tomonidan tayyorlangan", color: '#E0F2FE', iconColor: '#0284c7' },
+    { icon: Gamepad2, title: "Interaktiv o'yinlar", desc: "O'yin orqali o'rganish metodikasi", color: '#DCFCE7', iconColor: '#16a34a' },
+    { icon: Trophy, title: 'Mukofotlar', desc: "Yulduzlar va sovg'alar tizimi", color: '#FEF3C7', iconColor: '#d97706' },
+    { icon: BarChart3, title: 'Statistika', desc: "Bolaning rivojlanishini kuzating", color: '#F3E8FF', iconColor: '#9333ea' },
   ];
 
   return (
@@ -57,7 +58,7 @@ export default function HomePage() {
               UZ
             </button>
             <button className="btn btn-light rounded-circle p-2">
-              <span className="material-symbols-outlined">menu</span>
+              <Menu size={20} />
             </button>
           </div>
         </div>
@@ -70,7 +71,7 @@ export default function HomePage() {
             {/* Content */}
             <div className="col-12 col-lg-6 text-center text-lg-start">
               <div className="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-pill mb-3" style={{ backgroundColor: 'rgba(43, 140, 238, 0.1)' }}>
-                <span className="material-symbols-outlined text-primary" style={{ fontSize: '20px' }}>waving_hand</span>
+                <Hand size={20} className="text-primary" />
                 <span className="fw-semibold text-primary">Xush kelibsiz!</span>
               </div>
 
@@ -90,11 +91,11 @@ export default function HomePage() {
               {/* CTA Buttons */}
               <div className="d-flex flex-column flex-sm-row gap-3 justify-content-center justify-content-lg-start">
                 <Link href="/register" className="btn btn-primary btn-lg rounded-4 py-3 px-4 fw-bold d-flex align-items-center justify-content-center gap-2 shadow">
-                  <span className="material-symbols-outlined">rocket_launch</span>
+                  <Rocket size={20} />
                   Bepul boshlash
                 </Link>
                 <Link href="/login" className="btn btn-light btn-lg rounded-4 py-3 px-4 fw-bold d-flex align-items-center justify-content-center gap-2 border">
-                  <span className="material-symbols-outlined text-primary">login</span>
+                  <LogIn size={20} className="text-primary" />
                   Kirish
                 </Link>
               </div>
@@ -102,11 +103,11 @@ export default function HomePage() {
               {/* Trust badges */}
               <div className="d-flex align-items-center gap-3 mt-4 justify-content-center justify-content-lg-start">
                 <div className="d-flex align-items-center gap-2 px-3 py-2 rounded-3" style={{ backgroundColor: '#dcfce7' }}>
-                  <span className="material-symbols-outlined text-success" style={{ fontSize: '20px' }}>verified</span>
+                  <CheckCircle size={20} className="text-success" />
                   <span className="small fw-medium text-success">7 kun bepul</span>
                 </div>
                 <div className="d-flex align-items-center gap-2 px-3 py-2 rounded-3" style={{ backgroundColor: '#fef3c7' }}>
-                  <span className="material-symbols-outlined text-warning" style={{ fontSize: '20px' }}>star</span>
+                  <Star size={20} style={{ color: '#d97706' }} />
                   <span className="small fw-medium" style={{ color: '#b45309' }}>500+ o'quvchi</span>
                 </div>
               </div>
@@ -131,7 +132,7 @@ export default function HomePage() {
                   style={{ bottom: '-20px', left: '-30px' }}
                 >
                   <div className="rounded-circle bg-success d-flex align-items-center justify-content-center" style={{ width: '40px', height: '40px' }}>
-                    <span className="material-symbols-outlined text-white" style={{ fontSize: '20px' }}>play_arrow</span>
+                    <Play size={20} className="text-white" />
                   </div>
                   <div>
                     <p className="fw-bold mb-0 small">50+ video darslar</p>
@@ -163,17 +164,20 @@ export default function HomePage() {
           </div>
 
           <div className="row g-4">
-            {features.map((feature, index) => (
-              <div key={index} className="col-6 col-lg-3">
-                <div className="card border-0 rounded-4 h-100 text-center p-4" style={{ backgroundColor: feature.color }}>
-                  <div className="rounded-4 p-3 bg-white shadow-sm mx-auto mb-3" style={{ width: 'fit-content' }}>
-                    <span className="material-symbols-outlined" style={{ color: feature.iconColor, fontSize: '32px' }}>{feature.icon}</span>
+            {features.map((feature, index) => {
+              const IconComponent = feature.icon;
+              return (
+                <div key={index} className="col-6 col-lg-3">
+                  <div className="card border-0 rounded-4 h-100 text-center p-4" style={{ backgroundColor: feature.color }}>
+                    <div className="rounded-4 p-3 bg-white shadow-sm mx-auto mb-3" style={{ width: 'fit-content' }}>
+                      <IconComponent size={32} style={{ color: feature.iconColor }} />
+                    </div>
+                    <h4 className="fw-bold mb-2" style={{ fontSize: '1rem' }}>{feature.title}</h4>
+                    <p className="small text-muted mb-0">{feature.desc}</p>
                   </div>
-                  <h4 className="fw-bold mb-2" style={{ fontSize: '1rem' }}>{feature.title}</h4>
-                  <p className="small text-muted mb-0">{feature.desc}</p>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
@@ -187,28 +191,31 @@ export default function HomePage() {
           </div>
 
           <div className="row g-4">
-            {steps.map((step, index) => (
-              <div key={index} className="col-12 col-md-6">
-                <div
-                  className="d-flex align-items-start gap-3 p-4 rounded-4 position-relative h-100"
-                  style={{ backgroundColor: step.color }}
-                >
-                  <div className="rounded-4 p-2 bg-white shadow-sm flex-shrink-0">
-                    <span className="material-symbols-outlined" style={{ color: step.iconColor, fontSize: '28px' }}>{step.icon}</span>
-                  </div>
-                  <div>
-                    <h4 className="fw-bold mb-1" style={{ fontSize: '16px' }}>{step.title}</h4>
-                    <p className="small text-muted mb-0">{step.desc}</p>
-                  </div>
-                  <span
-                    className="position-absolute fw-bold opacity-25"
-                    style={{ top: '1rem', right: '1rem', fontSize: '2.5rem', color: step.iconColor }}
+            {steps.map((step, index) => {
+              const IconComponent = step.icon;
+              return (
+                <div key={index} className="col-12 col-md-6">
+                  <div
+                    className="d-flex align-items-start gap-3 p-4 rounded-4 position-relative h-100"
+                    style={{ backgroundColor: step.color }}
                   >
-                    {index + 1}
-                  </span>
+                    <div className="rounded-4 p-2 bg-white shadow-sm flex-shrink-0">
+                      <IconComponent size={28} style={{ color: step.iconColor }} />
+                    </div>
+                    <div>
+                      <h4 className="fw-bold mb-1" style={{ fontSize: '16px' }}>{step.title}</h4>
+                      <p className="small text-muted mb-0">{step.desc}</p>
+                    </div>
+                    <span
+                      className="position-absolute fw-bold opacity-25"
+                      style={{ top: '1rem', right: '1rem', fontSize: '2.5rem', color: step.iconColor }}
+                    >
+                      {index + 1}
+                    </span>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
@@ -257,11 +264,11 @@ export default function HomePage() {
               <h6 className="fw-bold mb-3">Bog'lanish</h6>
               <ul className="list-unstyled">
                 <li className="mb-2 d-flex align-items-center gap-2">
-                  <span className="material-symbols-outlined text-white-50" style={{ fontSize: '18px' }}>language</span>
+                  <Globe size={18} className="text-white-50" />
                   <span className="text-white-50 small">bolajoon.uz</span>
                 </li>
                 <li className="mb-2 d-flex align-items-center gap-2">
-                  <span className="material-symbols-outlined text-white-50" style={{ fontSize: '18px' }}>location_on</span>
+                  <MapPin size={18} className="text-white-50" />
                   <span className="text-white-50 small">O'zbekiston</span>
                 </li>
               </ul>
@@ -272,7 +279,7 @@ export default function HomePage() {
               <h6 className="fw-bold mb-3">Ishlab chiquvchi</h6>
               <div className="d-flex align-items-center gap-3 p-3 rounded-3" style={{ backgroundColor: 'rgba(255,255,255,0.1)' }}>
                 <div className="rounded-circle bg-primary d-flex align-items-center justify-content-center" style={{ width: '40px', height: '40px' }}>
-                  <span className="material-symbols-outlined text-white" style={{ fontSize: '20px' }}>code</span>
+                  <Code size={20} className="text-white" />
                 </div>
                 <div>
                   <p className="fw-semibold mb-0 small">Lakodros</p>
@@ -286,8 +293,8 @@ export default function HomePage() {
           <div className="border-top border-secondary pt-4">
             <div className="d-flex flex-column flex-md-row align-items-center justify-content-between gap-2">
               <p className="text-white-50 small mb-0">© 2024 Bolajon.uz. Barcha huquqlar himoyalangan.</p>
-              <p className="text-white-50 small mb-0">
-                <span className="material-symbols-outlined align-middle me-1" style={{ fontSize: '14px' }}>favorite</span>
+              <p className="text-white-50 small mb-0 d-flex align-items-center gap-1">
+                <Heart size={14} />
                 O'zbekistonda ishlab chiqilgan
               </p>
             </div>
@@ -299,19 +306,19 @@ export default function HomePage() {
       <nav className="bottom-nav d-md-none">
         <div className="d-flex justify-content-between align-items-center" style={{ maxWidth: '400px', margin: '0 auto' }}>
           <Link href="/" className="nav-link active">
-            <span className="material-symbols-outlined filled">home</span>
+            <Home size={24} />
             <span>Asosiy</span>
           </Link>
           <Link href="/login" className="nav-link">
-            <span className="material-symbols-outlined">smart_display</span>
+            <Video size={24} />
             <span>Darslar</span>
           </Link>
           <Link href="/login" className="nav-link">
-            <span className="material-symbols-outlined">leaderboard</span>
+            <BarChart3 size={24} />
             <span>Natijalar</span>
           </Link>
           <Link href="/login" className="nav-link">
-            <span className="material-symbols-outlined">account_circle</span>
+            <Users size={24} />
             <span>Profil</span>
           </Link>
         </div>

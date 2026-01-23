@@ -2,6 +2,7 @@
 
 import { useState, useEffect, createContext, useContext } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import { CreditCard, CircleDot, Circle, Copy, Check, Phone } from 'lucide-react';
 
 const SubscriptionContext = createContext();
 
@@ -159,7 +160,7 @@ export default function SubscriptionModal() {
                 <div className="modal-content rounded-4 border-0">
                     <div className="modal-header border-0 pb-0">
                         <h5 className="modal-title fw-bold d-flex align-items-center gap-2">
-                            <span className="material-symbols-outlined text-primary">payments</span>
+                            <CreditCard size={20} className="text-primary" />
                             {isExpired ? 'Obuna muddati tugadi' : 'Obunani uzaytirish'}
                         </h5>
                         <button
@@ -201,9 +202,7 @@ export default function SubscriptionModal() {
                                         onClick={() => setSelectedDays(pkg.days)}
                                     >
                                         <div className="d-flex align-items-center gap-2">
-                                            <span className={`material-symbols-outlined ${selectedDays === pkg.days ? '' : 'text-muted'}`} style={{ fontSize: '20px' }}>
-                                                {selectedDays === pkg.days ? 'radio_button_checked' : 'radio_button_unchecked'}
-                                            </span>
+                                            {selectedDays === pkg.days ? <CircleDot size={20} /> : <Circle size={20} className="text-muted" />}
                                             <span className="fw-semibold">{pkg.label}</span>
                                         </div>
                                         <span className="fw-bold">
@@ -256,9 +255,7 @@ export default function SubscriptionModal() {
                             <div className="d-flex align-items-center justify-content-between">
                                 <p className="fw-bold font-monospace mb-0 fs-5">{paymentInfo.cardNumber}</p>
                                 <button onClick={copyCardNumber} className="btn btn-sm btn-outline-primary rounded-2">
-                                    <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
-                                        {copied ? 'check' : 'content_copy'}
-                                    </span>
+                                    {copied ? <Check size={18} /> : <Copy size={18} />}
                                 </button>
                             </div>
                         </div>
@@ -285,7 +282,7 @@ export default function SubscriptionModal() {
                             href={`tel:${paymentInfo.adminPhone}`}
                             className="btn btn-success w-100 rounded-3 py-3 d-flex align-items-center justify-content-center gap-2"
                         >
-                            <span className="material-symbols-outlined">call</span>
+                            <Phone size={20} />
                             <span className="fw-bold">{paymentInfo.adminPhone}</span>
                         </a>
                     </div>

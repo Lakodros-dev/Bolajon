@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { ArrowLeft, Timer, Star, RotateCcw } from 'lucide-react';
 
 export default function CatchNumberTestPage() {
     const router = useRouter();
@@ -70,12 +71,12 @@ export default function CatchNumberTestPage() {
                         Natija: <span className="text-primary">{score}</span> ta to'g'ri
                     </p>
                     <div className="d-flex gap-3 justify-content-center">
-                        <button onClick={restartGame} className="btn btn-primary btn-lg rounded-3">
-                            <span className="material-symbols-outlined me-2">refresh</span>
+                        <button onClick={restartGame} className="btn btn-primary btn-lg rounded-3 d-flex align-items-center gap-2">
+                            <RotateCcw size={20} />
                             Qayta o'ynash
                         </button>
-                        <button onClick={() => router.push('/admin/games-test')} className="btn btn-outline-secondary btn-lg rounded-3">
-                            <span className="material-symbols-outlined me-2">arrow_back</span>
+                        <button onClick={() => router.push('/admin/games-test')} className="btn btn-outline-secondary btn-lg rounded-3 d-flex align-items-center gap-2">
+                            <ArrowLeft size={20} />
                             Orqaga
                         </button>
                     </div>
@@ -90,17 +91,17 @@ export default function CatchNumberTestPage() {
             <div className="bg-white border-bottom py-3 px-4">
                 <div className="d-flex align-items-center justify-content-between">
                     <button onClick={() => router.push('/admin/games-test')} className="btn btn-light rounded-circle">
-                        <span className="material-symbols-outlined">arrow_back</span>
+                        <ArrowLeft size={20} />
                     </button>
                     <h5 className="fw-bold mb-0">Catch the Number</h5>
                     <div className="d-flex gap-2">
-                        <div className="badge bg-danger rounded-pill px-3 py-2">
-                            <span className="material-symbols-outlined" style={{ fontSize: '16px', verticalAlign: 'middle' }}>timer</span>
-                            {' '}{timeLeft}s
+                        <div className="badge bg-danger rounded-pill px-3 py-2 d-flex align-items-center gap-1">
+                            <Timer size={16} />
+                            {timeLeft}s
                         </div>
-                        <div className="badge bg-primary rounded-pill px-3 py-2">
-                            <span className="material-symbols-outlined" style={{ fontSize: '16px', verticalAlign: 'middle' }}>star</span>
-                            {' '}{score}
+                        <div className="badge bg-primary rounded-pill px-3 py-2 d-flex align-items-center gap-1">
+                            <Star size={16} />
+                            {score}
                         </div>
                     </div>
                 </div>

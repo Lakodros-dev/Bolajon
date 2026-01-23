@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
+import { ArrowLeft, Star, RotateCcw, Frown, Image as ImageIcon, CheckCircle, XCircle } from 'lucide-react';
 
 export default function VocabularyGamePage() {
     const params = useParams();
@@ -127,9 +128,7 @@ export default function VocabularyGamePage() {
     if (!lesson || vocabulary.length === 0) {
         return (
             <div className="min-vh-100 d-flex flex-column align-items-center justify-content-center bg-light p-4">
-                <span className="material-symbols-outlined text-muted mb-3" style={{ fontSize: '64px' }}>
-                    sentiment_dissatisfied
-                </span>
+                <Frown size={64} className="text-muted mb-3" />
                 <h4 className="text-muted mb-3">Bu dars uchun lug'at topilmadi</h4>
                 <Link href="/dashboard/games" className="btn btn-primary">
                     Orqaga qaytish
@@ -168,18 +167,18 @@ export default function VocabularyGamePage() {
                             </div>
                         </div>
                         {won && (
-                            <div className="alert alert-success mb-4">
-                                <span className="material-symbols-outlined me-2">star</span>
+                            <div className="alert alert-success mb-4 d-flex align-items-center justify-content-center gap-2">
+                                <Star size={20} />
                                 O'yin yutildi! Progress saqlandi.
                             </div>
                         )}
                         <div className="d-flex gap-2 justify-content-center">
-                            <button onClick={restartGame} className="btn btn-outline-primary">
-                                <span className="material-symbols-outlined me-1">replay</span>
+                            <button onClick={restartGame} className="btn btn-outline-primary d-flex align-items-center gap-2">
+                                <RotateCcw size={18} />
                                 Qayta o'ynash
                             </button>
-                            <Link href="/dashboard/games" className="btn btn-primary">
-                                <span className="material-symbols-outlined me-1">arrow_back</span>
+                            <Link href="/dashboard/games" className="btn btn-primary d-flex align-items-center gap-2">
+                                <ArrowLeft size={18} />
                                 Orqaga
                             </Link>
                         </div>
@@ -198,19 +197,15 @@ export default function VocabularyGamePage() {
                 <div className="container">
                     <div className="d-flex align-items-center justify-content-between">
                         <Link href="/dashboard/games" className="btn btn-outline-secondary btn-sm">
-                            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
-                                arrow_back
-                            </span>
+                            <ArrowLeft size={18} />
                         </Link>
                         <div className="text-center flex-grow-1 mx-3">
                             <h6 className="fw-bold mb-0">{lesson.title}</h6>
                             <small className="text-muted">Lug'at o'yini</small>
                         </div>
                         <div className="d-flex gap-2 align-items-center">
-                            <div className="badge bg-success rounded-pill px-3 py-2">
-                                <span className="material-symbols-outlined me-1" style={{ fontSize: '16px', verticalAlign: 'middle' }}>
-                                    star
-                                </span>
+                            <div className="badge bg-success rounded-pill px-3 py-2 d-flex align-items-center gap-1">
+                                <Star size={16} />
                                 {score}
                             </div>
                             <div className="badge bg-primary rounded-pill px-3 py-2">
@@ -240,7 +235,7 @@ export default function VocabularyGamePage() {
                         <div className="card-body p-4">
                             {currentWord.image ? (
                                 <img
-                                    src={`/api/image/${currentWord.image}`}
+                                    src={currentWord.image}
                                     alt="?"
                                     className="img-fluid rounded-3 mb-3"
                                     style={{ maxHeight: 200, objectFit: 'contain' }}
@@ -250,9 +245,7 @@ export default function VocabularyGamePage() {
                                     className="bg-light rounded-3 d-flex align-items-center justify-content-center mb-3"
                                     style={{ height: 150 }}
                                 >
-                                    <span className="material-symbols-outlined text-muted" style={{ fontSize: '64px' }}>
-                                        image
-                                    </span>
+                                    <ImageIcon size={64} className="text-muted" />
                                 </div>
                             )}
                             <h4 className="fw-bold text-primary mb-0">

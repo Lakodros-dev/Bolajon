@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
+import { Code } from 'lucide-react';
 
 export default function Footer() {
     return (
@@ -31,7 +32,7 @@ export default function Footer() {
                         <h6 className="fw-bold mb-2 small">Ishlab chiquvchi</h6>
                         <div className="d-flex align-items-center gap-2">
                             <div className="rounded-circle bg-primary d-flex align-items-center justify-content-center" style={{ width: '32px', height: '32px' }}>
-                                <span className="material-symbols-outlined text-white" style={{ fontSize: '16px' }}>code</span>
+                                <Code size={16} className="text-white" />
                             </div>
                             <div>
                                 <p className="fw-semibold mb-0 small">Lakodros</p>

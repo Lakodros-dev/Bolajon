@@ -4,19 +4,20 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
+import { Home, Video, Gamepad2, GraduationCap, Trophy, BarChart3, Gift, ShieldCheck, LogOut } from 'lucide-react';
 
 export default function Sidebar() {
     const pathname = usePathname();
     const { user, logout } = useAuth();
 
     const navItems = [
-        { href: '/dashboard', icon: 'home', label: 'Asosiy' },
-        { href: '/dashboard/lessons', icon: 'smart_display', label: 'Darslar' },
-        { href: '/dashboard/games', icon: 'sports_esports', label: "O'yinlar" },
-        { href: '/dashboard/students', icon: 'school', label: "O'quvchilarim" },
-        { href: '/dashboard/leaderboard', icon: 'emoji_events', label: 'Leaderboard' },
-        { href: '/dashboard/statistics', icon: 'leaderboard', label: 'Natijalar' },
-        { href: '/dashboard/rewards', icon: 'redeem', label: "Sovg'alar" },
+        { href: '/dashboard', icon: Home, label: 'Asosiy' },
+        { href: '/dashboard/lessons', icon: Video, label: 'Darslar' },
+        { href: '/dashboard/games', icon: Gamepad2, label: "O'yinlar" },
+        { href: '/dashboard/students', icon: GraduationCap, label: "O'quvchilarim" },
+        { href: '/dashboard/leaderboard', icon: Trophy, label: 'Leaderboard' },
+        { href: '/dashboard/statistics', icon: BarChart3, label: 'Natijalar' },
+        { href: '/dashboard/rewards', icon: Gift, label: "Sovg'alar" },
     ];
 
     return (
@@ -37,24 +38,25 @@ export default function Sidebar() {
             {/* Navigation */}
             <nav className="flex-grow-1 px-2 py-2">
                 <ul className="nav flex-column gap-1">
-                    {navItems.map((item) => (
-                        <li key={item.href} className="nav-item">
-                            <Link
-                                href={item.href}
-                                prefetch={true}
-                                className={`nav-link d-flex align-items-center gap-2 rounded-3 px-3 py-2 ${pathname === item.href
-                                    ? 'bg-primary text-white'
-                                    : 'text-dark'
-                                    }`}
-                                style={{ fontSize: '14px' }}
-                            >
-                                <span className={`material-symbols-outlined ${pathname === item.href ? 'filled' : ''}`} style={{ fontSize: '20px' }}>
-                                    {item.icon}
-                                </span>
-                                <span className="fw-medium">{item.label}</span>
-                            </Link>
-                        </li>
-                    ))}
+                    {navItems.map((item) => {
+                        const Icon = item.icon;
+                        return (
+                            <li key={item.href} className="nav-item">
+                                <Link
+                                    href={item.href}
+                                    prefetch={true}
+                                    className={`nav-link d-flex align-items-center gap-2 rounded-3 px-3 py-2 ${pathname === item.href
+                                        ? 'bg-primary text-white'
+                                        : 'text-dark'
+                                        }`}
+                                    style={{ fontSize: '14px' }}
+                                >
+                                    <Icon size={20} strokeWidth={pathname === item.href ? 2.5 : 2} />
+                                    <span className="fw-medium">{item.label}</span>
+                                </Link>
+                            </li>
+                        );
+                    })}
                 </ul>
             </nav>
 
@@ -82,7 +84,7 @@ export default function Sidebar() {
                         className="btn btn-outline-primary w-100 rounded-3 mb-1 d-flex align-items-center justify-content-center gap-2"
                         style={{ fontSize: '13px', padding: '6px 12px' }}
                     >
-                        <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>admin_panel_settings</span>
+                        <ShieldCheck size={18} />
                         Admin rejimi
                     </Link>
                 )}
@@ -91,7 +93,7 @@ export default function Sidebar() {
                     className="btn btn-outline-danger w-100 rounded-3 d-flex align-items-center justify-content-center gap-2"
                     style={{ fontSize: '13px', padding: '6px 12px' }}
                 >
-                    <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>logout</span>
+                    <LogOut size={18} />
                     Chiqish
                 </button>
             </div>

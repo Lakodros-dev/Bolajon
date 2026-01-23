@@ -4,6 +4,7 @@ import { useMemo } from 'react';
 import { useData } from '@/context/DataContext';
 import Header from '@/components/dashboard/Header';
 import Link from 'next/link';
+import { ArrowLeft, Star, GraduationCap, CheckCircle, BookOpen } from 'lucide-react';
 
 export default function StatisticsPage() {
     const { statistics, initialLoading } = useData();
@@ -30,7 +31,7 @@ export default function StatisticsPage() {
                     href="/dashboard/students"
                     className="btn btn-light rounded-pill px-3 py-2 mb-3 d-inline-flex d-lg-none align-items-center gap-2"
                 >
-                    <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>arrow_back</span>
+                    <ArrowLeft size={18} />
                     <span className="small fw-semibold">O'quvchilar</span>
                 </Link>
 
@@ -50,7 +51,7 @@ export default function StatisticsPage() {
                             </p>
                         </div>
                         <div className="position-absolute top-50 end-0 translate-middle-y" style={{ marginRight: '-1rem', opacity: 0.9 }}>
-                            <span className="material-symbols-outlined filled" style={{ fontSize: '120px', color: '#fbbf24' }}>star</span>
+                            <Star size={120} fill="#fbbf24" style={{ color: '#fbbf24' }} />
                         </div>
                     </div>
                 </div>
@@ -70,7 +71,7 @@ export default function StatisticsPage() {
                             <div className="col-6 col-lg-3">
                                 <div className="card border-0 rounded-4 h-100 card-pastel-blue">
                                     <div className="card-body text-center p-3">
-                                        <span className="material-symbols-outlined mb-2" style={{ fontSize: '28px', color: '#0284c7' }}>school</span>
+                                        <GraduationCap size={28} style={{ color: '#0284c7' }} className="mb-2" />
                                         <h3 className="h4 fw-bold mb-0">{stats.totalStudents}</h3>
                                         <p className="small text-muted mb-0">O'quvchilar</p>
                                     </div>
@@ -79,7 +80,7 @@ export default function StatisticsPage() {
                             <div className="col-6 col-lg-3">
                                 <div className="card border-0 rounded-4 h-100 card-pastel-green">
                                     <div className="card-body text-center p-3">
-                                        <span className="material-symbols-outlined mb-2" style={{ fontSize: '28px', color: '#16a34a' }}>task_alt</span>
+                                        <CheckCircle size={28} style={{ color: '#16a34a' }} className="mb-2" />
                                         <h3 className="h4 fw-bold mb-0">{stats.completedLessons}</h3>
                                         <p className="small text-muted mb-0">Yakunlangan</p>
                                     </div>
@@ -88,7 +89,7 @@ export default function StatisticsPage() {
                             <div className="col-6 col-lg-3">
                                 <div className="card border-0 rounded-4 h-100 card-pastel-purple">
                                     <div className="card-body text-center p-3">
-                                        <span className="material-symbols-outlined mb-2" style={{ fontSize: '28px', color: '#9333ea' }}>menu_book</span>
+                                        <BookOpen size={28} style={{ color: '#9333ea' }} className="mb-2" />
                                         <h3 className="h4 fw-bold mb-0">{stats.totalLessons}</h3>
                                         <p className="small text-muted mb-0">Jami darslar</p>
                                     </div>
@@ -97,7 +98,7 @@ export default function StatisticsPage() {
                             <div className="col-6 col-lg-3">
                                 <div className="card border-0 rounded-4 h-100 card-pastel-yellow">
                                     <div className="card-body text-center p-3">
-                                        <span className="material-symbols-outlined filled mb-2" style={{ fontSize: '28px', color: '#d97706' }}>star</span>
+                                        <Star size={28} fill="#d97706" style={{ color: '#d97706' }} className="mb-2" />
                                         <h3 className="h4 fw-bold mb-0">{stats.averageStars}</h3>
                                         <p className="small text-muted mb-0">O'rtacha</p>
                                     </div>
@@ -157,7 +158,7 @@ export default function StatisticsPage() {
                                                     <span className="fw-semibold">{student.name}</span>
                                                 </div>
                                                 <div className="d-flex align-items-center gap-1">
-                                                    <span className="material-symbols-outlined filled text-warning" style={{ fontSize: '18px' }}>star</span>
+                                                    <Star size={18} fill="#fbbf24" className="text-warning" />
                                                     <span className="fw-bold">{student.stars}</span>
                                                 </div>
                                             </div>

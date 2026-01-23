@@ -6,6 +6,7 @@ import { useData } from '@/context/DataContext';
 import { useSubscription } from '@/components/SubscriptionModal';
 import Header from '@/components/dashboard/Header';
 import Link from 'next/link';
+import { Play, Clock, GraduationCap } from 'lucide-react';
 
 const levelNames = {
     1: "Boshlang'ich",
@@ -122,9 +123,7 @@ export default function LessonsPage() {
                                                                     <span className="fw-bold" style={{ fontSize: '28px', color: colors.color }}>
                                                                         {idx + 1}
                                                                     </span>
-                                                                    <span className="material-symbols-outlined" style={{ fontSize: '24px', color: colors.color, opacity: 0.6 }}>
-                                                                        play_lesson
-                                                                    </span>
+                                                                    <Play size={24} color={colors.color} style={{ opacity: 0.6 }} />
                                                                 </div>
                                                             </div>
                                                             <div className="flex-grow-1 min-width-0">
@@ -137,13 +136,13 @@ export default function LessonsPage() {
                                                                 <h3 className="fw-bold mb-1 text-dark text-truncate" style={{ fontSize: '15px' }}>{lesson.title}</h3>
                                                                 <p className="small text-muted mb-1 text-truncate" style={{ fontSize: '13px' }}>{lesson.description}</p>
                                                                 <div className="d-flex align-items-center gap-1 text-muted" style={{ fontSize: '12px' }}>
-                                                                    <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>schedule</span>
+                                                                    <Clock size={14} />
                                                                     {lesson.duration || 5} daqiqa
                                                                 </div>
                                                             </div>
                                                             <div className="flex-shrink-0">
                                                                 <div className="rounded-circle d-flex align-items-center justify-content-center" style={{ width: '40px', height: '40px', backgroundColor: 'rgba(43, 140, 238, 0.1)' }}>
-                                                                    <span className="material-symbols-outlined filled text-primary">play_arrow</span>
+                                                                    <Play size={20} fill="#2b8cee" className="text-primary" />
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -160,7 +159,7 @@ export default function LessonsPage() {
 
                 {!initialLoading && lessons.length === 0 && (
                     <div className="text-center py-5">
-                        <span className="material-symbols-outlined text-muted mb-3" style={{ fontSize: '64px' }}>school</span>
+                        <GraduationCap size={64} className="text-muted mb-3" />
                         <p className="text-muted">
                             {loadingTimeout ? 'Darslarni yuklashda xatolik yuz berdi' : 'Hozircha darslar yo\'q'}
                         </p>

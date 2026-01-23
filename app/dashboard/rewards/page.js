@@ -6,6 +6,7 @@ import { useAuth } from '@/context/AuthContext';
 import Header from '@/components/dashboard/Header';
 import ConfirmModal from '@/components/ConfirmModal';
 import AlertModal from '@/components/AlertModal';
+import { Star, ShoppingCart, X, Plus, Minus, Trash2, Gift, Eye, Ban, Check, ShoppingBag } from 'lucide-react';
 
 const categoryColors = {
     toy: '#fce7f3',
@@ -285,12 +286,12 @@ export default function RewardsPage() {
                 {/* Stars Wallet */}
                 <div className="card border-0 rounded-4 mb-4 overflow-hidden position-relative" style={{ background: 'linear-gradient(135deg, #2b8cee 0%, #1e40af 100%)' }}>
                     <div className="position-absolute top-0 end-0" style={{ marginTop: '-1rem', marginRight: '-1rem', opacity: 0.1 }}>
-                        <span className="material-symbols-outlined filled" style={{ fontSize: '140px', color: 'white' }}>star</span>
+                        <Star size={140} fill="white" color="white" style={{ opacity: 0.1 }} />
                     </div>
                     <div className="card-body p-4 text-white text-center position-relative" style={{ zIndex: 1 }}>
                         <p className="small opacity-75 text-uppercase mb-1" style={{ letterSpacing: '0.1em' }}>Jami yulduzlar</p>
                         <div className="d-flex align-items-center justify-content-center gap-2">
-                            <span className="material-symbols-outlined filled text-warning" style={{ fontSize: '40px' }}>star</span>
+                            <Star size={40} fill="#fbbf24" className="text-warning" />
                             <h1 className="display-4 fw-bold mb-0">{initialLoading ? '-' : dashboard.totalStars.toLocaleString()}</h1>
                         </div>
                     </div>
@@ -314,7 +315,7 @@ export default function RewardsPage() {
                                 className="btn btn-primary rounded-pill d-flex align-items-center gap-2 position-relative"
                                 onClick={() => setShowCart(true)}
                             >
-                                <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>shopping_cart</span>
+                                <ShoppingCart size={20} />
                                 <span className="d-none d-sm-inline">Savatcha</span>
                                 {cartItemsCount > 0 && (
                                     <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
@@ -375,7 +376,7 @@ export default function RewardsPage() {
 
                                                 {/* Price */}
                                                 <div className="d-flex align-items-center gap-1 mb-3">
-                                                    <span className="material-symbols-outlined filled text-warning" style={{ fontSize: '20px' }}>star</span>
+                                                    <Star size={20} fill="#fbbf24" className="text-warning" />
                                                     <span className="fw-bold text-dark" style={{ fontSize: '18px' }}>{reward.cost}</span>
                                                     <span className="text-muted small">yulduz</span>
                                                 </div>
@@ -389,9 +390,7 @@ export default function RewardsPage() {
                                                     }}
                                                     disabled={isOutOfStock}
                                                 >
-                                                    <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
-                                                        {isOutOfStock ? 'block' : inCart > 0 ? 'check' : 'visibility'}
-                                                    </span>
+                                                    {isOutOfStock ? <Ban size={18} /> : inCart > 0 ? <Check size={18} /> : <Eye size={18} />}
                                                     {isOutOfStock ? 'Tugagan' : inCart > 0 ? `Savatda (${inCart})` : 'Ko\'rish'}
                                                 </button>
                                             </div>
@@ -402,7 +401,7 @@ export default function RewardsPage() {
 
                             {rewards.length === 0 && (
                                 <div className="col-12 text-center py-5">
-                                    <span className="material-symbols-outlined text-muted mb-3" style={{ fontSize: '64px' }}>redeem</span>
+                                    <Gift size={64} className="text-muted mb-3" />
                                     <p className="text-muted">Hozircha sovg'alar yo'q</p>
                                 </div>
                             )}
@@ -429,7 +428,7 @@ export default function RewardsPage() {
                         <div className="p-4 border-bottom d-flex justify-content-between align-items-center">
                             <h5 className="fw-bold mb-0">Savatcha ({cartItemsCount})</h5>
                             <button className="btn btn-link text-dark p-0" onClick={() => setShowCart(false)}>
-                                <span className="material-symbols-outlined">close</span>
+                                <X size={24} />
                             </button>
                         </div>
 
@@ -454,7 +453,7 @@ export default function RewardsPage() {
                         <div className="flex-grow-1 overflow-auto p-3">
                             {cart.length === 0 ? (
                                 <div className="text-center py-5">
-                                    <span className="material-symbols-outlined text-muted mb-2" style={{ fontSize: '48px' }}>shopping_cart</span>
+                                    <ShoppingCart size={48} className="text-muted mb-2" />
                                     <p className="text-muted">Savatcha bo'sh</p>
                                 </div>
                             ) : (
@@ -480,7 +479,7 @@ export default function RewardsPage() {
                                                     <div className="flex-grow-1">
                                                         <h6 className="fw-bold mb-1" style={{ fontSize: '14px' }}>{item.title}</h6>
                                                         <div className="d-flex align-items-center gap-1 mb-2">
-                                                            <span className="material-symbols-outlined filled text-warning" style={{ fontSize: '14px' }}>star</span>
+                                                            <Star size={14} fill="#fbbf24" className="text-warning" />
                                                             <span className="fw-semibold small">{item.cost} x {item.quantity} = {item.cost * item.quantity}</span>
                                                         </div>
                                                         <div className="d-flex align-items-center gap-2">
@@ -489,7 +488,7 @@ export default function RewardsPage() {
                                                                 style={{ width: '28px', height: '28px' }}
                                                                 onClick={() => updateQuantity(item._id, item.quantity - 1)}
                                                             >
-                                                                <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>remove</span>
+                                                                <Minus size={16} />
                                                             </button>
                                                             <span className="fw-bold">{item.quantity}</span>
                                                             <button
@@ -497,14 +496,14 @@ export default function RewardsPage() {
                                                                 style={{ width: '28px', height: '28px' }}
                                                                 onClick={() => updateQuantity(item._id, item.quantity + 1)}
                                                             >
-                                                                <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>add</span>
+                                                                <Plus size={16} />
                                                             </button>
                                                             <button
                                                                 className="btn btn-sm btn-outline-danger ms-auto rounded-circle p-0 d-flex align-items-center justify-content-center"
                                                                 style={{ width: '28px', height: '28px' }}
                                                                 onClick={() => removeFromCart(item._id)}
                                                             >
-                                                                <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>delete</span>
+                                                                <Trash2 size={16} />
                                                             </button>
                                                         </div>
                                                     </div>
@@ -522,7 +521,7 @@ export default function RewardsPage() {
                                 <div className="d-flex justify-content-between align-items-center mb-3">
                                     <span className="fw-semibold">Jami:</span>
                                     <div className="d-flex align-items-center gap-1">
-                                        <span className="material-symbols-outlined filled text-warning" style={{ fontSize: '24px' }}>star</span>
+                                        <Star size={24} fill="#fbbf24" className="text-warning" />
                                         <span className="fw-bold h4 mb-0">{cartTotal}</span>
                                     </div>
                                 </div>
@@ -535,7 +534,7 @@ export default function RewardsPage() {
                                         <span className="spinner-border spinner-border-sm" />
                                     ) : (
                                         <>
-                                            <span className="material-symbols-outlined me-2" style={{ fontSize: '20px' }}>redeem</span>
+                                            <Gift size={20} className="me-2" />
                                             Sovg'a berish
                                         </>
                                     )}
@@ -568,7 +567,7 @@ export default function RewardsPage() {
                                     style={{ width: '36px', height: '36px' }}
                                     onClick={() => setSelectedReward(null)}
                                 >
-                                    <span className="material-symbols-outlined">close</span>
+                                    <X size={20} />
                                 </button>
                                 {selectedReward.image ? (
                                     <img src={selectedReward.image} alt={selectedReward.title} style={{ maxHeight: '120px', objectFit: 'contain' }} />
@@ -586,7 +585,7 @@ export default function RewardsPage() {
 
                                 {/* Price */}
                                 <div className="d-flex align-items-center gap-2 mb-4 p-3 rounded-3" style={{ backgroundColor: '#fef3c7' }}>
-                                    <span className="material-symbols-outlined filled text-warning" style={{ fontSize: '32px' }}>star</span>
+                                    <Star size={32} fill="#fbbf24" className="text-warning" />
                                     <span className="fw-bold h3 mb-0">{selectedReward.cost}</span>
                                     <span className="text-muted">yulduz</span>
                                     {selectedReward.stock !== -1 && (
@@ -603,7 +602,7 @@ export default function RewardsPage() {
                                             style={{ width: '40px', height: '40px' }}
                                             onClick={() => setRewardQuantity(Math.max(1, rewardQuantity - 1))}
                                         >
-                                            <span className="material-symbols-outlined">remove</span>
+                                            <Minus size={20} />
                                         </button>
                                         <span className="fw-bold h4 mb-0" style={{ minWidth: '40px', textAlign: 'center' }}>{rewardQuantity}</span>
                                         <button
@@ -615,7 +614,7 @@ export default function RewardsPage() {
                                                 }
                                             }}
                                         >
-                                            <span className="material-symbols-outlined">add</span>
+                                            <Plus size={20} />
                                         </button>
                                         <span className="text-muted ms-2">
                                             = <span className="fw-bold text-warning">{selectedReward.cost * rewardQuantity}</span> yulduz
@@ -646,7 +645,7 @@ export default function RewardsPage() {
                                         className="btn btn-outline-primary flex-grow-1 rounded-3 py-3 d-flex align-items-center justify-content-center gap-2"
                                         onClick={addToCartFromModal}
                                     >
-                                        <span className="material-symbols-outlined">add_shopping_cart</span>
+                                        <ShoppingBag size={20} />
                                         Savatga
                                     </button>
                                     <button
@@ -658,7 +657,7 @@ export default function RewardsPage() {
                                             <span className="spinner-border spinner-border-sm" />
                                         ) : (
                                             <>
-                                                <span className="material-symbols-outlined">redeem</span>
+                                                <Gift size={20} />
                                                 Sotib olish
                                             </>
                                         )}

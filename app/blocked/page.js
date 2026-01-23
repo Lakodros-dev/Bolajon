@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import Image from 'next/image';
+import { LogOut, CreditCard, Phone, Copy, Check, Clock } from 'lucide-react';
 
 export default function BlockedPage() {
     const { logout } = useAuth();
@@ -52,8 +53,8 @@ export default function BlockedPage() {
             <header className="bg-white border-bottom py-3 px-4">
                 <div className="d-flex align-items-center justify-content-between">
                     <Image src="/logo.png" alt="Bolajon.uz" width={120} height={40} style={{ objectFit: 'contain' }} />
-                    <button onClick={logout} className="btn btn-outline-secondary btn-sm rounded-3">
-                        <span className="material-symbols-outlined me-1" style={{ fontSize: '18px' }}>logout</span>
+                    <button onClick={logout} className="btn btn-outline-secondary btn-sm rounded-3 d-flex align-items-center gap-2">
+                        <LogOut size={18} />
                         Chiqish
                     </button>
                 </div>
@@ -69,7 +70,7 @@ export default function BlockedPage() {
                             background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)'
                         }}
                     >
-                        <span className="material-symbols-outlined text-white" style={{ fontSize: '48px' }}>lock_clock</span>
+                        <Clock size={48} className="text-white" />
                     </div>
 
                     <h1 className="h3 fw-bold mb-2">Obuna muddati tugadi</h1>
@@ -99,7 +100,7 @@ export default function BlockedPage() {
                             <div className="card border-0 rounded-4 shadow-sm mb-4">
                                 <div className="card-body p-4">
                                     <h6 className="fw-bold mb-3 d-flex align-items-center gap-2">
-                                        <span className="material-symbols-outlined text-primary">credit_card</span>
+                                        <CreditCard size={20} className="text-primary" />
                                         To'lov ma'lumotlari
                                     </h6>
                                     <div className="bg-light rounded-3 p-3 mb-3">
@@ -107,9 +108,7 @@ export default function BlockedPage() {
                                         <div className="d-flex align-items-center justify-content-between">
                                             <p className="fw-bold font-monospace mb-0 fs-5">{paymentInfo.cardNumber}</p>
                                             <button onClick={copyCardNumber} className="btn btn-sm btn-outline-primary rounded-2">
-                                                <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
-                                                    {copied ? 'check' : 'content_copy'}
-                                                </span>
+                                                {copied ? <Check size={18} /> : <Copy size={18} />}
                                             </button>
                                         </div>
                                     </div>
@@ -124,7 +123,7 @@ export default function BlockedPage() {
                                 <div className="card-body p-4">
                                     <p className="text-muted small mb-3">To'lovni amalga oshirgandan so'ng admin bilan bog'laning</p>
                                     <a href={`tel:${paymentInfo.adminPhone}`} className="btn btn-success w-100 rounded-3 py-3 d-flex align-items-center justify-content-center gap-2">
-                                        <span className="material-symbols-outlined">call</span>
+                                        <Phone size={20} />
                                         <span className="fw-bold">{paymentInfo.adminPhone}</span>
                                     </a>
                                 </div>

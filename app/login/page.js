@@ -6,6 +6,7 @@ import { useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
 import Image from 'next/image';
 import PhoneInput from '@/components/PhoneInput';
+import { GraduationCap, Star, Lock, PlayCircle, Gift } from 'lucide-react';
 
 export default function LoginPage() {
     const router = useRouter();
@@ -67,10 +68,10 @@ export default function LoginPage() {
                 }}>
                 {/* Background decoration */}
                 <div className="position-absolute" style={{ top: '-10%', right: '-10%', opacity: 0.1 }}>
-                    <span className="material-symbols-outlined" style={{ fontSize: '400px', color: 'white' }}>school</span>
+                    <GraduationCap size={400} color="white" />
                 </div>
                 <div className="position-absolute" style={{ bottom: '-5%', left: '-5%', opacity: 0.1 }}>
-                    <span className="material-symbols-outlined" style={{ fontSize: '300px', color: 'white' }}>star</span>
+                    <Star size={300} color="white" />
                 </div>
 
                 <div className="text-center text-white position-relative" style={{ zIndex: 1 }}>
@@ -91,19 +92,19 @@ export default function LoginPage() {
                     <div className="d-flex justify-content-center gap-4 mt-4">
                         <div className="text-center">
                             <div className="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-2" style={{ width: '60px', height: '60px', backgroundColor: 'rgba(255,255,255,0.2)' }}>
-                                <span className="material-symbols-outlined" style={{ fontSize: '28px' }}>play_lesson</span>
+                                <PlayCircle size={28} />
                             </div>
                             <p className="small opacity-75">Video darslar</p>
                         </div>
                         <div className="text-center">
                             <div className="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-2" style={{ width: '60px', height: '60px', backgroundColor: 'rgba(255,255,255,0.2)' }}>
-                                <span className="material-symbols-outlined filled" style={{ fontSize: '28px' }}>star</span>
+                                <Star size={28} fill="white" />
                             </div>
                             <p className="small opacity-75">Yulduz tizimi</p>
                         </div>
                         <div className="text-center">
                             <div className="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-2" style={{ width: '60px', height: '60px', backgroundColor: 'rgba(255,255,255,0.2)' }}>
-                                <span className="material-symbols-outlined" style={{ fontSize: '28px' }}>redeem</span>
+                                <Gift size={28} />
                             </div>
                             <p className="small opacity-75">Sovg'alar</p>
                         </div>
@@ -155,7 +156,7 @@ export default function LoginPage() {
                             <div className="mb-4">
                                 <label className="form-label small fw-semibold">Parol</label>
                                 <div className="position-relative">
-                                    <span className="material-symbols-outlined position-absolute top-50 start-0 translate-middle-y ms-3 text-muted">lock</span>
+                                    <Lock size={20} className="position-absolute top-50 start-0 translate-middle-y ms-3 text-muted" />
                                     <input
                                         type="password"
                                         name="password"

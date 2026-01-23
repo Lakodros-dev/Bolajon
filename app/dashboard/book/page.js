@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { ArrowLeft, BookOpen, ShoppingCart, Phone, Copy, Check } from 'lucide-react';
 
 const PDF_PATH = '/book/bolajon-darslik.pdf';
 
@@ -60,14 +61,14 @@ export default function BookPage() {
                     zIndex: 100
                 }}>
                 <div className="d-flex align-items-center gap-2">
-                    <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>auto_stories</span>
+                    <BookOpen size={20} />
                     <span className="small fw-semibold">Bosmaxona variantini xarid qiling!</span>
                 </div>
                 <button
                     onClick={() => setShowBuyModal(true)}
-                    className="btn btn-light btn-sm rounded-pill px-3 py-1 fw-semibold d-flex align-items-center"
+                    className="btn btn-light btn-sm rounded-pill px-3 py-1 fw-semibold d-flex align-items-center gap-2"
                 >
-                    <span className="material-symbols-outlined me-1" style={{ fontSize: '16px' }}>shopping_cart</span>
+                    <ShoppingCart size={16} />
                     Sotib olish
                 </button>
             </div>
@@ -77,7 +78,7 @@ export default function BookPage() {
                 <div className="d-flex align-items-center justify-content-between">
                     <div className="d-flex align-items-center gap-2">
                         <Link href="/dashboard" className="btn btn-light rounded-circle p-2">
-                            <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>arrow_back</span>
+                            <ArrowLeft size={20} />
                         </Link>
                         <div>
                             <h1 className="small fw-bold mb-0">Bolajon Darsligi</h1>
@@ -137,7 +138,7 @@ export default function BookPage() {
                         <div className="modal-content rounded-4 border-0">
                             <div className="modal-header border-0 pb-0">
                                 <h5 className="modal-title fw-bold d-flex align-items-center gap-2">
-                                    <span className="material-symbols-outlined text-warning">auto_stories</span>
+                                    <BookOpen size={24} className="text-warning" />
                                     Kitobni sotib olish
                                 </h5>
                                 <button
@@ -159,9 +160,7 @@ export default function BookPage() {
                                     <div className="d-flex align-items-center justify-content-between">
                                         <p className="fw-bold font-monospace mb-0 fs-5">{paymentInfo.cardNumber}</p>
                                         <button onClick={copyCardNumber} className="btn btn-sm btn-outline-primary rounded-2">
-                                            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
-                                                {copied ? 'check' : 'content_copy'}
-                                            </span>
+                                            {copied ? <Check size={18} /> : <Copy size={18} />}
                                         </button>
                                     </div>
                                 </div>
@@ -188,7 +187,7 @@ export default function BookPage() {
                                     href={`tel:${paymentInfo.adminPhone}`}
                                     className="btn btn-success w-100 rounded-3 py-3 d-flex align-items-center justify-content-center gap-2"
                                 >
-                                    <span className="material-symbols-outlined">call</span>
+                                    <Phone size={20} />
                                     <span className="fw-bold">{paymentInfo.adminPhone}</span>
                                 </a>
                             </div>

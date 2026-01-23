@@ -1,5 +1,7 @@
 'use client';
 
+import { Check, Star } from 'lucide-react';
+
 /**
  * YinYang Progress Component
  * Shows lesson and game completion status
@@ -32,16 +34,11 @@ export default function YinYangProgress({ lessonCompleted, gameWon, size = 60 })
                     border: '3px solid #fff'
                 }}
             >
-                <span
-                    className="material-symbols-outlined"
-                    style={{
-                        fontSize: size * 0.5,
-                        color: '#fff',
-                        fontWeight: 'bold'
-                    }}
-                >
-                    check_circle
-                </span>
+                <Check
+                    size={size * 0.5}
+                    color="#fff"
+                    strokeWidth={3}
+                />
             </div>
         );
     }
@@ -92,9 +89,7 @@ export default function YinYangProgress({ lessonCompleted, gameWon, size = 60 })
                         zIndex: 2
                     }}
                 >
-                    <span className="material-symbols-outlined" style={{ fontSize: size * 0.2, color: '#fff' }}>
-                        check
-                    </span>
+                    <Check size={size * 0.2} color="#fff" strokeWidth={3} />
                 </div>
             )}
             {gameWon && (
@@ -107,9 +102,7 @@ export default function YinYangProgress({ lessonCompleted, gameWon, size = 60 })
                         zIndex: 2
                     }}
                 >
-                    <span className="material-symbols-outlined" style={{ fontSize: size * 0.2, color: '#fff' }}>
-                        star
-                    </span>
+                    <Star size={size * 0.2} color="#fff" fill="#fff" />
                 </div>
             )}
         </div>

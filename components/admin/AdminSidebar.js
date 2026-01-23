@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { useState, useEffect } from 'react';
+import { LayoutDashboard, Users, Video, Gift, Gamepad2, BarChart3, Settings, Menu, X, ArrowLeftRight, LogOut } from 'lucide-react';
 
 export default function AdminSidebar() {
     const pathname = usePathname();
@@ -32,13 +33,13 @@ export default function AdminSidebar() {
     }, [pathname, isMobile]);
 
     const menuItems = [
-        { href: '/admin', icon: 'dashboard', label: 'Dashboard' },
-        { href: '/admin/users', icon: 'group', label: 'Foydalanuvchilar' },
-        { href: '/admin/lessons', icon: 'smart_display', label: 'Darslar' },
-        { href: '/admin/rewards', icon: 'redeem', label: "Sovg'alar" },
-        { href: '/admin/games-test', icon: 'sports_esports', label: "O'yinlarni test qilish" },
-        { href: '/admin/statistics', icon: 'analytics', label: 'Statistika' },
-        { href: '/admin/settings', icon: 'settings', label: 'Sozlamalar' },
+        { href: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
+        { href: '/admin/users', icon: Users, label: 'Foydalanuvchilar' },
+        { href: '/admin/lessons', icon: Video, label: 'Darslar' },
+        { href: '/admin/rewards', icon: Gift, label: "Sovg'alar" },
+        { href: '/admin/games-test', icon: Gamepad2, label: "O'yinlarni test qilish" },
+        { href: '/admin/statistics', icon: BarChart3, label: 'Statistika' },
+        { href: '/admin/settings', icon: Settings, label: 'Sozlamalar' },
     ];
 
     return (
@@ -50,7 +51,7 @@ export default function AdminSidebar() {
                         className="btn btn-light rounded-circle p-2"
                         onClick={() => setIsOpen(true)}
                     >
-                        <span className="material-symbols-outlined">menu</span>
+                        <Menu size={20} />
                     </button>
                     <Image src="/logo.png" alt="Bolajon.uz" width={100} height={32} style={{ objectFit: 'contain' }} />
                     <span className="badge bg-primary">Admin</span>
@@ -89,7 +90,7 @@ export default function AdminSidebar() {
                                 onClick={() => setIsOpen(false)}
                                 style={{ width: '32px', height: '32px' }}
                             >
-                                <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>close</span>
+                                <X size={18} />
                             </button>
                         )}
                     </div>
@@ -98,22 +99,25 @@ export default function AdminSidebar() {
                 {/* Navigation */}
                 <nav className="flex-grow-1 px-2 py-2">
                     <ul className="nav flex-column gap-1">
-                        {menuItems.map((item) => (
-                            <li key={item.href} className="nav-item">
-                                <Link
-                                    href={item.href}
-                                    prefetch={true}
-                                    className={`nav-link d-flex align-items-center gap-2 rounded-3 px-3 py-2 ${pathname === item.href
-                                        ? 'bg-primary text-white'
-                                        : 'text-dark hover-bg-light'
-                                        }`}
-                                    style={{ fontSize: '14px' }}
-                                >
-                                    <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>{item.icon}</span>
-                                    <span className="fw-medium">{item.label}</span>
-                                </Link>
-                            </li>
-                        ))}
+                        {menuItems.map((item) => {
+                            const Icon = item.icon;
+                            return (
+                                <li key={item.href} className="nav-item">
+                                    <Link
+                                        href={item.href}
+                                        prefetch={true}
+                                        className={`nav-link d-flex align-items-center gap-2 rounded-3 px-3 py-2 ${pathname === item.href
+                                            ? 'bg-primary text-white'
+                                            : 'text-dark hover-bg-light'
+                                            }`}
+                                        style={{ fontSize: '14px' }}
+                                    >
+                                        <Icon size={20} strokeWidth={pathname === item.href ? 2.5 : 2} />
+                                        <span className="fw-medium">{item.label}</span>
+                                    </Link>
+                                </li>
+                            );
+                        })}
                     </ul>
                 </nav>
 
@@ -140,7 +144,7 @@ export default function AdminSidebar() {
                         className="btn btn-outline-primary w-100 rounded-3 mb-1 d-flex align-items-center justify-content-center gap-2"
                         style={{ fontSize: '13px', padding: '6px 12px' }}
                     >
-                        <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>swap_horiz</span>
+                        <ArrowLeftRight size={18} />
                         O'qituvchi rejimi
                     </Link>
                     <button
@@ -148,7 +152,7 @@ export default function AdminSidebar() {
                         className="btn btn-outline-danger w-100 rounded-3 d-flex align-items-center justify-content-center gap-2"
                         style={{ fontSize: '13px', padding: '6px 12px' }}
                     >
-                        <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>logout</span>
+                        <LogOut size={18} />
                         Chiqish
                     </button>
                 </div>

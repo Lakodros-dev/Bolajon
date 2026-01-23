@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
+import { ArrowLeft } from 'lucide-react';
 
 const INSTRUCTIONS = ['walk left', 'walk right', 'jump', 'stop'];
 const MAX_MISTAKES = 3;
@@ -395,7 +396,7 @@ export default function MovementsGame() {
                     textDecoration: 'none',
                 }}
             >
-                <span className="material-symbols-outlined" style={{ fontSize: '22px', color: '#374151' }}>arrow_back</span>
+                <ArrowLeft size={22} style={{ color: '#374151' }} />
             </Link>
 
             {/* Header */}

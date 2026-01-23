@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
+import { ArrowLeft, Volume2, CheckCircle, XCircle, RotateCcw, Frown } from 'lucide-react';
 
 export default function DropToBasketGame() {
     const params = useParams();
@@ -216,7 +217,7 @@ export default function DropToBasketGame() {
     }
 
     return (
-        <div className="min-vh-100 p-4" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', position: 'relative', overflow: 'hidden' }}>
+        <div className="min-vh-100" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', position: 'relative', overflow: 'hidden' }}>
             {showConfetti && (
                 <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 9999 }}>
                     {[...Array(30)].map((_, i) => (
@@ -238,47 +239,116 @@ export default function DropToBasketGame() {
                 </div>
             )}
 
-            <div className="d-flex justify-content-between align-items-center mb-4">
-                <Link href="/dashboard/games" className="btn btn-light rounded-circle p-2 shadow">
-                    <span className="material-symbols-outlined">arrow_back</span>
-                </Link>
-                <div className="d-flex gap-3">
-                    <div className="bg-white rounded-3 px-4 py-2 shadow-sm">
-                        <span className="fw-bold text-success d-flex align-items-center gap-1">
-                            <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>check_circle</span>
-                            {score}
-                        </span>
+            {/* Fixed Header */}
+            <div style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100, background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', paddingTop: '20px', paddingBottom: '20px' }}>
+                <div className="container-fluid px-4">
+                    {/* Desktop Layout */}
+                    <div className="d-none d-lg-flex justify-content-between align-items-center">
+                        <Link href="/dashboard/games" className="btn btn-light rounded-circle shadow-sm" style={{ width: '50px', height: '50px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                            <ArrowLeft size={24} />
+                        </Link>
+                        
+                        {currentWord && (
+                            <div className="bg-white bg-opacity-90 rounded-4 shadow-lg px-4 py-3 text-center flex-grow-1 mx-4" style={{ backdropFilter: 'blur(10px)', maxWidth: '600px' }}>
+                                <div className="d-flex align-items-center justify-content-center gap-3">
+                                    <span style={{ fontSize: '1.1rem', color: '#666' }}>🧺 Find the</span>
+                                    <span className="fw-bold" style={{ fontSize: '2.2rem', color: '#000', letterSpacing: '-0.5px' }}>{currentWord.word}</span>
+                                    <button 
+                                        onClick={() => speakText(`Find the ${currentWord.word}!`)} 
+                                        className="btn btn-primary rounded-circle shadow-sm" 
+                                        style={{ 
+                                            width: '50px', 
+                                            height: '50px', 
+                                            padding: 0, 
+                                            display: 'flex', 
+                                            alignItems: 'center', 
+                                            justifyContent: 'center', 
+                                            transition: 'all 0.2s',
+                                            flexShrink: 0
+                                        }} 
+                                        onMouseEnter={(e) => {
+                                            e.currentTarget.style.transform = 'scale(1.1)';
+                                            e.currentTarget.style.boxShadow = '0 6px 16px rgba(13, 110, 253, 0.4)';
+                                        }} 
+                                        onMouseLeave={(e) => {
+                                            e.currentTarget.style.transform = 'scale(1)';
+                                            e.currentTarget.style.boxShadow = '';
+                                        }}
+                                    >
+                                        <Volume2 size={24} />
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                        
+                        <div className="d-flex gap-2">
+                            <div className="bg-white bg-opacity-25 rounded-3 px-3 py-2 border border-white border-opacity-50 shadow-sm">
+                                <span className="fw-bold text-white d-flex align-items-center gap-1">
+                                    <CheckCircle size={18} />
+                                    {score}
+                                </span>
+                            </div>
+                            <div className="bg-white bg-opacity-25 rounded-3 px-3 py-2 border border-white border-opacity-50 shadow-sm">
+                                <span className="fw-bold text-white d-flex align-items-center gap-1">
+                                    <XCircle size={18} />
+                                    {mistakes}/{MAX_MISTAKES}
+                                </span>
+                            </div>
+                        </div>
                     </div>
-                    <div className="bg-white rounded-3 px-4 py-2 shadow-sm">
-                        <span className="fw-bold text-danger d-flex align-items-center gap-1">
-                            <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>cancel</span>
-                            {mistakes}/{MAX_MISTAKES}
-                        </span>
+                    
+                    {/* Mobile Layout */}
+                    <div className="d-lg-none">
+                        <div className="d-flex justify-content-between align-items-center mb-2">
+                            <Link href="/dashboard/games" className="btn btn-light rounded-circle shadow-sm" style={{ width: '40px', height: '40px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <ArrowLeft size={20} />
+                            </Link>
+                            
+                            <div className="d-flex gap-2">
+                                <div className="bg-white bg-opacity-25 rounded-3 px-2 py-1 border border-white border-opacity-50 shadow-sm">
+                                    <span className="fw-bold text-white d-flex align-items-center gap-1" style={{ fontSize: '14px' }}>
+                                        <CheckCircle size={16} />
+                                        {score}
+                                    </span>
+                                </div>
+                                <div className="bg-white bg-opacity-25 rounded-3 px-2 py-1 border border-white border-opacity-50 shadow-sm">
+                                    <span className="fw-bold text-white d-flex align-items-center gap-1" style={{ fontSize: '14px' }}>
+                                        <XCircle size={16} />
+                                        {mistakes}/{MAX_MISTAKES}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {currentWord && (
+                            <div className="bg-white bg-opacity-90 rounded-4 shadow-lg px-3 py-2 text-center" style={{ backdropFilter: 'blur(10px)', marginTop: '8px' }}>
+                                <div className="d-flex align-items-center justify-content-center gap-2">
+                                    <span style={{ fontSize: '0.9rem', color: '#666' }}>🧺 Find the</span>
+                                    <span className="fw-bold" style={{ fontSize: '1.8rem', color: '#000', letterSpacing: '-0.5px' }}>{currentWord.word}</span>
+                                    <button 
+                                        onClick={() => speakText(`Find the ${currentWord.word}!`)} 
+                                        className="btn btn-primary rounded-circle shadow-sm" 
+                                        style={{ 
+                                            width: '40px', 
+                                            height: '40px', 
+                                            padding: 0, 
+                                            display: 'flex', 
+                                            alignItems: 'center', 
+                                            justifyContent: 'center'
+                                        }}
+                                    >
+                                        <Volume2 size={20} />
+                                    </button>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
-
-            {currentWord && (
-                <div className="text-center mb-4">
-                    <div className="card border-0 rounded-4 shadow-lg mx-auto" style={{ maxWidth: 500, animation: 'slideDown 0.5s ease' }}>
-                        <div className="card-body p-4">
-                            <h3 className="fw-bold mb-3">
-                                🧺 Find the <span className="text-primary" style={{ fontSize: '1.8em' }}>{currentWord.word}</span>!
-                            </h3>
-                            <p className="text-muted mb-3">{currentWord.translation}</p>
-                            <button
-                                onClick={() => speakText(`Find the ${currentWord.word}!`)}
-                                className="btn btn-primary rounded-circle p-3 shadow"
-                                style={{ transition: 'transform 0.2s' }}
-                                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-                                onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                            >
-                                <span className="material-symbols-outlined">volume_up</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            
+            {/* Game Area with top padding */}
+            <div style={{ paddingTop: '140px' }} className="d-lg-none"></div>
+            <div style={{ paddingTop: '100px' }} className="d-none d-lg-block"></div>
 
             {feedback && (
                 <div
@@ -298,7 +368,7 @@ export default function DropToBasketGame() {
                 </div>
             )}
 
-            <div style={{ position: 'relative', height: '55vh', marginTop: '20px', overflow: 'hidden' }}>
+            <div style={{ position: 'relative', height: '80vh', marginTop: '20px', overflow: 'hidden' }}>
                 {fallingItems.map((item) => (
                     <div
                         key={item.id}
@@ -306,65 +376,50 @@ export default function DropToBasketGame() {
                         style={{
                             position: 'absolute',
                             left: `${item.left}%`,
-                            top: '-120px',
+                            top: '0',
                             cursor: 'pointer',
                             animation: `fallDown ${FALL_DURATION}ms linear`,
                             zIndex: 10
                         }}
                     >
                         <div
-                            className="card border-0 rounded-4 shadow-lg"
+                            className="rounded-circle d-flex align-items-center justify-content-center shadow-lg"
                             style={{
-                                width: '110px',
-                                background: item.isCorrect 
-                                    ? 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)' 
-                                    : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                                transition: 'transform 0.2s',
-                                border: '3px solid white'
+                                width: '100px',
+                                height: '100px',
+                                background: item.image ? 'white' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                border: '4px solid white',
+                                boxShadow: '0 8px 20px rgba(0,0,0,0.3)',
+                                overflow: 'hidden',
+                                transition: 'transform 0.2s'
                             }}
-                            onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+                            onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.15)'}
                             onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
                         >
-                            <div className="card-body p-3 text-center">
-                                {item.image ? (
-                                    <img
-                                        src={item.image}
-                                        alt={item.word}
-                                        style={{
-                                            width: '70px',
-                                            height: '70px',
-                                            objectFit: 'contain',
-                                            borderRadius: '8px',
-                                            marginBottom: '8px'
-                                        }}
-                                    />
-                                ) : (
-                                    <div
-                                        style={{
-                                            width: '70px',
-                                            height: '70px',
-                                            background: 'white',
-                                            borderRadius: '8px',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            marginBottom: '8px',
-                                            fontSize: '32px'
-                                        }}
-                                    >
-                                        {item.word.charAt(0).toUpperCase()}
-                                    </div>
-                                )}
-                                <p className="mb-0 fw-bold text-white small">{item.word}</p>
-                            </div>
+                            {item.image ? (
+                                <img
+                                    src={item.image}
+                                    alt={item.word}
+                                    style={{
+                                        width: '80px',
+                                        height: '80px',
+                                        objectFit: 'cover',
+                                        borderRadius: '50%'
+                                    }}
+                                />
+                            ) : (
+                                <span style={{ fontSize: '40px', fontWeight: 'bold', color: 'white', textShadow: '2px 2px 4px rgba(0,0,0,0.3)' }}>
+                                    {item.word.charAt(0).toUpperCase()}
+                                </span>
+                            )}
                         </div>
                     </div>
                 ))}
             </div>
 
-            <div className="text-center" style={{ position: 'fixed', bottom: '30px', left: '50%', transform: 'translateX(-50%)', zIndex: 5 }}>
-                <div style={{ fontSize: '100px', animation: 'float 3s ease-in-out infinite' }}>🧺</div>
-                <p className="text-white fw-bold fs-4">Catch here!</p>
+            <div className="text-center" style={{ position: 'fixed', bottom: '20px', left: '50%', transform: 'translateX(-50%)', zIndex: 5 }}>
+                <div style={{ fontSize: '80px', animation: 'float 3s ease-in-out infinite' }}>🧺</div>
+                <p className="text-white fw-bold">Catch here!</p>
             </div>
 
             <style jsx>{`
@@ -376,10 +431,10 @@ export default function DropToBasketGame() {
                 }
                 @keyframes fallDown {
                     from {
-                        transform: translateY(0);
+                        transform: translateY(-100px);
                     }
                     to {
-                        transform: translateY(calc(65vh + 120px));
+                        transform: translateY(calc(70vh + 100px));
                     }
                 }
                 @keyframes slideDown {
@@ -416,7 +471,7 @@ export default function DropToBasketGame() {
                         transform: translateY(0);
                     }
                     50% {
-                        transform: translateY(-15px);
+                        transform: translateY(-10px);
                     }
                 }
             `}</style>

@@ -3,6 +3,7 @@
 import { useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
 import Image from 'next/image';
+import { ShieldCheck, Clock, User } from 'lucide-react';
 
 export default function Header({ title, showStars = false, stars = 0, showSubscription = false, daysRemaining = 0 }) {
     const { user } = useAuth();
@@ -28,7 +29,7 @@ export default function Header({ title, showStars = false, stars = 0, showSubscr
                             className="btn btn-outline-primary rounded-pill px-2 py-1 d-lg-none d-flex align-items-center gap-1"
                             style={{ fontSize: '12px' }}
                         >
-                            <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>admin_panel_settings</span>
+                            <ShieldCheck size={16} />
                             <span className="d-none d-sm-inline">Admin</span>
                         </Link>
                     )}
@@ -41,15 +42,12 @@ export default function Header({ title, showStars = false, stars = 0, showSubscr
                                 backgroundColor: daysRemaining <= 3 ? '#fee2e2' : '#e0f2fe'
                             }}
                         >
-                            <span
-                                className="material-symbols-outlined"
+                            <Clock
+                                size={16}
                                 style={{
-                                    fontSize: '16px',
                                     color: daysRemaining <= 3 ? '#dc2626' : '#0284c7'
                                 }}
-                            >
-                                schedule
-                            </span>
+                            />
                             <span
                                 className="fw-bold small"
                                 style={{ color: daysRemaining <= 3 ? '#dc2626' : '#0284c7' }}
@@ -61,7 +59,7 @@ export default function Header({ title, showStars = false, stars = 0, showSubscr
 
                     {/* Profile */}
                     <Link href="/dashboard/profile" className="btn btn-light rounded-circle p-2" style={{ width: 38, height: 38 }}>
-                        <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>person</span>
+                        <User size={20} />
                     </Link>
                 </div>
             </div>

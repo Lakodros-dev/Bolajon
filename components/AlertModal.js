@@ -1,5 +1,7 @@
 'use client';
 
+import { CheckCircle, XCircle, AlertTriangle, Info } from 'lucide-react';
+
 export default function AlertModal({
     show,
     onClose,
@@ -10,14 +12,15 @@ export default function AlertModal({
 }) {
     if (!show) return null;
 
-    const typeStyles = {
-        success: { bg: '#dcfce7', color: 'text-success', icon: 'check_circle' },
-        error: { bg: '#fee2e2', color: 'text-danger', icon: 'error' },
-        warning: { bg: '#fef3c7', color: 'text-warning', icon: 'warning' },
-        info: { bg: '#dbeafe', color: 'text-primary', icon: 'info' }
+    const typeConfig = {
+        success: { bg: '#dcfce7', color: 'text-success', Icon: CheckCircle },
+        error: { bg: '#fee2e2', color: 'text-danger', Icon: XCircle },
+        warning: { bg: '#fef3c7', color: 'text-warning', Icon: AlertTriangle },
+        info: { bg: '#dbeafe', color: 'text-primary', Icon: Info }
     };
 
-    const style = typeStyles[type] || typeStyles.info;
+    const config = typeConfig[type] || typeConfig.info;
+    const IconComponent = config.Icon;
 
     return (
         <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1050 }}>
@@ -26,11 +29,9 @@ export default function AlertModal({
                     <div className="modal-body p-4 text-center">
                         <div
                             className="rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center"
-                            style={{ width: '64px', height: '64px', backgroundColor: style.bg }}
+                            style={{ width: '64px', height: '64px', backgroundColor: config.bg }}
                         >
-                            <span className={`material-symbols-outlined ${style.color}`} style={{ fontSize: '32px' }}>
-                                {style.icon}
-                            </span>
+                            <IconComponent size={32} className={config.color} />
                         </div>
                         <h5 className="fw-bold mb-2">{title}</h5>
                         <p className="text-muted mb-4">{message}</p>

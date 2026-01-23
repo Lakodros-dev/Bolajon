@@ -5,13 +5,26 @@ import { useData } from '@/context/DataContext';
 import { useAuth } from '@/context/AuthContext';
 import Header from '@/components/dashboard/Header';
 import Link from 'next/link';
+import { Play, GraduationCap, CheckCircle2, Star, BookOpen, Download, ShoppingCart, Phone, Video, Users, HelpCircle, Copy, Check } from 'lucide-react';
 
 const quickActions = [
-    { icon: 'person_add', label: "O'quvchi qo'shish", href: '/dashboard/students/add', color: '#E0F2FE', iconColor: '#0284c7', tour: 'add-student' },
-    { icon: 'play_lesson', label: 'Dars boshlash', href: '/dashboard/lessons', color: '#DCFCE7', iconColor: '#16a34a', tour: 'start-lesson' },
-    { icon: 'star', label: 'Yulduz berish', href: '/dashboard/students', color: '#FEF3C7', iconColor: '#d97706' },
-    { icon: 'redeem', label: "Sovg'a berish", href: '/dashboard/rewards', color: '#F3E8FF', iconColor: '#9333ea' },
+    { icon: 'UserPlus', label: "O'quvchi qo'shish", href: '/dashboard/students/add', color: '#E0F2FE', iconColor: '#0284c7', tour: 'add-student' },
+    { icon: 'Play', label: 'Dars boshlash', href: '/dashboard/lessons', color: '#DCFCE7', iconColor: '#16a34a', tour: 'start-lesson' },
+    { icon: 'Star', label: 'Yulduz berish', href: '/dashboard/students', color: '#FEF3C7', iconColor: '#d97706' },
+    { icon: 'Gift', label: "Sovg'a berish", href: '/dashboard/rewards', color: '#F3E8FF', iconColor: '#9333ea' },
 ];
+
+// Icon component mapper
+const IconComponent = ({ name, ...props }) => {
+    const icons = {
+        UserPlus: () => <Users {...props} />,
+        Play: () => <Play {...props} />,
+        Star: () => <Star {...props} fill="currentColor" />,
+        Gift: () => <Star {...props} />
+    };
+    const Icon = icons[name] || icons.Star;
+    return <Icon />;
+};
 
 export default function DashboardPage() {
     const { dashboard, initialLoading } = useData();
@@ -86,8 +99,8 @@ export default function DashboardPage() {
                         <p className="small opacity-75 mb-3">
                             Darslarni o'rgatishni boshlang
                         </p>
-                        <Link href="/dashboard/lessons" prefetch={true} className="btn btn-light btn-sm rounded-pill px-4 fw-semibold d-inline-flex align-items-center">
-                            <span className="material-symbols-outlined me-1" style={{ fontSize: '18px', lineHeight: 1 }}>play_arrow</span>
+                        <Link href="/dashboard/lessons" prefetch={true} className="btn btn-light btn-sm rounded-pill px-4 fw-semibold d-inline-flex align-items-center gap-2">
+                            <Play size={18} />
                             Darsni boshlash
                         </Link>
                     </div>
@@ -98,7 +111,7 @@ export default function DashboardPage() {
                     <div className="col-4">
                         <div className="card border-0 rounded-4 h-100 card-pastel-blue">
                             <div className="card-body text-center p-2 p-sm-3">
-                                <span className="material-symbols-outlined mb-1" style={{ fontSize: '28px', color: '#0284c7' }}>school</span>
+                                <GraduationCap size={28} color="#0284c7" className="mb-1" />
                                 <h3 className="h5 fw-bold mb-0">{initialLoading ? '-' : dashboard.totalStudents}</h3>
                                 <p className="small text-muted mb-0" style={{ fontSize: '11px', whiteSpace: 'nowrap' }}>Bolalar</p>
                             </div>
@@ -107,7 +120,7 @@ export default function DashboardPage() {
                     <div className="col-4">
                         <div className="card border-0 rounded-4 h-100 card-pastel-green">
                             <div className="card-body text-center p-2 p-sm-3">
-                                <span className="material-symbols-outlined mb-1" style={{ fontSize: '28px', color: '#16a34a' }}>task_alt</span>
+                                <CheckCircle2 size={28} color="#16a34a" className="mb-1" />
                                 <h3 className="h5 fw-bold mb-0">{initialLoading ? '-' : dashboard.completedLessons}</h3>
                                 <p className="small text-muted mb-0" style={{ fontSize: '11px', whiteSpace: 'nowrap' }}>Darslar</p>
                             </div>
@@ -116,7 +129,7 @@ export default function DashboardPage() {
                     <div className="col-4">
                         <div className="card border-0 rounded-4 h-100 card-pastel-yellow">
                             <div className="card-body text-center p-2 p-sm-3">
-                                <span className="material-symbols-outlined filled mb-1" style={{ fontSize: '28px', color: '#d97706' }}>star</span>
+                                <Star size={28} fill="#d97706" color="#d97706" className="mb-1" />
                                 <h3 className="h5 fw-bold mb-0">{initialLoading ? '-' : dashboard.totalStars}</h3>
                                 <p className="small text-muted mb-0" style={{ fontSize: '11px', whiteSpace: 'nowrap' }}>Yulduzlar</p>
                             </div>
@@ -129,7 +142,7 @@ export default function DashboardPage() {
                     <div className="card-body text-white p-4">
                         <div className="d-flex align-items-center gap-3">
                             <Link href="/dashboard/book" className="rounded-4 p-3 bg-white bg-opacity-25 text-white text-decoration-none" style={{ cursor: 'pointer' }}>
-                                <span className="material-symbols-outlined" style={{ fontSize: '40px' }}>auto_stories</span>
+                                <BookOpen size={40} />
                             </Link>
                             <div className="flex-grow-1">
                                 <h3 className="fw-bold mb-0" style={{ fontSize: '1.1rem' }}>Bolajon kursining mashq kitobidan foydalaning</h3>
@@ -139,16 +152,16 @@ export default function DashboardPage() {
                             <a
                                 href="/book/bolajon-darslik.pdf"
                                 download="Bolajon-Mashq-Kitobi.pdf"
-                                className="btn btn-light btn-sm rounded-pill px-4 fw-semibold d-inline-flex align-items-center"
+                                className="btn btn-light btn-sm rounded-pill px-4 fw-semibold d-inline-flex align-items-center gap-2"
                             >
-                                <span className="material-symbols-outlined me-1" style={{ fontSize: '18px' }}>download</span>
+                                <Download size={18} />
                                 Yuklab olish
                             </a>
                             <button
                                 onClick={() => setShowBuyModal(true)}
-                                className="btn btn-outline-light btn-sm rounded-pill px-4 fw-semibold d-inline-flex align-items-center"
+                                className="btn btn-outline-light btn-sm rounded-pill px-4 fw-semibold d-inline-flex align-items-center gap-2"
                             >
-                                <span className="material-symbols-outlined me-1" style={{ fontSize: '18px' }}>shopping_cart</span>
+                                <ShoppingCart size={18} />
                                 Sotib olish
                             </button>
                         </div>
@@ -168,9 +181,7 @@ export default function DashboardPage() {
                                 >
                                     <div className="card-body p-3 d-flex flex-column flex-lg-row align-items-center gap-3">
                                         <div className="rounded-3 p-2" style={{ backgroundColor: 'white' }}>
-                                            <span className="material-symbols-outlined" style={{ color: action.iconColor, fontSize: '24px' }}>
-                                                {action.icon}
-                                            </span>
+                                            <IconComponent name={action.icon} size={24} color={action.iconColor} />
                                         </div>
                                         <span className="fw-semibold text-dark small text-center text-lg-start">{action.label}</span>
                                     </div>
@@ -185,13 +196,13 @@ export default function DashboardPage() {
                     <div className="card-body p-4">
                         <div className="d-flex align-items-center justify-content-between mb-3">
                             <h3 className="h6 fw-bold mb-0">Qanday ishlaydi?</h3>
-                            <span className="material-symbols-outlined text-muted">help</span>
+                            <HelpCircle size={20} className="text-muted" />
                         </div>
 
                         <div className="d-flex flex-column gap-3">
                             <div className="d-flex align-items-start gap-3 p-3 rounded-4" style={{ backgroundColor: '#E0F2FE' }}>
                                 <div className="rounded-3 p-2 bg-white">
-                                    <span className="material-symbols-outlined" style={{ color: '#0284c7' }}>smart_display</span>
+                                    <Video size={20} color="#0284c7" />
                                 </div>
                                 <div>
                                     <h4 className="small fw-bold mb-1">1. Video darsni ko'ring</h4>
@@ -201,7 +212,7 @@ export default function DashboardPage() {
 
                             <div className="d-flex align-items-start gap-3 p-3 rounded-4" style={{ backgroundColor: '#DCFCE7' }}>
                                 <div className="rounded-3 p-2 bg-white">
-                                    <span className="material-symbols-outlined" style={{ color: '#16a34a' }}>groups</span>
+                                    <Users size={20} color="#16a34a" />
                                 </div>
                                 <div>
                                     <h4 className="small fw-bold mb-1">2. Bolalarga o'rgating</h4>
@@ -211,7 +222,7 @@ export default function DashboardPage() {
 
                             <div className="d-flex align-items-start gap-3 p-3 rounded-4" style={{ backgroundColor: '#FEF3C7' }}>
                                 <div className="rounded-3 p-2 bg-white">
-                                    <span className="material-symbols-outlined filled" style={{ color: '#d97706' }}>star</span>
+                                    <Star size={20} fill="#d97706" color="#d97706" />
                                 </div>
                                 <div>
                                     <h4 className="small fw-bold mb-1">3. Yulduz bering</h4>
@@ -230,7 +241,7 @@ export default function DashboardPage() {
                         <div className="modal-content rounded-4 border-0">
                             <div className="modal-header border-0 pb-0">
                                 <h5 className="modal-title fw-bold d-flex align-items-center gap-2">
-                                    <span className="material-symbols-outlined text-warning">auto_stories</span>
+                                    <BookOpen size={24} className="text-warning" />
                                     Kitobni sotib olish
                                 </h5>
                                 <button
@@ -252,9 +263,7 @@ export default function DashboardPage() {
                                     <div className="d-flex align-items-center justify-content-between">
                                         <p className="fw-bold font-monospace mb-0 fs-5">{paymentInfo.cardNumber}</p>
                                         <button onClick={copyCardNumber} className="btn btn-sm btn-outline-primary rounded-2">
-                                            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
-                                                {copied ? 'check' : 'content_copy'}
-                                            </span>
+                                            {copied ? <Check size={18} /> : <Copy size={18} />}
                                         </button>
                                     </div>
                                 </div>
@@ -281,7 +290,7 @@ export default function DashboardPage() {
                                     href={`tel:${paymentInfo.adminPhone}`}
                                     className="btn btn-success w-100 rounded-3 py-3 d-flex align-items-center justify-content-center gap-2"
                                 >
-                                    <span className="material-symbols-outlined">call</span>
+                                    <Phone size={20} />
                                     <span className="fw-bold">{paymentInfo.adminPhone}</span>
                                 </a>
                             </div>

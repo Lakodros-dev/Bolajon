@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { ArrowLeft, Star, ShoppingBasket, X, CheckCircle } from 'lucide-react';
 
 export default function ShoppingBasketTestPage() {
     const router = useRouter();
@@ -80,15 +81,15 @@ export default function ShoppingBasketTestPage() {
             <div className="bg-white border-bottom py-3 px-4">
                 <div className="d-flex align-items-center justify-content-between">
                     <button onClick={() => router.push('/admin/games-test')} className="btn btn-light rounded-circle">
-                        <span className="material-symbols-outlined">arrow_back</span>
+                        <ArrowLeft size={20} />
                     </button>
                     <div className="text-center">
                         <h5 className="fw-bold mb-0">Shopping Basket</h5>
                         <small className="text-muted">Level {level}</small>
                     </div>
-                    <div className="badge bg-primary rounded-pill px-3 py-2">
-                        <span className="material-symbols-outlined" style={{ fontSize: '16px', verticalAlign: 'middle' }}>star</span>
-                        {' '}{score}
+                    <div className="badge bg-primary rounded-pill px-3 py-2 d-flex align-items-center gap-1">
+                        <Star size={16} />
+                        {score}
                     </div>
                 </div>
             </div>
@@ -145,8 +146,8 @@ export default function ShoppingBasketTestPage() {
                     <div className="col-lg-5">
                         <div className="card border-0 rounded-4 shadow-sm">
                             <div className="card-body p-4">
-                                <h6 className="fw-bold mb-3">
-                                    <span className="material-symbols-outlined me-2" style={{ fontSize: '20px', verticalAlign: 'middle' }}>shopping_basket</span>
+                                <h6 className="fw-bold mb-3 d-flex align-items-center gap-2">
+                                    <ShoppingBasket size={20} />
                                     Savat ({basket.length})
                                 </h6>
                                 
@@ -169,16 +170,16 @@ export default function ShoppingBasketTestPage() {
                                                         className="btn btn-sm btn-outline-danger rounded-circle"
                                                         style={{ width: '30px', height: '30px', padding: 0 }}
                                                     >
-                                                        <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>close</span>
+                                                        <X size={16} />
                                                     </button>
                                                 </div>
                                             ))}
                                         </div>
                                         <button
                                             onClick={checkBasket}
-                                            className="btn btn-primary w-100 rounded-3"
+                                            className="btn btn-primary w-100 rounded-3 d-flex align-items-center justify-content-center gap-2"
                                         >
-                                            <span className="material-symbols-outlined me-2" style={{ fontSize: '18px', verticalAlign: 'middle' }}>check_circle</span>
+                                            <CheckCircle size={18} />
                                             Tekshirish
                                         </button>
                                     </>

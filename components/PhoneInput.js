@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 
 /**
  * International Phone Input with country selector and auto-formatting
@@ -145,9 +146,7 @@ export default function PhoneInput({ value, onChange, className = '', ...props }
                 >
                     <span style={{ fontSize: '20px' }}>{selectedCountry.flag}</span>
                     <span className="text-muted small">+{selectedCountry.dialCode}</span>
-                    <span className="material-symbols-outlined text-muted" style={{ fontSize: '18px' }}>
-                        {isOpen ? 'expand_less' : 'expand_more'}
-                    </span>
+                    {isOpen ? <ChevronUp size={18} className="text-muted" /> : <ChevronDown size={18} className="text-muted" />}
                 </button>
 
                 {/* Phone Input */}

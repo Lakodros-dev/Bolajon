@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { ArrowLeft, RotateCcw, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export default function DropToBasketTestPage() {
     const router = useRouter();
@@ -88,12 +89,12 @@ export default function DropToBasketTestPage() {
                         Natija: <span className="text-primary">{score}</span> ta ushlandi
                     </p>
                     <div className="d-flex gap-3 justify-content-center">
-                        <button onClick={restartGame} className="btn btn-primary btn-lg rounded-3">
-                            <span className="material-symbols-outlined me-2">refresh</span>
+                        <button onClick={restartGame} className="btn btn-primary btn-lg rounded-3 d-flex align-items-center gap-2">
+                            <RotateCcw size={20} />
                             Qayta o'ynash
                         </button>
-                        <button onClick={() => router.push('/admin/games-test')} className="btn btn-outline-secondary btn-lg rounded-3">
-                            <span className="material-symbols-outlined me-2">arrow_back</span>
+                        <button onClick={() => router.push('/admin/games-test')} className="btn btn-outline-secondary btn-lg rounded-3 d-flex align-items-center gap-2">
+                            <ArrowLeft size={20} />
                             Orqaga
                         </button>
                     </div>
@@ -108,7 +109,7 @@ export default function DropToBasketTestPage() {
             <div className="bg-white border-bottom py-3 px-4">
                 <div className="d-flex align-items-center justify-content-between">
                     <button onClick={() => router.push('/admin/games-test')} className="btn btn-light rounded-circle">
-                        <span className="material-symbols-outlined">arrow_back</span>
+                        <ArrowLeft size={20} />
                     </button>
                     <h5 className="fw-bold mb-0">Savatga tashlash</h5>
                     <div className="d-flex gap-2">
@@ -161,14 +162,14 @@ export default function DropToBasketTestPage() {
                             className="btn btn-primary btn-lg rounded-circle"
                             style={{ width: '80px', height: '80px' }}
                         >
-                            <span className="material-symbols-outlined" style={{ fontSize: '40px' }}>arrow_back</span>
+                            <ChevronLeft size={40} />
                         </button>
                         <button
                             onClick={() => moveBasket('right')}
                             className="btn btn-primary btn-lg rounded-circle"
                             style={{ width: '80px', height: '80px' }}
                         >
-                            <span className="material-symbols-outlined" style={{ fontSize: '40px' }}>arrow_forward</span>
+                            <ChevronRight size={40} />
                         </button>
                     </div>
                 </div>

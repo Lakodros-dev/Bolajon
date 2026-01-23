@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import Header from '@/components/dashboard/Header';
 import Link from 'next/link';
+import { ArrowLeft, Search, Trophy } from 'lucide-react';
 
 export default function LeaderboardPage() {
     const { getAuthHeader } = useAuth();
@@ -68,16 +69,14 @@ export default function LeaderboardPage() {
                     href="/dashboard/students"
                     className="btn btn-light rounded-pill px-3 py-2 mb-3 d-inline-flex d-lg-none align-items-center gap-2"
                 >
-                    <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>arrow_back</span>
+                    <ArrowLeft size={18} />
                     <span className="small fw-semibold">O'quvchilar</span>
                 </Link>
 
                 {/* Search */}
                 <div className="mb-4">
                     <div className="position-relative">
-                        <span className="material-symbols-outlined position-absolute top-50 start-0 translate-middle-y ms-3 text-muted">
-                            search
-                        </span>
+                        <Search size={20} className="position-absolute top-50 start-0 translate-middle-y ms-3 text-muted" />
                         <input
                             type="text"
                             className="form-control rounded-4 py-2 ps-5"
@@ -96,9 +95,7 @@ export default function LeaderboardPage() {
                     </div>
                 ) : students.length === 0 ? (
                     <div className="text-center py-5">
-                        <span className="material-symbols-outlined text-muted mb-2" style={{ fontSize: '48px' }}>
-                            emoji_events
-                        </span>
+                        <Trophy size={48} className="text-muted mb-2" />
                         <p className="text-muted mb-0">
                             {search ? "Hech narsa topilmadi" : "Hozircha o'quvchilar yo'q"}
                         </p>

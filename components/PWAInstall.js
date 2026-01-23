@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { Smartphone, X } from 'lucide-react';
 
 export default function PWAInstall() {
     const [deferredPrompt, setDeferredPrompt] = useState(null);
@@ -96,16 +97,14 @@ export default function PWAInstall() {
                     }
                 `}</style>
                 <div className="rounded-3 bg-primary bg-opacity-10 p-2 flex-shrink-0">
-                    <span className="material-symbols-outlined text-primary" style={{ fontSize: '24px' }}>
-                        install_mobile
-                    </span>
+                    <Smartphone size={24} className="text-primary" />
                 </div>
                 <div className="flex-grow-1">
                     <p className="fw-semibold mb-0" style={{ fontSize: '14px' }}>Ilovani o'rnating</p>
                     <p className="text-muted mb-0" style={{ fontSize: '12px' }}>Tezroq kirish uchun</p>
                 </div>
                 <button onClick={handleDismiss} className="btn btn-light btn-sm rounded-circle p-1">
-                    <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>close</span>
+                    <X size={18} />
                 </button>
                 <button onClick={handleInstall} className="btn btn-primary btn-sm rounded-3 px-3">
                     O'rnatish
