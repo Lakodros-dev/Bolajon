@@ -3,23 +3,57 @@
 import { useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ShieldCheck, Clock, User } from 'lucide-react';
+import { ShieldCheck, Clock, User, ChevronRight } from 'lucide-react';
 
-export default function Header({ title, showStars = false, stars = 0, showSubscription = false, daysRemaining = 0 }) {
+export default function Header({ title, showStars = false, stars = 0, showSubscription = false, daysRemaining = 0, breadcrumbs = [] }) {
     const { user } = useAuth();
 
     return (
         <header className="sticky-top bg-white border-bottom py-3 px-3">
             <div className="d-flex align-items-center justify-content-between">
-                {/* Logo only */}
+                {/* Logo - only show on mobile, hidden on desktop (sidebar has logo) */}
                 <Image
                     src="/logo.png"
                     alt="Bolajon"
                     width={120}
                     height={40}
-                    className="rounded-3"
+                    className="rounded-3 d-lg-none"
                     style={{ objectFit: 'cover' }}
                 />
+
+                {/* Breadcrumb navigation on desktop - hidden on mobile */}
+                <div className="d-none d-lg-block">
+                    {breadcrumbs && breadcrumbs.length > 0 ? (
+                        <nav aria-label="breadcrumb">
+                            <ol className="breadcrumb mb-0">
+                                {breadcrumbs.map((crumb, index) => (
+                                    <li 
+                                        key={index} 
+                                        className={`breadcrumb-item ${index === breadcrumbs.length - 1 ? 'active' : ''}`}
+                                        aria-current={index === breadcrumbs.length - 1 ? 'page' : undefined}
+                                    >
+                                        {index === breadcrumbs.length - 1 ? (
+                                            <span className="fw-semibold">{crumb.label}</span>
+                                        ) : (
+                                            <Link href={crumb.href} className="text-decoration-none">
+                                                {crumb.label}
+                                            </Link>
+                                        )}
+                                    </li>
+                                ))}
+                            </ol>
+                        </nav>
+                    ) : (
+                        <div>
+                            {user && (
+                                <p className="text-muted mb-0 small">Xush kelibsiz, {user.name}!</p>
+                            )}
+                            {title && (
+                                <h1 className="h5 fw-bold mb-0">{title}</h1>
+                            )}
+                        </div>
+                    )}
+                </div>
 
                 <div className="d-flex align-items-center gap-2">
                     {/* Admin Mode Button - only for admins on mobile */}
@@ -64,8 +98,9 @@ export default function Header({ title, showStars = false, stars = 0, showSubscr
                 </div>
             </div>
 
+            {/* Title below on mobile only */}
             {title && (
-                <h1 className="h4 fw-bold mt-3 mb-0">{title}</h1>
+                <h1 className="h4 fw-bold mt-3 mb-0 d-lg-none">{title}</h1>
             )}
         </header>
     );

@@ -276,7 +276,11 @@ export default function VocabularyGamePage() {
                                     onClick={() => handleOptionClick(option)}
                                     disabled={selectedOption !== null}
                                     className={`btn ${btnClass} w-100 py-3 rounded-3 fw-bold`}
-                                    style={{ fontSize: '1.1rem' }}
+                                    style={{ 
+                                        fontSize: '1.1rem',
+                                        pointerEvents: selectedOption !== null ? 'none' : 'auto',
+                                        WebkitTapHighlightColor: 'transparent'
+                                    }}
                                 >
                                     {option.word}
                                 </button>

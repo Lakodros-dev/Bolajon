@@ -88,7 +88,13 @@ export default function GamesPage() {
     if (showStudentModal) {
         return (
             <div className="page-content">
-                <Header title="O'yinlar" />
+                <Header 
+                    title="O'yinlar"
+                    breadcrumbs={[
+                        { label: 'Asosiy', href: '/dashboard' },
+                        { label: "O'yinlar", href: '/dashboard/games' }
+                    ]}
+                />
                 <main className="p-3">
                     <div className="text-center mb-4">
                         <h1 className="h4 fw-bold mb-2">🎮 O'yinlar</h1>
@@ -152,7 +158,13 @@ export default function GamesPage() {
     // Roadmap View
     return (
         <div className="page-content">
-            <Header title="O'yinlar" />
+            <Header 
+                title="O'yinlar"
+                breadcrumbs={[
+                    { label: 'Asosiy', href: '/dashboard' },
+                    { label: "O'yinlar", href: '/dashboard/games' }
+                ]}
+            />
             <main className="p-3">
                 {/* Selected Student Header */}
                 <div className="d-flex align-items-center justify-content-between mb-4">

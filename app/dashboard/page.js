@@ -87,6 +87,9 @@ export default function DashboardPage() {
                 stars={dashboard.totalStars}
                 showSubscription={true}
                 daysRemaining={daysRemaining}
+                breadcrumbs={[
+                    { label: 'Asosiy', href: '/dashboard' }
+                ]}
             />
 
             <main className="p-3">

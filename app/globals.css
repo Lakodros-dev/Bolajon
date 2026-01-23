@@ -468,3 +468,61 @@ img {
   opacity: 1;
   transform: rotate(3deg) translate(0px, -4px);
 }
+
+/* Mobile tap highlight fix - prevents blue highlight on touch */
+* {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+
+/* Remove focus outline on buttons after click (mobile) */
+button:focus,
+.btn:focus {
+  outline: none;
+  box-shadow: none !important;
+}
+
+/* Prevent hover states from sticking on mobile */
+@media (hover: none) and (pointer: coarse) {
+  button:hover,
+  .btn:hover,
+  .card:hover {
+    transform: none !important;
+    box-shadow: none !important;
+  }
+}
+
+/* Active state for mobile touch feedback */
+button:active,
+.btn:active {
+  transform: scale(0.98);
+  transition: transform 0.1s ease;
+}
+
+/* Breadcrumb styling */
+.breadcrumb {
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  font-size: 14px;
+}
+
+.breadcrumb-item + .breadcrumb-item::before {
+  content: "›";
+  color: #6c757d;
+  font-size: 18px;
+  padding: 0 8px;
+}
+
+.breadcrumb-item a {
+  color: #6c757d;
+  transition: color 0.2s;
+}
+
+.breadcrumb-item a:hover {
+  color: var(--primary);
+}
+
+.breadcrumb-item.active {
+  color: #1d1d1f;
+}

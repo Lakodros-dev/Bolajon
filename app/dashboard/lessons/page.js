@@ -40,7 +40,14 @@ export default function LessonsPage() {
 
     return (
         <div className="page-content">
-            <Header showStars={true} stars={dashboard.totalStars} />
+            <Header 
+                showStars={true} 
+                stars={dashboard.totalStars}
+                breadcrumbs={[
+                    { label: 'Asosiy', href: '/dashboard' },
+                    { label: 'Darslar', href: '/dashboard/lessons' }
+                ]}
+            />
 
             <main className="p-3">
                 <h1 className="h4 fw-bold mb-4">

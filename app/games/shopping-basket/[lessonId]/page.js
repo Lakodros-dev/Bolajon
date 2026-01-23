@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
-import { ArrowLeft, Volume2, CheckCircle, XCircle, RotateCcw, Frown, ShoppingCart, ArrowDown, X as CloseIcon } from 'lucide-react';
+import { ArrowLeft, Volume2, CheckCircle, XCircle, RotateCcw, Frown, ShoppingCart, ShoppingBag, ArrowDown, X as CloseIcon } from 'lucide-react';
 
 export default function ShoppingBasketGame() {
     const params = useParams();

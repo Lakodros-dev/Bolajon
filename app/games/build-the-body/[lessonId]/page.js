@@ -338,17 +338,9 @@ export default function BuildTheBodyGame() {
                                     cursor: feedback ? 'not-allowed' : 'pointer',
                                     transition: 'all 0.3s ease',
                                     background: 'white',
-                                    minHeight: '250px'
-                                }}
-                                onMouseEnter={(e) => {
-                                    if (!feedback) {
-                                        e.currentTarget.style.transform = 'translateY(-10px)';
-                                        e.currentTarget.style.boxShadow = '0 20px 40px rgba(0,0,0,0.2)';
-                                    }
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.currentTarget.style.transform = 'translateY(0)';
-                                    e.currentTarget.style.boxShadow = '';
+                                    minHeight: '250px',
+                                    WebkitTapHighlightColor: 'transparent',
+                                    pointerEvents: feedback ? 'none' : 'auto'
                                 }}
                             >
                                 <div className="card-body p-4 d-flex flex-column align-items-center justify-content-center">

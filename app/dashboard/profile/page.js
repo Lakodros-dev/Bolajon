@@ -6,15 +6,20 @@ import { useSubscription } from '@/components/SubscriptionModal';
 import Header from '@/components/dashboard/Header';
 import AlertModal from '@/components/AlertModal';
 import ConfirmModal from '@/components/ConfirmModal';
-import { Wallet, Calendar, CreditCard, Edit, LogOut, User, Phone, BadgeCheck, Save, Copy, Check, PhoneCall } from 'lucide-react';
+import { Wallet, Calendar, CreditCard, Edit, LogOut, User, Phone, BadgeCheck, Save, Copy, Check, PhoneCall, Users, Trash2 } from 'lucide-react';
 
 export default function ProfilePage() {
     const { user, logout, getAuthHeader } = useAuth();
-    const { daysRemaining, checkSubscription } = useSubscription();
+    const { daysRemaining } = useSubscription();
     const [saving, setSaving] = useState(false);
     const [showLogoutModal, setShowLogoutModal] = useState(false);
     const [showTopUpModal, setShowTopUpModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
+    const [showEditStudentModal, setShowEditStudentModal] = useState(false);
+    const [showDeleteStudentModal, setShowDeleteStudentModal] = useState(false);
+    const [selectedStudent, setSelectedStudent] = useState(null);
+    const [students, setStudents] = useState([]);
+    const [loadingStudents, setLoadingStudents] = useState(true);
     const [alertModal, setAlertModal] = useState({ show: false, title: '', message: '', type: 'success' });
     const [balance, setBalance] = useState(0);
     const [topUpAmount, setTopUpAmount] = useState(10000);
@@ -26,10 +31,14 @@ export default function ProfilePage() {
         newPassword: '',
         confirmPassword: ''
     });
+    const [studentFormData, setStudentFormData] = useState({
+        name: ''
+    });
 
     useEffect(() => {
         fetchUserData();
         fetchPaymentInfo();
+        fetchStudents();
     }, []);
 
     const fetchUserData = async () => {
@@ -59,6 +68,23 @@ export default function ProfilePage() {
             }
         } catch (error) {
             console.error('Failed to fetch payment info:', error);
+        }
+    };
+
+    const fetchStudents = async () => {
+        try {
+            setLoadingStudents(true);
+            const res = await fetch('/api/students', {
+                headers: getAuthHeader()
+            });
+            const data = await res.json();
+            if (data.success) {
+                setStudents(data.students || []);
+            }
+        } catch (error) {
+            console.error('Failed to fetch students:', error);
+        } finally {
+            setLoadingStudents(false);
         }
     };
 
@@ -123,6 +149,96 @@ export default function ProfilePage() {
                 show: true,
                 title: 'Xatolik',
                 message: 'Profilni yangilashda xatolik',
+                type: 'danger'
+            });
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const handleEditStudent = (student) => {
+        setSelectedStudent(student);
+        setStudentFormData({ name: student.name });
+        setShowEditStudentModal(true);
+    };
+
+    const handleUpdateStudent = async (e) => {
+        e.preventDefault();
+        if (!selectedStudent) return;
+
+        setSaving(true);
+        try {
+            const res = await fetch(`/api/students/${selectedStudent._id}`, {
+                method: 'PUT',
+                headers: getAuthHeader(),
+                body: JSON.stringify({ name: studentFormData.name })
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                setAlertModal({
+                    show: true,
+                    title: 'Muvaffaqiyatli',
+                    message: 'O\'quvchi ma\'lumotlari yangilandi',
+                    type: 'success'
+                });
+                setShowEditStudentModal(false);
+                fetchStudents();
+            } else {
+                setAlertModal({
+                    show: true,
+                    title: 'Xatolik',
+                    message: data.error || 'O\'quvchini yangilashda xatolik',
+                    type: 'danger'
+                });
+            }
+        } catch (error) {
+            console.error('Failed to update student:', error);
+            setAlertModal({
+                show: true,
+                title: 'Xatolik',
+                message: 'O\'quvchini yangilashda xatolik',
+                type: 'danger'
+            });
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const handleDeleteStudent = async () => {
+        if (!selectedStudent) return;
+
+        setSaving(true);
+        try {
+            const res = await fetch(`/api/students/${selectedStudent._id}`, {
+                method: 'DELETE',
+                headers: getAuthHeader()
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                setAlertModal({
+                    show: true,
+                    title: 'Muvaffaqiyatli',
+                    message: 'O\'quvchi o\'chirildi',
+                    type: 'success'
+                });
+                setShowDeleteStudentModal(false);
+                fetchStudents();
+            } else {
+                setAlertModal({
+                    show: true,
+                    title: 'Xatolik',
+                    message: data.error || 'O\'quvchini o\'chirishda xatolik',
+                    type: 'danger'
+                });
+            }
+        } catch (error) {
+            console.error('Failed to delete student:', error);
+            setAlertModal({
+                show: true,
+                title: 'Xatolik',
+                message: 'O\'quvchini o\'chirishda xatolik',
                 type: 'danger'
             });
         } finally {
@@ -334,6 +450,71 @@ export default function ProfilePage() {
                         </div>
                     </div>
                 </div>
+
+                {/* Students List */}
+                <div className="card border shadow-sm rounded-3 mb-3" style={{ backgroundColor: '#fff' }}>
+                    <div className="card-body p-3">
+                        <div className="d-flex align-items-center gap-2 mb-3">
+                            <Users size={20} className="text-primary" />
+                            <h6 className="fw-bold mb-0">O'quvchilar</h6>
+                            <span className="badge bg-primary rounded-pill ms-auto">{students.length}</span>
+                        </div>
+
+                        {loadingStudents ? (
+                            <div className="text-center py-4">
+                                <div className="spinner-border spinner-border-sm text-primary"></div>
+                            </div>
+                        ) : students.length === 0 ? (
+                            <div className="text-center py-4 text-muted">
+                                <Users size={32} className="mb-2 opacity-50" />
+                                <p className="small mb-0">O'quvchilar yo'q</p>
+                            </div>
+                        ) : (
+                            <div className="d-flex flex-column gap-2">
+                                {students.map((student) => (
+                                    <div
+                                        key={student._id}
+                                        className="d-flex align-items-center gap-3 p-2 rounded-3 border"
+                                        style={{ backgroundColor: '#f8f9fa' }}
+                                    >
+                                        <div
+                                            className="rounded-circle"
+                                            style={{
+                                                width: '40px',
+                                                height: '40px',
+                                                backgroundImage: `url('https://ui-avatars.com/api/?name=${encodeURIComponent(student.name)}&background=667eea&color=fff&size=80&bold=true')`,
+                                                backgroundSize: 'cover'
+                                            }}
+                                        />
+                                        <div className="flex-grow-1">
+                                            <p className="fw-semibold mb-0 small">{student.name}</p>
+                                            <p className="text-muted mb-0" style={{ fontSize: '11px' }}>
+                                                {student.age} yosh • ⭐ {student.stars || 0}
+                                            </p>
+                                        </div>
+                                        <button
+                                            onClick={() => handleEditStudent(student)}
+                                            className="btn btn-sm btn-outline-primary rounded-2 p-2"
+                                            style={{ width: '32px', height: '32px' }}
+                                        >
+                                            <Edit size={14} />
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                setSelectedStudent(student);
+                                                setShowDeleteStudentModal(true);
+                                            }}
+                                            className="btn btn-sm btn-outline-danger rounded-2 p-2"
+                                            style={{ width: '32px', height: '32px' }}
+                                        >
+                                            <Trash2 size={14} />
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </div>
             </main>
 
             {/* Edit Profile Modal */}
@@ -399,6 +580,54 @@ export default function ProfilePage() {
                                                 onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                                             />
                                         </div>
+                                    </div>
+
+                                    <button
+                                        type="submit"
+                                        className="btn btn-primary rounded-3 w-100 py-2 fw-semibold d-flex align-items-center justify-content-center gap-2"
+                                        disabled={saving}
+                                    >
+                                        {saving ? (
+                                            <span className="spinner-border spinner-border-sm"></span>
+                                        ) : (
+                                            <Save size={18} />
+                                        )}
+                                        Saqlash
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Edit Student Modal */}
+            {showEditStudentModal && selectedStudent && (
+                <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 10000 }}>
+                    <div className="modal-dialog modal-dialog-centered">
+                        <div className="modal-content rounded-4 border-0">
+                            <div className="modal-header border-0 pb-0">
+                                <h5 className="modal-title fw-bold d-flex align-items-center gap-2">
+                                    <Edit size={20} className="text-primary" />
+                                    O'quvchini tahrirlash
+                                </h5>
+                                <button
+                                    type="button"
+                                    className="btn-close"
+                                    onClick={() => setShowEditStudentModal(false)}
+                                ></button>
+                            </div>
+                            <div className="modal-body">
+                                <form onSubmit={handleUpdateStudent}>
+                                    <div className="mb-4">
+                                        <label className="form-label small fw-semibold">Ism va familiya</label>
+                                        <input
+                                            type="text"
+                                            className="form-control rounded-3 border"
+                                            value={studentFormData.name}
+                                            onChange={(e) => setStudentFormData({ name: e.target.value })}
+                                            required
+                                        />
                                     </div>
 
                                     <button
@@ -522,6 +751,16 @@ export default function ProfilePage() {
                 title="Tizimdan chiqish"
                 message="Haqiqatan ham tizimdan chiqmoqchimisiz?"
                 confirmText="Chiqish"
+                type="danger"
+            />
+
+            <ConfirmModal
+                show={showDeleteStudentModal}
+                onClose={() => setShowDeleteStudentModal(false)}
+                onConfirm={handleDeleteStudent}
+                title="O'quvchini o'chirish"
+                message={`${selectedStudent?.name} o'quvchisini o'chirmoqchimisiz? Bu amal qaytarilmaydi.`}
+                confirmText="O'chirish"
                 type="danger"
             />
 

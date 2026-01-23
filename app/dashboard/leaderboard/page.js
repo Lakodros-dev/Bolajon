@@ -61,7 +61,13 @@ export default function LeaderboardPage() {
 
     return (
         <div className="page-content">
-            <Header title="Leaderboard" />
+            <Header 
+                title="Leaderboard"
+                breadcrumbs={[
+                    { label: 'Asosiy', href: '/dashboard' },
+                    { label: 'Leaderboard', href: '/dashboard/leaderboard' }
+                ]}
+            />
 
             <main className="p-3">
                 {/* Back button - mobile only */}
