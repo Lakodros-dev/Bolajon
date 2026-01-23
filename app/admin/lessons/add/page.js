@@ -3,11 +3,13 @@
 import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
+import { useData } from '@/context/DataContext';
 import Link from 'next/link';
 
 export default function AddLessonPage() {
     const router = useRouter();
     const { getAuthHeader, token } = useAuth();
+    const { addLesson } = useData();
     const [loading, setLoading] = useState(false);
     const [uploading, setUploading] = useState(false);
     const [uploadProgress, setUploadProgress] = useState(0);
@@ -200,6 +202,9 @@ export default function AddLessonPage() {
             const data = await res.json();
 
             if (data.success) {
+                // Add to global cache
+                addLesson(data.lesson);
+                
                 router.push('/admin/lessons');
             } else {
                 setError(data.error || "Dars qo'shishda xatolik");

@@ -2,12 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import { useData } from '@/context/DataContext';
 import Link from 'next/link';
 import ConfirmModal from '@/components/ConfirmModal';
 import { Plus, PlayCircle, Eye, EyeOff, Edit2, Trash2, Video } from 'lucide-react';
 
 export default function AdminLessonsPage() {
     const { getAuthHeader } = useAuth();
+    const { lessons: cachedLessons, updateLesson, deleteLesson: deleteLessonFromCache } = useData();
     const [lessons, setLessons] = useState([]);
     const [loading, setLoading] = useState(true);
     const [deleteModal, setDeleteModal] = useState({ show: false, lesson: null });
@@ -16,6 +18,13 @@ export default function AdminLessonsPage() {
     useEffect(() => {
         fetchLessons();
     }, []);
+
+    // Update local lessons when cache changes
+    useEffect(() => {
+        if (cachedLessons.length > 0) {
+            setLessons(cachedLessons);
+        }
+    }, [cachedLessons]);
 
     const fetchLessons = async () => {
         try {
@@ -43,6 +52,10 @@ export default function AdminLessonsPage() {
             });
             const data = await res.json();
             if (data.success) {
+                // Update global cache
+                updateLesson(lesson._id, { isActive: !lesson.isActive });
+                
+                // Update local state
                 setLessons(lessons.map(l =>
                     l._id === lesson._id ? { ...l, isActive: !l.isActive } : l
                 ));
@@ -64,6 +77,10 @@ export default function AdminLessonsPage() {
             });
             const data = await res.json();
             if (data.success) {
+                // Remove from global cache
+                deleteLessonFromCache(lesson._id);
+                
+                // Remove from local state
                 setLessons(lessons.filter(l => l._id !== lesson._id));
             }
         } catch (error) {

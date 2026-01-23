@@ -2,10 +2,12 @@
 
 import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import { useData } from '@/context/DataContext';
 import { X, Check } from 'lucide-react';
 
 export default function CompleteLessonModal({ show, onClose, student, lesson, onComplete }) {
     const { getAuthHeader } = useAuth();
+    const { updateStudent: updateStudentInCache } = useData();
     const [stars, setStars] = useState(5);
     const [notes, setNotes] = useState('');
     const [loading, setLoading] = useState(false);
@@ -32,7 +34,14 @@ export default function CompleteLessonModal({ show, onClose, student, lesson, on
             const data = await res.json();
 
             if (data.success) {
-                onComplete(data);
+                // Update global cache
+                updateStudentInCache(data.student._id, { stars: data.student.stars });
+                
+                // Update local state
+                if (onComplete) {
+                    onComplete(data);
+                }
+                
                 onClose();
                 setStars(5);
                 setNotes('');

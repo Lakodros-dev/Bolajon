@@ -2,10 +2,12 @@
 
 import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import { useData } from '@/context/DataContext';
 import { Star, Minus, Plus } from 'lucide-react';
 
 export default function QuickStarsModal({ show, onClose, student, onUpdate }) {
     const { getAuthHeader } = useAuth();
+    const { updateStudent: updateStudentInCache } = useData();
     const [amount, setAmount] = useState(1);
     const [reason, setReason] = useState('');
     const [loading, setLoading] = useState(false);
@@ -28,7 +30,14 @@ export default function QuickStarsModal({ show, onClose, student, onUpdate }) {
             const data = await res.json();
 
             if (data.success) {
-                onUpdate(data.student);
+                // Update global cache
+                updateStudentInCache(data.student._id, { stars: data.student.stars });
+                
+                // Update local state
+                if (onUpdate) {
+                    onUpdate(data.student);
+                }
+                
                 onClose();
                 setAmount(1);
                 setReason('');

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import { useData } from '@/context/DataContext';
 import { useSubscription } from '@/components/SubscriptionModal';
 import Header from '@/components/dashboard/Header';
 import AlertModal from '@/components/AlertModal';
@@ -11,6 +12,7 @@ import { Wallet, Calendar, CreditCard, Edit, LogOut, User, Phone, BadgeCheck, Sa
 export default function ProfilePage() {
     const { user, logout, getAuthHeader } = useAuth();
     const { daysRemaining } = useSubscription();
+    const { students: cachedStudents, updateStudent: updateStudentInCache } = useData();
     const [saving, setSaving] = useState(false);
     const [showLogoutModal, setShowLogoutModal] = useState(false);
     const [showTopUpModal, setShowTopUpModal] = useState(false);
@@ -18,8 +20,7 @@ export default function ProfilePage() {
     const [showEditStudentModal, setShowEditStudentModal] = useState(false);
     const [showDeleteStudentModal, setShowDeleteStudentModal] = useState(false);
     const [selectedStudent, setSelectedStudent] = useState(null);
-    const [students, setStudents] = useState([]);
-    const [loadingStudents, setLoadingStudents] = useState(true);
+    const [loadingStudents, setLoadingStudents] = useState(false);
     const [alertModal, setAlertModal] = useState({ show: false, title: '', message: '', type: 'success' });
     const [balance, setBalance] = useState(0);
     const [topUpAmount, setTopUpAmount] = useState(10000);
@@ -38,7 +39,6 @@ export default function ProfilePage() {
     useEffect(() => {
         fetchUserData();
         fetchPaymentInfo();
-        fetchStudents();
     }, []);
 
     const fetchUserData = async () => {
@@ -68,23 +68,6 @@ export default function ProfilePage() {
             }
         } catch (error) {
             console.error('Failed to fetch payment info:', error);
-        }
-    };
-
-    const fetchStudents = async () => {
-        try {
-            setLoadingStudents(true);
-            const res = await fetch('/api/students', {
-                headers: getAuthHeader()
-            });
-            const data = await res.json();
-            if (data.success) {
-                setStudents(data.students || []);
-            }
-        } catch (error) {
-            console.error('Failed to fetch students:', error);
-        } finally {
-            setLoadingStudents(false);
         }
     };
 
@@ -176,6 +159,9 @@ export default function ProfilePage() {
             const data = await res.json();
 
             if (data.success) {
+                // Update in global cache
+                updateStudentInCache(selectedStudent._id, { name: studentFormData.name });
+                
                 setAlertModal({
                     show: true,
                     title: 'Muvaffaqiyatli',
@@ -183,7 +169,6 @@ export default function ProfilePage() {
                     type: 'success'
                 });
                 setShowEditStudentModal(false);
-                fetchStudents();
             } else {
                 setAlertModal({
                     show: true,
@@ -217,6 +202,9 @@ export default function ProfilePage() {
             const data = await res.json();
 
             if (data.success) {
+                // Remove from global cache
+                updateStudentInCache(selectedStudent._id, { isActive: false });
+                
                 setAlertModal({
                     show: true,
                     title: 'Muvaffaqiyatli',
@@ -224,7 +212,6 @@ export default function ProfilePage() {
                     type: 'success'
                 });
                 setShowDeleteStudentModal(false);
-                fetchStudents();
             } else {
                 setAlertModal({
                     show: true,
@@ -457,21 +444,17 @@ export default function ProfilePage() {
                         <div className="d-flex align-items-center gap-2 mb-3">
                             <Users size={20} className="text-primary" />
                             <h6 className="fw-bold mb-0">O'quvchilar</h6>
-                            <span className="badge bg-primary rounded-pill ms-auto">{students.length}</span>
+                            <span className="badge bg-primary rounded-pill ms-auto">{cachedStudents.length}</span>
                         </div>
 
-                        {loadingStudents ? (
-                            <div className="text-center py-4">
-                                <div className="spinner-border spinner-border-sm text-primary"></div>
-                            </div>
-                        ) : students.length === 0 ? (
+                        {cachedStudents.length === 0 ? (
                             <div className="text-center py-4 text-muted">
                                 <Users size={32} className="mb-2 opacity-50" />
                                 <p className="small mb-0">O'quvchilar yo'q</p>
                             </div>
                         ) : (
                             <div className="d-flex flex-column gap-2">
-                                {students.map((student) => (
+                                {cachedStudents.map((student) => (
                                     <div
                                         key={student._id}
                                         className="d-flex align-items-center gap-3 p-2 rounded-3 border"

@@ -2,10 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import { useData } from '@/context/DataContext';
 import Link from 'next/link';
 
 export default function AdminRewardsPage() {
     const { getAuthHeader } = useAuth();
+    const { rewards: cachedRewards, updateReward, deleteReward: deleteRewardFromCache } = useData();
     const [rewards, setRewards] = useState([]);
     const [loading, setLoading] = useState(true);
     const [deleteModal, setDeleteModal] = useState({ show: false, reward: null });
@@ -31,6 +33,13 @@ export default function AdminRewardsPage() {
         fetchRewards();
     }, []);
 
+    // Update local rewards when cache changes
+    useEffect(() => {
+        if (cachedRewards.length > 0) {
+            setRewards(cachedRewards);
+        }
+    }, [cachedRewards]);
+
     const fetchRewards = async () => {
         try {
             const res = await fetch('/api/rewards');
@@ -54,6 +63,10 @@ export default function AdminRewardsPage() {
             });
             const data = await res.json();
             if (data.success) {
+                // Update global cache
+                updateReward(reward._id, { isActive: !reward.isActive });
+                
+                // Update local state
                 setRewards(rewards.map(r =>
                     r._id === reward._id ? { ...r, isActive: !r.isActive } : r
                 ));
@@ -74,6 +87,10 @@ export default function AdminRewardsPage() {
             });
             const data = await res.json();
             if (data.success) {
+                // Remove from global cache
+                deleteRewardFromCache(deleteModal.reward._id);
+                
+                // Remove from local state
                 setRewards(rewards.filter(r => r._id !== deleteModal.reward._id));
                 setDeleteModal({ show: false, reward: null });
             }

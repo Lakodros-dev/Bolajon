@@ -4,7 +4,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
-import { ArrowLeft, Star, RotateCcw, Frown, Image as ImageIcon, CheckCircle, XCircle } from 'lucide-react';
+import GameOverModal from '@/components/GameOverModal';
+import { ArrowLeft, Frown, Image as ImageIcon, CheckCircle, XCircle, Star } from 'lucide-react';
 
 export default function VocabularyGamePage() {
     const params = useParams();
@@ -142,49 +143,12 @@ export default function VocabularyGamePage() {
         const won = percentage >= 70;
 
         return (
-            <div className="min-vh-100 d-flex flex-column align-items-center justify-content-center bg-light p-4">
-                <div className="card border-0 rounded-4 shadow-lg text-center" style={{ maxWidth: 400 }}>
-                    <div className="card-body p-5">
-                        <div className="mb-4">
-                            <span style={{ fontSize: '80px' }}>
-                                {won ? '🎉' : '😊'}
-                            </span>
-                        </div>
-                        <h2 className="fw-bold mb-2">
-                            {won ? 'Tabriklaymiz!' : 'Yaxshi urinish!'}
-                        </h2>
-                        <p className="text-muted mb-4">
-                            {vocabulary.length} ta so'zdan {score} tasini to'g'ri topdingiz
-                        </p>
-                        <div className="mb-4">
-                            <div className="progress" style={{ height: 20 }}>
-                                <div
-                                    className={`progress-bar ${won ? 'bg-success' : 'bg-warning'}`}
-                                    style={{ width: `${percentage}%` }}
-                                >
-                                    {percentage}%
-                                </div>
-                            </div>
-                        </div>
-                        {won && (
-                            <div className="alert alert-success mb-4 d-flex align-items-center justify-content-center gap-2">
-                                <Star size={20} />
-                                O'yin yutildi! Progress saqlandi.
-                            </div>
-                        )}
-                        <div className="d-flex gap-2 justify-content-center">
-                            <button onClick={restartGame} className="btn btn-outline-primary d-flex align-items-center gap-2">
-                                <RotateCcw size={18} />
-                                Qayta o'ynash
-                            </button>
-                            <Link href="/dashboard/games" className="btn btn-primary d-flex align-items-center gap-2">
-                                <ArrowLeft size={18} />
-                                Orqaga
-                            </Link>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <GameOverModal
+                won={won}
+                score={score}
+                total={vocabulary.length}
+                onRestart={restartGame}
+            />
         );
     }
 

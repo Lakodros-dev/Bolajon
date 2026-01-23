@@ -4,7 +4,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
-import { ArrowLeft, Volume2, CheckCircle, XCircle, RotateCcw, Frown, ShoppingCart, ShoppingBag, ArrowDown, X as CloseIcon } from 'lucide-react';
+import GameOverModal from '@/components/GameOverModal';
+import { ArrowLeft, Volume2, CheckCircle, XCircle, Frown, ShoppingCart, ShoppingBag, ArrowDown, X as CloseIcon } from 'lucide-react';
 
 export default function ShoppingBasketGame() {
     const params = useParams();
@@ -36,6 +37,21 @@ export default function ShoppingBasketGame() {
             fetchLesson();
         }
     }, [lessonId]);
+
+    // Auto-repeat audio every 3 seconds
+    useEffect(() => {
+        if (!currentTask) return;
+
+        // Speak immediately when task changes
+        speakWord(currentTask.word);
+
+        // Set up interval to repeat every 3 seconds
+        const interval = setInterval(() => {
+            speakWord(currentTask.word);
+        }, 3000);
+
+        return () => clearInterval(interval);
+    }, [currentTask]);
 
     const fetchLesson = async () => {
         try {
@@ -77,31 +93,65 @@ export default function ShoppingBasketGame() {
 
     const handleDragStart = (e, item) => {
         setDraggedItem(item);
-        e.dataTransfer.effectAllowed = 'move';
+        if (e.dataTransfer) {
+            e.dataTransfer.effectAllowed = 'move';
+        }
+    };
+
+    const handleTouchStart = (e, item) => {
+        setDraggedItem(item);
+    };
+
+    const handleTouchEnd = (e, item) => {
+        if (!currentTask) return;
+        
+        // Check if touch ended over basket
+        const touch = e.changedTouches[0];
+        const basketElement = document.getElementById('basket-drop-zone');
+        if (basketElement) {
+            const rect = basketElement.getBoundingClientRect();
+            if (
+                touch.clientX >= rect.left &&
+                touch.clientX <= rect.right &&
+                touch.clientY >= rect.top &&
+                touch.clientY <= rect.bottom
+            ) {
+                handleItemDrop(item);
+            }
+        }
+        setDraggedItem(null);
     };
 
     const handleDragOver = (e) => {
         e.preventDefault();
-        e.dataTransfer.dropEffect = 'move';
+        if (e.dataTransfer) {
+            e.dataTransfer.dropEffect = 'move';
+        }
     };
 
     const handleDrop = (e) => {
         e.preventDefault();
         if (!draggedItem || !currentTask) return;
+        handleItemDrop(draggedItem);
+        setDraggedItem(null);
+    };
 
-        const isCorrect = draggedItem.word === currentTask.word;
+    const handleItemDrop = (item) => {
+        if (!item || !currentTask) return;
+
+        const isCorrect = item.word === currentTask.word;
 
         if (isCorrect) {
             // Correct!
             setScore(prev => prev + 1);
-            setFeedback({ type: 'success', message: '✓ Good job!' });
+            setFeedback({ type: 'success', message: '✓ To\'g\'ri!' });
             setShowConfetti(true);
             speakText('Good job!');
 
             // Remove item from items and add to basket
-            setItems(prev => prev.filter(item => item.word !== draggedItem.word));
-            setBasket(prev => [...prev, draggedItem]);
-            setCompletedItems(prev => [...prev, draggedItem.word]);
+            setItems(prev => prev.filter(i => i.word !== item.word));
+            setBasket(prev => [...prev, item]);
+            setCompletedItems(prev => [...prev, item.word]);
 
             // Hide confetti after animation
             setTimeout(() => setShowConfetti(false), 2000);
@@ -119,7 +169,7 @@ export default function ShoppingBasketGame() {
         } else {
             // Wrong!
             setMistakes(prev => prev + 1);
-            setFeedback({ type: 'error', message: '✗ Try again!' });
+            setFeedback({ type: 'error', message: '✗ Qayta urinib ko\'ring!' });
             setIsShaking(true);
             speakText('Try again!');
 
@@ -137,12 +187,21 @@ export default function ShoppingBasketGame() {
                 }, 1500);
             }
         }
+    };
 
-        setDraggedItem(null);
+    const speakWord = (word) => {
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel(); // Cancel any ongoing speech
+            const utterance = new SpeechSynthesisUtterance(word);
+            utterance.lang = 'en-US';
+            utterance.rate = 0.9;
+            window.speechSynthesis.speak(utterance);
+        }
     };
 
     const speakText = (text) => {
         if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel(); // Cancel any ongoing speech
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = 'en-US';
             utterance.rate = 0.9;
@@ -152,7 +211,7 @@ export default function ShoppingBasketGame() {
 
     const speakTask = () => {
         if (currentTask) {
-            speakText(`Add the ${currentTask.word} to the basket!`);
+            speakWord(currentTask.word);
         }
     };
 
@@ -202,40 +261,18 @@ export default function ShoppingBasketGame() {
 
     if (gameOver) {
         const won = mistakes < MAX_MISTAKES;
-        const percentage = Math.round((score / vocabulary.length) * 100);
-
         return (
-            <div className="min-vh-100 d-flex flex-column align-items-center justify-content-center p-4" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
-                <div className="card border-0 rounded-4 shadow-lg text-center" style={{ maxWidth: 400 }}>
-                    <div className="card-body p-5">
-                        <div className="mb-4">
-                            <span style={{ fontSize: '80px' }}>
-                                {won ? '🎉' : '😊'}
-                            </span>
-                        </div>
-                        <h2 className="fw-bold mb-2">
-                            {won ? 'Ajoyib!' : 'Yaxshi harakat!'}
-                        </h2>
-                        <p className="text-muted mb-4">
-                            {score} / {vocabulary.length} to'g'ri
-                        </p>
-                        <div className="d-flex gap-3 justify-content-center">
-                            <button onClick={restartGame} className="btn btn-primary rounded-3 px-4 d-flex align-items-center gap-2">
-                                <RotateCcw size={20} />
-                                Qayta o'ynash
-                            </button>
-                            <Link href="/dashboard/games" className="btn btn-outline-secondary rounded-3 px-4">
-                                Chiqish
-                            </Link>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <GameOverModal
+                won={won}
+                score={score}
+                total={vocabulary.length}
+                onRestart={restartGame}
+            />
         );
     }
 
     return (
-        <div className="min-vh-100 p-4" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', position: 'relative', overflow: 'hidden' }}>
+        <div className="min-vh-100 d-flex flex-column" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', position: 'relative', overflow: 'hidden' }}>
             {/* Confetti Animation */}
             {showConfetti && (
                 <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 9999 }}>
@@ -258,62 +295,60 @@ export default function ShoppingBasketGame() {
                 </div>
             )}
 
-            {/* Header */}
-            <div className="d-flex justify-content-between align-items-center mb-4">
-                <Link href="/dashboard/games" className="btn btn-light rounded-circle p-2 shadow">
-                    <ArrowLeft size={20} />
-                </Link>
-                <div className="d-flex gap-3">
-                    <div className="bg-white rounded-3 px-4 py-2 shadow-sm">
-                        <span className="fw-bold text-success d-flex align-items-center gap-1">
-                            <CheckCircle size={20} />
-                            {score}
-                        </span>
-                    </div>
-                    <div className="bg-white rounded-3 px-4 py-2 shadow-sm">
-                        <span className="fw-bold text-danger d-flex align-items-center gap-1">
-                            <XCircle size={20} />
-                            {mistakes}/{MAX_MISTAKES}
-                        </span>
+            {/* Compact Header */}
+            <div className="p-2">
+                <div className="d-flex justify-content-between align-items-center">
+                    <Link href="/dashboard/lessons" className="btn btn-light rounded-circle shadow" style={{ width: '36px', height: '36px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <ArrowLeft size={18} />
+                    </Link>
+                    
+                    <div className="d-flex gap-2">
+                        <div className="bg-white rounded-3 px-2 py-1 shadow-sm">
+                            <span className="fw-bold text-success d-flex align-items-center gap-1" style={{ fontSize: '13px' }}>
+                                <CheckCircle size={14} />
+                                {score}/{vocabulary.length}
+                            </span>
+                        </div>
+                        <div className="bg-white rounded-3 px-2 py-1 shadow-sm">
+                            <span className="fw-bold text-danger d-flex align-items-center gap-1" style={{ fontSize: '13px' }}>
+                                <XCircle size={14} />
+                                {mistakes}/{MAX_MISTAKES}
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            {/* Progress Bar */}
-            <div className="mb-4">
-                <div className="bg-white rounded-pill p-1 shadow-sm">
-                    <div 
-                        className="bg-success rounded-pill transition-all" 
-                        style={{ 
-                            height: '8px', 
-                            width: `${(score / vocabulary.length) * 100}%`,
-                            transition: 'width 0.5s ease'
-                        }}
-                    />
-                </div>
-                <p className="text-white text-center mt-2 small fw-semibold">
-                    {score} / {vocabulary.length} items collected
-                </p>
-            </div>
-
-            {/* Task */}
+            {/* Task Card - Simple and Clear */}
             {currentTask && (
-                <div className="text-center mb-4">
-                    <div className="card border-0 rounded-4 shadow-lg mx-auto" style={{ maxWidth: 500, animation: 'slideDown 0.5s ease' }}>
-                        <div className="card-body p-4">
-                            <h3 className="fw-bold mb-3">
-                                🛒 Add the <span className="text-primary" style={{ fontSize: '1.5em' }}>{currentTask.word}</span> to the basket!
-                            </h3>
-                            <p className="text-muted mb-3">({currentTask.translation})</p>
-                            <button 
-                                onClick={speakTask} 
-                                className="btn btn-primary rounded-circle p-3 shadow"
-                                style={{ transition: 'transform 0.2s' }}
-                                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-                                onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                            >
-                                <Volume2 size={20} />
-                            </button>
+                <div className="px-2 pb-2">
+                    <div className="card border-0 rounded-4 shadow-lg" style={{ 
+                        background: 'linear-gradient(135deg, #FFD93D 0%, #FFC107 100%)',
+                        animation: 'slideDown 0.5s ease, pulse 2s ease-in-out infinite'
+                    }}>
+                        <div className="card-body p-3">
+                            <div className="d-flex align-items-center justify-content-center gap-2">
+                                <span style={{ fontSize: '2rem' }}>🛒</span>
+                                <h4 className="fw-bold mb-0 text-dark">Savatga qo'shing:</h4>
+                                <span className="badge bg-white text-dark" style={{ fontSize: '2rem', padding: '12px 24px', fontWeight: 'bold', boxShadow: '0 4px 8px rgba(0,0,0,0.2)' }}>
+                                    {currentTask.word}
+                                </span>
+                                <button 
+                                    onClick={speakTask} 
+                                    className="btn btn-light rounded-circle shadow" 
+                                    style={{ 
+                                        width: '44px', 
+                                        height: '44px', 
+                                        padding: 0, 
+                                        display: 'flex', 
+                                        alignItems: 'center', 
+                                        justifyContent: 'center',
+                                        transition: 'transform 0.2s'
+                                    }}
+                                >
+                                    <Volume2 size={22} className="text-primary" />
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -322,104 +357,112 @@ export default function ShoppingBasketGame() {
             {/* Feedback */}
             {feedback && (
                 <div 
-                    className={`alert alert-${feedback.type === 'success' ? 'success' : 'danger'} text-center fw-bold mb-4 mx-auto shadow-lg`} 
+                    className={`alert alert-${feedback.type === 'success' ? 'success' : 'danger'} text-center fw-bold mx-2 shadow-lg`} 
                     style={{ 
-                        maxWidth: 400,
                         animation: feedback.type === 'success' ? 'bounce 0.5s ease' : 'shake 0.5s ease',
-                        fontSize: '1.2em'
+                        fontSize: '1.3em',
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        zIndex: 1000,
+                        maxWidth: '300px'
                     }}
                 >
                     {feedback.message}
                 </div>
             )}
 
-            {/* Game Area */}
-            <div className="row g-4">
-                {/* Items */}
-                <div className="col-lg-8">
-                    <div className="card border-0 rounded-4 shadow-lg">
-                        <div className="card-body p-4">
-                            <h5 className="fw-bold mb-4 d-flex align-items-center gap-2">
-                                <ShoppingBag size={20} className="text-primary" />
-                                Available Items:
-                            </h5>
-                            <div className="row g-3">
-                                {items.map((item, index) => (
-                                    <div key={index} className="col-4 col-md-3">
-                                        <div
-                                            draggable
-                                            onDragStart={(e) => handleDragStart(e, item)}
-                                            className={`card border-2 rounded-3 text-center p-3 ${completedItems.includes(item.word) ? 'opacity-50' : ''}`}
-                                            style={{ 
-                                                cursor: 'grab', 
-                                                transition: 'all 0.2s',
-                                                boxShadow: draggedItem?.word === item.word ? '0 8px 16px rgba(0,0,0,0.2)' : '0 2px 4px rgba(0,0,0,0.1)'
-                                            }}
-                                            onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-5px) scale(1.05)'}
-                                            onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0) scale(1)'}
-                                        >
-                                            {item.image ? (
-                                                <img 
-                                                    src={item.image} 
-                                                    alt={item.word} 
-                                                    className="mb-2" 
-                                                    style={{ 
-                                                        width: '80px', 
-                                                        height: '80px', 
-                                                        objectFit: 'contain',
-                                                        filter: completedItems.includes(item.word) ? 'grayscale(100%)' : 'none'
-                                                    }} 
-                                                />
-                                            ) : (
-                                                <div className="mb-2" style={{ fontSize: '60px' }}>📦</div>
-                                            )}
-                                            <p className="small fw-semibold mb-0">{item.word}</p>
-                                            <p className="text-muted mb-0" style={{ fontSize: '0.7em' }}>{item.translation}</p>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Basket */}
-                <div className="col-lg-4">
-                    <div
-                        className={`card border-0 rounded-4 shadow-lg h-100 ${isShaking ? 'shake' : ''}`}
-                        onDragOver={handleDragOver}
-                        onDrop={handleDrop}
-                        style={{ 
-                            minHeight: '400px', 
-                            background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-                            transition: 'transform 0.3s ease'
-                        }}
-                    >
-                        <div className="card-body p-4 d-flex flex-column align-items-center justify-content-center text-white">
-                            <div style={{ fontSize: '80px', animation: 'float 3s ease-in-out infinite' }} className="mb-3">🧺</div>
-                            <h5 className="fw-bold mb-3">Shopping Basket</h5>
-                            {basket.length === 0 ? (
-                                <p className="text-center opacity-75">
-                                    <ArrowDown size={40} className="mb-2" />
-                                    <br />
-                                    Drag items here
-                                </p>
-                            ) : (
-                                <div className="d-flex flex-wrap gap-2 justify-content-center">
-                                    {basket.map((item, index) => (
-                                        <div 
-                                            key={index} 
-                                            className="bg-white text-dark rounded-3 px-3 py-2 shadow-sm"
-                                            style={{ animation: 'popIn 0.3s ease' }}
-                                        >
-                                            <small className="fw-semibold d-flex align-items-center gap-1">
-                                                <span>✓</span>
-                                                {item.word}
-                                            </small>
+            {/* Main Content - Flex grow to fill space */}
+            <div className="flex-grow-1 px-2 pb-2 d-flex flex-column" style={{ minHeight: 0 }}>
+                {/* Game Area */}
+                <div className="row g-2 flex-grow-1" style={{ minHeight: 0 }}>
+                    {/* Items */}
+                    <div className="col-12 col-lg-7">
+                        <div className="card border-0 rounded-4 shadow-sm h-100" style={{ background: 'rgba(255, 255, 255, 0.95)' }}>
+                            <div className="card-body p-2" style={{ overflowY: 'auto', maxHeight: '100%' }}>
+                                <h6 className="fw-bold mb-2 d-flex align-items-center gap-2 text-center justify-content-center" style={{ fontSize: '0.9rem' }}>
+                                    <ShoppingBag size={16} className="text-primary" />
+                                    Mahsulotlar
+                                </h6>
+                                <div className="row g-2">
+                                    {items.map((item, index) => (
+                                        <div key={index} className="col-4">
+                                            <div
+                                                draggable
+                                                onDragStart={(e) => handleDragStart(e, item)}
+                                                onTouchStart={(e) => handleTouchStart(e, item)}
+                                                onTouchEnd={(e) => handleTouchEnd(e, item)}
+                                                className="card rounded-3 text-center p-2 border-0"
+                                                style={{ 
+                                                    cursor: 'grab', 
+                                                    transition: 'all 0.2s',
+                                                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                                                    background: 'white',
+                                                    height: '100px'
+                                                }}
+                                            >
+                                                {item.image ? (
+                                                    <img 
+                                                        src={item.image} 
+                                                        alt={item.word} 
+                                                        style={{ 
+                                                            width: '100%', 
+                                                            height: '100%', 
+                                                            objectFit: 'cover',
+                                                            borderRadius: '8px'
+                                                        }} 
+                                                    />
+                                                ) : (
+                                                    <div className="d-flex align-items-center justify-content-center h-100" style={{ fontSize: '60px' }}>📦</div>
+                                                )}
+                                            </div>
                                         </div>
                                     ))}
                                 </div>
-                            )}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Basket */}
+                    <div className="col-12 col-lg-5">
+                        <div
+                            id="basket-drop-zone"
+                            className={`card border-0 rounded-4 shadow-lg h-100 ${isShaking ? 'shake' : ''}`}
+                            onDragOver={handleDragOver}
+                            onDrop={handleDrop}
+                            style={{ 
+                                background: 'linear-gradient(135deg, #6DD5FA 0%, #2980B9 100%)',
+                                transition: 'transform 0.3s ease',
+                                minHeight: '180px'
+                            }}
+                        >
+                            <div className="card-body p-3 d-flex flex-column align-items-center justify-content-center text-white">
+                                <div style={{ fontSize: '60px', animation: 'float 3s ease-in-out infinite' }} className="mb-2">🧺</div>
+                                <h5 className="fw-bold mb-2" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.2)' }}>Savat</h5>
+                                {basket.length === 0 ? (
+                                    <p className="text-center fw-semibold small mb-0" style={{ textShadow: '1px 1px 2px rgba(0,0,0,0.2)' }}>
+                                        <ArrowDown size={28} className="mb-1" />
+                                        <br />
+                                        Bu yerga tashlang
+                                    </p>
+                                ) : (
+                                    <div className="d-flex flex-wrap gap-2 justify-content-center">
+                                        {basket.map((item, index) => (
+                                            <div 
+                                                key={index} 
+                                                className="bg-white text-dark rounded-3 px-2 py-1 shadow"
+                                                style={{ animation: 'popIn 0.3s ease' }}
+                                            >
+                                                <small className="fw-bold d-flex align-items-center gap-1" style={{ fontSize: '0.8rem' }}>
+                                                    <span>✓</span>
+                                                    {item.word}
+                                                </small>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -441,6 +484,16 @@ export default function ShoppingBasketGame() {
                     to {
                         opacity: 1;
                         transform: translateY(0);
+                    }
+                }
+                @keyframes pulse {
+                    0%, 100% { 
+                        transform: scale(1);
+                        box-shadow: 0 4px 12px rgba(255,193,7,0.3);
+                    }
+                    50% { 
+                        transform: scale(1.02);
+                        box-shadow: 0 6px 20px rgba(255,193,7,0.5);
                     }
                 }
                 @keyframes bounce {

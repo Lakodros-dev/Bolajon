@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
+import { ArrowLeft, Volume2, CheckCircle, XCircle } from 'lucide-react';
 
 const numberToWord = (num) => {
     if (num === 0) return 'Zero';

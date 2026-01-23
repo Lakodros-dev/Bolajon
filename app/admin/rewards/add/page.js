@@ -3,11 +3,13 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
+import { useData } from '@/context/DataContext';
 import Link from 'next/link';
 
 export default function AddRewardPage() {
     const router = useRouter();
     const { getAuthHeader } = useAuth();
+    const { addReward } = useData();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [formData, setFormData] = useState({
@@ -50,6 +52,9 @@ export default function AddRewardPage() {
             const data = await res.json();
 
             if (data.success) {
+                // Add to global cache
+                addReward(data.reward);
+                
                 router.push('/admin/rewards');
             } else {
                 setError(data.error || "Sovg'a qo'shishda xatolik");

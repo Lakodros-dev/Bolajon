@@ -3,7 +3,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
-import { ArrowLeft, Volume2, CheckCircle, XCircle, RotateCcw, Frown } from 'lucide-react';
+import { ArrowLeft, Volume2, CheckCircle, XCircle, Frown } from 'lucide-react';
+import GameOverModal from '@/components/GameOverModal';
 
 export default function DropToBasketGame() {
     const params = useParams();
@@ -15,6 +16,9 @@ export default function DropToBasketGame() {
     const [lesson, setLesson] = useState(null);
     const [loading, setLoading] = useState(true);
     const [currentWord, setCurrentWord] = useState(null);
+    const [currentWordIndex, setCurrentWordIndex] = useState(0);
+    const [completedWords, setCompletedWords] = useState(0);
+    const [totalWords, setTotalWords] = useState(0);
     const [fallingItems, setFallingItems] = useState([]);
     const [score, setScore] = useState(0);
     const [mistakes, setMistakes] = useState(0);
@@ -58,10 +62,28 @@ export default function DropToBasketGame() {
     };
 
     const startGame = useCallback((vocabulary) => {
+        setTotalWords(vocabulary.length);
+        setCurrentWordIndex(0);
+        setCompletedWords(0);
         const randomWord = vocabulary[Math.floor(Math.random() * vocabulary.length)];
         setCurrentWord(randomWord);
-        speakText(`Find the ${randomWord.word}!`);
+        // Birinchi so'zni darhol aytish - useEffect aytadi
     }, []);
+
+    // Har 3 soniyada so'zni qayta aytib turish
+    useEffect(() => {
+        if (!currentWord || gameOver) return;
+
+        // Darhol aytish
+        speakText(currentWord.word);
+
+        // Har 3 soniyada takrorlash
+        const speakInterval = setInterval(() => {
+            speakText(currentWord.word);
+        }, 3000);
+
+        return () => clearInterval(speakInterval);
+    }, [currentWord, gameOver]);
 
     useEffect(() => {
         if (gameOver || !currentWord || !lesson) return;
@@ -110,12 +132,22 @@ export default function DropToBasketGame() {
                 setFeedback(null);
             }, 1000);
 
+            // Keyingi so'zga o'tish
             setTimeout(() => {
-                if (score + 1 >= 15) {
+                const nextIndex = currentWordIndex + 1;
+                const newCompleted = completedWords + 1;
+                setCompletedWords(newCompleted);
+                
+                if (nextIndex >= lesson.vocabulary.length) {
+                    // Barcha so'zlar tugadi - o'yin tugadi
                     setGameOver(true);
                     recordGameWin();
                 } else {
-                    startGame(lesson.vocabulary);
+                    // Keyingi so'zga o'tish
+                    setCurrentWordIndex(nextIndex);
+                    const nextWord = lesson.vocabulary[nextIndex];
+                    setCurrentWord(nextWord);
+                    // Keyingi so'zni aytish - useEffect avtomatik aytadi
                 }
             }, 1500);
         } else {
@@ -165,6 +197,8 @@ export default function DropToBasketGame() {
         setShowConfetti(false);
         setFeedback(null);
         setNextId(0);
+        setCurrentWordIndex(0);
+        setCompletedWords(0);
         if (lesson && lesson.vocabulary) {
             startGame(lesson.vocabulary);
         }
@@ -193,26 +227,12 @@ export default function DropToBasketGame() {
     if (gameOver) {
         const won = mistakes < MAX_MISTAKES;
         return (
-            <div className="min-vh-100 d-flex flex-column align-items-center justify-content-center p-4" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
-                <div className="card border-0 rounded-4 shadow-lg text-center" style={{ maxWidth: 400 }}>
-                    <div className="card-body p-5">
-                        <div className="mb-4">
-                            <span style={{ fontSize: '80px' }}>{won ? '🎉' : '😊'}</span>
-                        </div>
-                        <h2 className="fw-bold mb-2">{won ? 'Ajoyib!' : 'Yaxshi harakat!'}</h2>
-                        <p className="text-muted mb-4">{score} ta to'g'ri, {mistakes} ta xato</p>
-                        <div className="d-flex gap-3 justify-content-center">
-                            <button onClick={restartGame} className="btn btn-primary rounded-3 px-4">
-                                <span className="material-symbols-outlined me-2" style={{ fontSize: '20px' }}>replay</span>
-                                Qayta o'ynash
-                            </button>
-                            <Link href="/dashboard/games" className="btn btn-outline-secondary rounded-3 px-4">
-                                Chiqish
-                            </Link>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <GameOverModal
+                won={won}
+                score={completedWords}
+                total={totalWords}
+                onRestart={restartGame}
+            />
         );
     }
 
@@ -244,52 +264,55 @@ export default function DropToBasketGame() {
                 <div className="container-fluid px-4">
                     {/* Desktop Layout */}
                     <div className="d-none d-lg-flex justify-content-between align-items-center">
-                        <Link href="/dashboard/games" className="btn btn-light rounded-circle shadow-sm" style={{ width: '50px', height: '50px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                            <ArrowLeft size={24} />
+                        <Link href="/dashboard/lessons" className="btn btn-light rounded-circle shadow-sm" style={{ width: '45px', height: '45px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                            <ArrowLeft size={22} />
                         </Link>
                         
                         {currentWord && (
-                            <div className="bg-white bg-opacity-90 rounded-4 shadow-lg px-4 py-3 text-center flex-grow-1 mx-4" style={{ backdropFilter: 'blur(10px)', maxWidth: '600px' }}>
+                            <div className="bg-white rounded-4 shadow-lg px-4 py-3 text-center flex-grow-1 mx-4" style={{ maxWidth: '700px' }}>
                                 <div className="d-flex align-items-center justify-content-center gap-3">
-                                    <span style={{ fontSize: '1.1rem', color: '#666' }}>🧺 Find the</span>
-                                    <span className="fw-bold" style={{ fontSize: '2.2rem', color: '#000', letterSpacing: '-0.5px' }}>{currentWord.word}</span>
+                                    <span style={{ fontSize: '1.1rem', color: '#666', fontWeight: '500' }}>🧺 Find the</span>
+                                    <span className="fw-bold" style={{ fontSize: '2.2rem', color: '#667eea', letterSpacing: '-0.5px' }}>{currentWord.word}</span>
                                     <button 
-                                        onClick={() => speakText(`Find the ${currentWord.word}!`)} 
-                                        className="btn btn-primary rounded-circle shadow-sm" 
+                                        onClick={() => speakText(currentWord.word)} 
+                                        className="btn rounded-circle shadow-sm" 
                                         style={{ 
-                                            width: '50px', 
-                                            height: '50px', 
+                                            width: '48px', 
+                                            height: '48px', 
                                             padding: 0, 
                                             display: 'flex', 
                                             alignItems: 'center', 
                                             justifyContent: 'center', 
                                             transition: 'all 0.2s',
-                                            flexShrink: 0
+                                            flexShrink: 0,
+                                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                            border: 'none',
+                                            color: 'white'
                                         }} 
                                         onMouseEnter={(e) => {
                                             e.currentTarget.style.transform = 'scale(1.1)';
-                                            e.currentTarget.style.boxShadow = '0 6px 16px rgba(13, 110, 253, 0.4)';
+                                            e.currentTarget.style.boxShadow = '0 6px 20px rgba(102, 126, 234, 0.4)';
                                         }} 
                                         onMouseLeave={(e) => {
                                             e.currentTarget.style.transform = 'scale(1)';
                                             e.currentTarget.style.boxShadow = '';
                                         }}
                                     >
-                                        <Volume2 size={24} />
+                                        <Volume2 size={22} />
                                     </button>
                                 </div>
                             </div>
                         )}
                         
                         <div className="d-flex gap-2">
-                            <div className="bg-white bg-opacity-25 rounded-3 px-3 py-2 border border-white border-opacity-50 shadow-sm">
-                                <span className="fw-bold text-white d-flex align-items-center gap-1">
+                            <div className="bg-white rounded-3 px-3 py-2 shadow-sm">
+                                <span className="fw-bold d-flex align-items-center gap-1" style={{ color: '#667eea' }}>
                                     <CheckCircle size={18} />
-                                    {score}
+                                    {completedWords}/{totalWords}
                                 </span>
                             </div>
-                            <div className="bg-white bg-opacity-25 rounded-3 px-3 py-2 border border-white border-opacity-50 shadow-sm">
-                                <span className="fw-bold text-white d-flex align-items-center gap-1">
+                            <div className="bg-white rounded-3 px-3 py-2 shadow-sm">
+                                <span className="fw-bold d-flex align-items-center gap-1" style={{ color: '#f093fb' }}>
                                     <XCircle size={18} />
                                     {mistakes}/{MAX_MISTAKES}
                                 </span>
@@ -300,20 +323,20 @@ export default function DropToBasketGame() {
                     {/* Mobile Layout */}
                     <div className="d-lg-none">
                         <div className="d-flex justify-content-between align-items-center mb-2">
-                            <Link href="/dashboard/games" className="btn btn-light rounded-circle shadow-sm" style={{ width: '40px', height: '40px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                <ArrowLeft size={20} />
+                            <Link href="/dashboard/lessons" className="btn btn-light rounded-circle shadow-sm" style={{ width: '38px', height: '38px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <ArrowLeft size={18} />
                             </Link>
                             
                             <div className="d-flex gap-2">
-                                <div className="bg-white bg-opacity-25 rounded-3 px-2 py-1 border border-white border-opacity-50 shadow-sm">
-                                    <span className="fw-bold text-white d-flex align-items-center gap-1" style={{ fontSize: '14px' }}>
-                                        <CheckCircle size={16} />
-                                        {score}
+                                <div className="bg-white rounded-3 px-2 py-1 shadow-sm">
+                                    <span className="fw-bold d-flex align-items-center gap-1" style={{ fontSize: '13px', color: '#667eea' }}>
+                                        <CheckCircle size={14} />
+                                        {completedWords}/{totalWords}
                                     </span>
                                 </div>
-                                <div className="bg-white bg-opacity-25 rounded-3 px-2 py-1 border border-white border-opacity-50 shadow-sm">
-                                    <span className="fw-bold text-white d-flex align-items-center gap-1" style={{ fontSize: '14px' }}>
-                                        <XCircle size={16} />
+                                <div className="bg-white rounded-3 px-2 py-1 shadow-sm">
+                                    <span className="fw-bold d-flex align-items-center gap-1" style={{ fontSize: '13px', color: '#f093fb' }}>
+                                        <XCircle size={14} />
                                         {mistakes}/{MAX_MISTAKES}
                                     </span>
                                 </div>
@@ -321,23 +344,26 @@ export default function DropToBasketGame() {
                         </div>
                         
                         {currentWord && (
-                            <div className="bg-white bg-opacity-90 rounded-4 shadow-lg px-3 py-2 text-center" style={{ backdropFilter: 'blur(10px)', marginTop: '8px' }}>
+                            <div className="bg-white rounded-4 shadow-lg px-3 py-2 text-center" style={{ marginTop: '8px' }}>
                                 <div className="d-flex align-items-center justify-content-center gap-2">
-                                    <span style={{ fontSize: '0.9rem', color: '#666' }}>🧺 Find the</span>
-                                    <span className="fw-bold" style={{ fontSize: '1.8rem', color: '#000', letterSpacing: '-0.5px' }}>{currentWord.word}</span>
+                                    <span style={{ fontSize: '0.9rem', color: '#666', fontWeight: '500' }}>🧺 Find the</span>
+                                    <span className="fw-bold" style={{ fontSize: '1.6rem', color: '#667eea', letterSpacing: '-0.5px' }}>{currentWord.word}</span>
                                     <button 
-                                        onClick={() => speakText(`Find the ${currentWord.word}!`)} 
-                                        className="btn btn-primary rounded-circle shadow-sm" 
+                                        onClick={() => speakText(currentWord.word)} 
+                                        className="btn rounded-circle shadow-sm" 
                                         style={{ 
-                                            width: '40px', 
-                                            height: '40px', 
+                                            width: '38px', 
+                                            height: '38px', 
                                             padding: 0, 
                                             display: 'flex', 
                                             alignItems: 'center', 
-                                            justifyContent: 'center'
+                                            justifyContent: 'center',
+                                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                            border: 'none',
+                                            color: 'white'
                                         }}
                                     >
-                                        <Volume2 size={20} />
+                                        <Volume2 size={18} />
                                     </button>
                                 </div>
                             </div>

@@ -159,18 +159,88 @@ export function DataProvider({ children }) {
     // Add student to cache
     const addStudent = useCallback((student) => {
         setStudents(prev => [...prev, student]);
-        setDashboard(prev => ({ ...prev, totalStudents: prev.totalStudents + 1 }));
+        setDashboard(prev => ({ 
+            ...prev, 
+            totalStudents: prev.totalStudents + 1,
+            totalStars: prev.totalStars + (student.stars || 0)
+        }));
     }, []);
 
     // Update student in cache
     const updateStudent = useCallback((id, updates) => {
         setStudents(prev => prev.map(s => s._id === id ? { ...s, ...updates } : s));
-    }, []);
+        
+        // Update dashboard totalStars if stars changed
+        if (updates.stars !== undefined) {
+            setDashboard(prev => {
+                const oldStudent = students.find(s => s._id === id);
+                const oldStars = oldStudent?.stars || 0;
+                const newStars = updates.stars;
+                const starsDiff = newStars - oldStars;
+                
+                return {
+                    ...prev,
+                    totalStars: Math.max(0, prev.totalStars + starsDiff)
+                };
+            });
+        }
+    }, [students]);
+
+    // Recalculate total stars when students change
+    useEffect(() => {
+        if (students.length > 0 && dataLoaded) {
+            const totalStars = students.reduce((sum, s) => sum + (s.stars || 0), 0);
+            setDashboard(prev => ({
+                ...prev,
+                totalStars
+            }));
+        }
+    }, [students, dataLoaded]);
 
     // Delete student from cache
     const deleteStudent = useCallback((id) => {
+        const student = students.find(s => s._id === id);
         setStudents(prev => prev.filter(s => s._id !== id));
-        setDashboard(prev => ({ ...prev, totalStudents: Math.max(0, prev.totalStudents - 1) }));
+        setDashboard(prev => ({ 
+            ...prev, 
+            totalStudents: Math.max(0, prev.totalStudents - 1),
+            totalStars: Math.max(0, prev.totalStars - (student?.stars || 0))
+        }));
+    }, [students]);
+
+    // Add lesson to cache
+    const addLesson = useCallback((lesson) => {
+        setLessons(prev => [...prev, lesson]);
+    }, []);
+
+    // Update lesson in cache
+    const updateLesson = useCallback((id, updates) => {
+        setLessons(prev => prev.map(l => l._id === id ? { ...l, ...updates } : l));
+    }, []);
+
+    // Delete lesson from cache
+    const deleteLesson = useCallback((id) => {
+        setLessons(prev => prev.filter(l => l._id !== id));
+    }, []);
+
+    // Add reward to cache
+    const addReward = useCallback((reward) => {
+        setRewards(prev => [...prev, reward]);
+    }, []);
+
+    // Update reward in cache
+    const updateReward = useCallback((id, updates) => {
+        setRewards(prev => prev.map(r => r._id === id ? { ...r, ...updates } : r));
+    }, []);
+
+    // Delete reward from cache
+    const deleteReward = useCallback((id) => {
+        setRewards(prev => prev.filter(r => r._id !== id));
+    }, []);
+
+    // Update dashboard stats
+    const updateDashboard = useCallback((updates) => {
+        setDashboard(prev => ({ ...prev, ...updates }));
     }, []);
 
     const contextValue = useMemo(() => ({
@@ -194,15 +264,31 @@ export function DataProvider({ children }) {
         refreshStatistics,
         refreshAll,
 
-        // CRUD helpers
+        // Student CRUD helpers
         addStudent,
         updateStudent,
-        deleteStudent
+        deleteStudent,
+
+        // Lesson CRUD helpers
+        addLesson,
+        updateLesson,
+        deleteLesson,
+
+        // Reward CRUD helpers
+        addReward,
+        updateReward,
+        deleteReward,
+
+        // Dashboard helper
+        updateDashboard
     }), [
         lessons, students, rewards, dashboard, statistics,
         initialLoading, dataLoaded, loadingTimeout,
         refreshLessons, refreshStudents, refreshRewards, refreshDashboard, refreshStatistics, refreshAll,
-        addStudent, updateStudent, deleteStudent
+        addStudent, updateStudent, deleteStudent,
+        addLesson, updateLesson, deleteLesson,
+        addReward, updateReward, deleteReward,
+        updateDashboard
     ]);
 
     return (

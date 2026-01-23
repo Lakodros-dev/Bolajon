@@ -2,12 +2,14 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import { useData } from '@/context/DataContext';
 import Header from '@/components/dashboard/Header';
 import Link from 'next/link';
 import { ArrowLeft, Search, Trophy } from 'lucide-react';
 
 export default function LeaderboardPage() {
     const { getAuthHeader } = useAuth();
+    const { students: cachedStudents } = useData();
     const [students, setStudents] = useState([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
@@ -36,6 +38,19 @@ export default function LeaderboardPage() {
     useEffect(() => {
         fetchLeaderboard();
     }, [fetchLeaderboard]);
+
+    // Update leaderboard when cached students change (real-time)
+    useEffect(() => {
+        if (!search && students.length > 0) {
+            // Update stars from cache
+            setStudents(prevStudents => 
+                prevStudents.map(student => {
+                    const cached = cachedStudents.find(s => s._id === student._id);
+                    return cached ? { ...student, stars: cached.stars } : student;
+                })
+            );
+        }
+    }, [cachedStudents, search, students.length]);
 
     // Debounced search
     const handleSearch = (value) => {
