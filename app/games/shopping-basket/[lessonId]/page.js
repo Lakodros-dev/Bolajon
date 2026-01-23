@@ -29,6 +29,8 @@ export default function ShoppingBasketGame() {
     const [isShaking, setIsShaking] = useState(false);
     const [completedItems, setCompletedItems] = useState([]);
     const [showConfetti, setShowConfetti] = useState(false);
+    const [touchStartPos, setTouchStartPos] = useState(null);
+    const [isDragging, setIsDragging] = useState(false);
 
     const MAX_MISTAKES = 3;
 
@@ -81,15 +83,23 @@ export default function ShoppingBasketGame() {
         const task = vocab[Math.floor(Math.random() * vocab.length)];
         setCurrentTask(task);
 
-        // Generate items (correct + random others)
+        // Generate more diverse items (correct + more random others)
         const others = vocab.filter(v => v.word !== task.word);
-        const shuffledOthers = others.sort(() => Math.random() - 0.5).slice(0, Math.min(5, others.length));
+        const shuffledOthers = others.sort(() => Math.random() - 0.5).slice(0, Math.min(8, others.length)); // 8 ta boshqa item
         const allItems = [task, ...shuffledOthers].sort(() => Math.random() - 0.5);
         
         setItems(allItems);
         setBasket([]);
         setFeedback(null);
     }, []);
+
+    const handleItemClick = (item) => {
+        // Faqat drag bo'lmagan holda click ishlasin
+        if (!isDragging && !currentTask) return;
+        if (!isDragging) {
+            handleItemDrop(item);
+        }
+    };
 
     const handleDragStart = (e, item) => {
         setDraggedItem(item);
@@ -99,27 +109,52 @@ export default function ShoppingBasketGame() {
     };
 
     const handleTouchStart = (e, item) => {
+        const touch = e.touches[0];
+        setTouchStartPos({ x: touch.clientX, y: touch.clientY });
         setDraggedItem(item);
+        setIsDragging(false);
+    };
+
+    const handleTouchMove = (e) => {
+        if (!touchStartPos) return;
+        const touch = e.touches[0];
+        const deltaX = Math.abs(touch.clientX - touchStartPos.x);
+        const deltaY = Math.abs(touch.clientY - touchStartPos.y);
+        
+        // Agar 10px dan ko'proq harakat qilsa, drag deb hisoblaymiz
+        if (deltaX > 10 || deltaY > 10) {
+            setIsDragging(true);
+        }
     };
 
     const handleTouchEnd = (e, item) => {
-        if (!currentTask) return;
+        if (!currentTask || !draggedItem) {
+            setDraggedItem(null);
+            setTouchStartPos(null);
+            setIsDragging(false);
+            return;
+        }
         
-        // Check if touch ended over basket
-        const touch = e.changedTouches[0];
-        const basketElement = document.getElementById('basket-drop-zone');
-        if (basketElement) {
-            const rect = basketElement.getBoundingClientRect();
-            if (
-                touch.clientX >= rect.left &&
-                touch.clientX <= rect.right &&
-                touch.clientY >= rect.top &&
-                touch.clientY <= rect.bottom
-            ) {
-                handleItemDrop(item);
+        // Agar drag qilingan bo'lsa, basket ustida ekanligini tekshiramiz
+        if (isDragging) {
+            const touch = e.changedTouches[0];
+            const basketElement = document.getElementById('basket-drop-zone');
+            if (basketElement) {
+                const rect = basketElement.getBoundingClientRect();
+                if (
+                    touch.clientX >= rect.left &&
+                    touch.clientX <= rect.right &&
+                    touch.clientY >= rect.top &&
+                    touch.clientY <= rect.bottom
+                ) {
+                    handleItemDrop(item);
+                }
             }
         }
+        
         setDraggedItem(null);
+        setTouchStartPos(null);
+        setIsDragging(false);
     };
 
     const handleDragOver = (e) => {
@@ -387,19 +422,24 @@ export default function ShoppingBasketGame() {
                                 </h6>
                                 <div className="row g-2">
                                     {items.map((item, index) => (
-                                        <div key={index} className="col-4">
+                                        <div key={index} className="col-4 col-md-3">
                                             <div
                                                 draggable
+                                                onClick={() => handleItemClick(item)}
                                                 onDragStart={(e) => handleDragStart(e, item)}
                                                 onTouchStart={(e) => handleTouchStart(e, item)}
+                                                onTouchMove={(e) => handleTouchMove(e)}
                                                 onTouchEnd={(e) => handleTouchEnd(e, item)}
                                                 className="card rounded-3 text-center p-2 border-0"
                                                 style={{ 
-                                                    cursor: 'grab', 
+                                                    cursor: 'pointer', 
                                                     transition: 'all 0.2s',
-                                                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                                                    boxShadow: draggedItem?.word === item.word && isDragging ? '0 8px 16px rgba(0,0,0,0.3)' : '0 2px 4px rgba(0,0,0,0.1)',
                                                     background: 'white',
-                                                    height: '100px'
+                                                    height: '110px',
+                                                    transform: draggedItem?.word === item.word && isDragging ? 'scale(1.1)' : 'scale(1)',
+                                                    opacity: draggedItem?.word === item.word && isDragging ? 0.7 : 1,
+                                                    touchAction: 'none'
                                                 }}
                                             >
                                                 {item.image ? (
@@ -409,8 +449,9 @@ export default function ShoppingBasketGame() {
                                                         style={{ 
                                                             width: '100%', 
                                                             height: '100%', 
-                                                            objectFit: 'cover',
-                                                            borderRadius: '8px'
+                                                            objectFit: 'contain',
+                                                            borderRadius: '8px',
+                                                            pointerEvents: 'none'
                                                         }} 
                                                     />
                                                 ) : (

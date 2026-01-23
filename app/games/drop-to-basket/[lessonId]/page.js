@@ -411,9 +411,9 @@ export default function DropToBasketGame() {
                         <div
                             className="rounded-circle d-flex align-items-center justify-content-center shadow-lg"
                             style={{
-                                width: '100px',
-                                height: '100px',
-                                background: item.image ? 'white' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                width: '110px',
+                                height: '110px',
+                                background: 'white',
                                 border: '4px solid white',
                                 boxShadow: '0 8px 20px rgba(0,0,0,0.3)',
                                 overflow: 'hidden',
@@ -427,10 +427,10 @@ export default function DropToBasketGame() {
                                     src={item.image}
                                     alt={item.word}
                                     style={{
-                                        width: '80px',
-                                        height: '80px',
-                                        objectFit: 'cover',
-                                        borderRadius: '50%'
+                                        width: '100%',
+                                        height: '100%',
+                                        objectFit: 'contain',
+                                        padding: '8px'
                                     }}
                                 />
                             ) : (
