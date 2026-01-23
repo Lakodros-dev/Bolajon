@@ -1,7 +1,9 @@
 'use client';
 
 import { useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { useData } from '@/context/DataContext';
+import { useSubscription } from '@/components/SubscriptionModal';
 import Header from '@/components/dashboard/Header';
 import Link from 'next/link';
 
@@ -22,7 +24,9 @@ const levelColors = {
 };
 
 export default function LessonsPage() {
+    const router = useRouter();
     const { lessons, dashboard, initialLoading, loadingTimeout } = useData();
+    const { requireSubscription } = useSubscription();
 
     const lessonsByLevel = useMemo(() => {
         return lessons.reduce((acc, lesson) => {
@@ -70,7 +74,11 @@ export default function LessonsPage() {
                                 <div className="row g-3">
                                     {lessonsByLevel[level].map((lesson, idx) => (
                                         <div key={lesson._id} className="col-12 col-lg-6">
-                                            <Link href={`/dashboard/lessons/${lesson._id}`} className="text-decoration-none">
+                                            <div 
+                                                onClick={() => requireSubscription(() => router.push(`/dashboard/lessons/${lesson._id}`))}
+                                                className="text-decoration-none"
+                                                style={{ cursor: 'pointer' }}
+                                            >
                                                 <div
                                                     data-tour={levelIdx === 0 && idx === 0 ? "lesson-card" : undefined}
                                                     className="card border rounded-4 lesson-card h-100"
@@ -78,7 +86,7 @@ export default function LessonsPage() {
                                                     <div className="card-body p-3">
                                                         <div className="d-flex gap-3 align-items-center">
                                                             <div
-                                                                className="rounded-3 flex-shrink-0 overflow-hidden d-flex align-items-center justify-content-center"
+                                                                className="rounded-circle flex-shrink-0 overflow-hidden d-flex align-items-center justify-content-center"
                                                                 style={{
                                                                     width: '80px',
                                                                     height: '80px',
@@ -96,7 +104,7 @@ export default function LessonsPage() {
                                                                         }}
                                                                         onError={(e) => {
                                                                             e.target.style.display = 'none';
-                                                                            e.target.nextSibling.style.display = 'flex';
+                                                                            e.target.nextElementSibling.style.display = 'flex';
                                                                         }}
                                                                     />
                                                                 ) : null}
@@ -107,9 +115,14 @@ export default function LessonsPage() {
                                                                         justifyContent: 'center',
                                                                         width: '100%',
                                                                         height: '100%',
+                                                                        flexDirection: 'column',
+                                                                        gap: '4px'
                                                                     }}
                                                                 >
-                                                                    <span className="material-symbols-outlined" style={{ fontSize: '32px', color: colors.color }}>
+                                                                    <span className="fw-bold" style={{ fontSize: '28px', color: colors.color }}>
+                                                                        {idx + 1}
+                                                                    </span>
+                                                                    <span className="material-symbols-outlined" style={{ fontSize: '24px', color: colors.color, opacity: 0.6 }}>
                                                                         play_lesson
                                                                     </span>
                                                                 </div>
@@ -136,7 +149,7 @@ export default function LessonsPage() {
                                                         </div>
                                                     </div>
                                                 </div>
-                                            </Link>
+                                            </div>
                                         </div>
                                     ))}
                                 </div>

@@ -116,3 +116,56 @@ export async function adminOnly(request) {
 export async function teacherOnly(request) {
     return authorize(request, ['teacher']);
 }
+
+/**
+ * Check if user has valid subscription
+ * @param {Request} request - Next.js request object
+ * @returns {Object} { success, user, error, daysRemaining }
+ */
+export async function requireSubscription(request) {
+    const authResult = await authenticate(request);
+
+    if (!authResult.success) {
+        return authResult;
+    }
+
+    const user = authResult.user;
+
+    // Admin always has access
+    if (user.role === 'admin') {
+        return {
+            success: true,
+            user,
+            daysRemaining: 999
+        };
+    }
+
+    // Check subscription
+    await dbConnect();
+    const freshUser = await User.findById(user._id);
+    
+    if (!freshUser) {
+        return {
+            success: false,
+            error: 'User not found.',
+            status: 404
+        };
+    }
+
+    const daysRemaining = freshUser.getDaysRemaining();
+
+    if (daysRemaining <= 0) {
+        return {
+            success: false,
+            error: 'Obuna muddati tugagan. Davom ettirish uchun to\'lov qiling.',
+            status: 402, // Payment Required
+            daysRemaining: 0
+        };
+    }
+
+    return {
+        success: true,
+        user: freshUser,
+        daysRemaining
+    };
+}

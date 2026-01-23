@@ -28,6 +28,15 @@ export default function DropToBasketGame() {
         if (lessonId) fetchLesson();
     }, [lessonId]);
 
+    // Cleanup: sahifadan chiqishda ovozni to'xtatish
+    useEffect(() => {
+        return () => {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+            }
+        };
+    }, []);
+
     const fetchLesson = async () => {
         try {
             const res = await fetch(`/api/lessons/${lessonId}`);
@@ -69,9 +78,10 @@ export default function DropToBasketGame() {
             setTimeout(() => {
                 setFallingItems(prev => {
                     const filtered = prev.filter(n => n.id !== newItem.id);
-                    if (newItem.isCorrect && prev.find(n => n.id === newItem.id)) {
-                        handleMissed();
-                    }
+                    // O'tkazib yuborish xato hisoblanmaydi - faqat noto'g'ri so'zni bosish xato
+                    // if (newItem.isCorrect && prev.find(n => n.id === newItem.id)) {
+                    //     handleMissed();
+                    // }
                     return filtered;
                 });
             }, FALL_DURATION);
@@ -79,16 +89,6 @@ export default function DropToBasketGame() {
 
         return () => clearInterval(interval);
     }, [gameOver, currentWord, lesson, nextId]);
-
-    const handleMissed = () => {
-        setMistakes(prev => {
-            const newMistakes = prev + 1;
-            if (newMistakes >= MAX_MISTAKES) {
-                setTimeout(() => setGameOver(true), 500);
-            }
-            return newMistakes;
-        });
-    };
 
     const handleItemClick = (item) => {
         if (gameOver) return;
@@ -114,14 +114,17 @@ export default function DropToBasketGame() {
                 }
             }, 1500);
         } else {
-            setMistakes(prev => prev + 1);
+            // Faqat noto'g'ri so'zni bosganda xato hisoblanadi
+            const newMistakes = mistakes + 1;
+            setMistakes(newMistakes);
             setFeedback({ type: 'error', message: '✗ Try again!' });
             speakText('Try again!');
             setFallingItems(prev => prev.filter(n => n.id !== item.id));
             
             setTimeout(() => setFeedback(null), 1000);
             
-            if (mistakes + 1 >= MAX_MISTAKES) {
+            // 5 ta xato bo'lganda o'yin tugaydi
+            if (newMistakes >= MAX_MISTAKES) {
                 setTimeout(() => setGameOver(true), 1000);
             }
         }

@@ -5,11 +5,10 @@ import Link from 'next/link';
 
 const COLORS = ['red', 'blue', 'yellow', 'green', 'black'];
 const TARGET_SCORE = 15;
-const GAME_DURATION = 180;
 const GAME_AREA_PADDING = 10;
 const MAX_TARGET_WAIT = 10000; // 10 sekund - maksimal kutish vaqti
 const RETRY_DELAY = 2000; // 2 sekund - qayta urinish orasidagi pauza
-const SPEAK_INTERVAL_MS = 6000; // Har 6 sekundda rang nomi avtomatik aytiladi
+const SPEAK_INTERVAL_MS = 3000; // Har 3 sekundda rang nomi avtomatik aytiladi
 
 const colorStyles = {
     red: { bg: '#E53935', shadow: '#B71C1C' },
@@ -30,13 +29,14 @@ const colorNames = {
 export default function PopTheBalloonGame() {
     const [balloons, setBalloons] = useState([]);
     const [score, setScore] = useState(0);
+    const [mistakes, setMistakes] = useState(0);
     const [targetColor, setTargetColor] = useState('');
-    const [timeLeft, setTimeLeft] = useState(GAME_DURATION);
     const [gameActive, setGameActive] = useState(false);
     const [gameStarted, setGameStarted] = useState(false);
     const [showWarning, setShowWarning] = useState(false);
-    const [timeTaken, setTimeTaken] = useState(0);
     const [isSpeaking, setIsSpeaking] = useState(false);
+
+    const MAX_MISTAKES = 5;
 
     const balloonIdRef = useRef(0);
     const lastColorRef = useRef('');
@@ -131,29 +131,40 @@ export default function PopTheBalloonGame() {
         }
     }, [gameStarted, selectNextColor]);
 
-    // Timer
-    useEffect(() => {
-        if (!gameActive || !gameStarted) return;
-        const timer = setInterval(() => {
-            setTimeLeft((prev) => {
-                if (prev <= 1) {
-                    setGameActive(false);
-                    return 0;
-                }
-                return prev - 1;
-            });
-        }, 1000);
-        return () => clearInterval(timer);
-    }, [gameActive, gameStarted]);
-
     // Spawn config
     const getSpawnConfig = useCallback((currentScore) => {
-        let spawnInterval = 1800 - currentScore * 30;
-        let balloonCount = 1;
-        if (currentScore >= 5) balloonCount = 2;
-        if (currentScore >= 10) balloonCount = 3;
-        spawnInterval = Math.max(1000, spawnInterval);
+        let spawnInterval = 2000 - currentScore * 20;
+        let balloonCount = 2;
+        if (currentScore >= 7) balloonCount = 3;
+        if (currentScore >= 12) balloonCount = 4;
+        spawnInterval = Math.max(1200, spawnInterval);
         return { spawnInterval, balloonCount };
+    }, []);
+
+    // Sharlar bir-biriga tegmaslik uchun pozitsiya tekshirish
+    const getValidPosition = useCallback((existingBalloons) => {
+        const minDistance = 15; // Minimal masofa (%)
+        let attempts = 0;
+        const maxAttempts = 20;
+        
+        while (attempts < maxAttempts) {
+            const randomX = GAME_AREA_PADDING + Math.random() * (100 - 2 * GAME_AREA_PADDING);
+            
+            // Boshqa sharlar bilan masofani tekshirish
+            const isTooClose = existingBalloons.some(balloon => {
+                const distance = Math.abs(balloon.x - randomX);
+                return distance < minDistance;
+            });
+            
+            if (!isTooClose) {
+                return randomX;
+            }
+            
+            attempts++;
+        }
+        
+        // Agar joy topilmasa, tasodifiy joy qaytarish
+        return GAME_AREA_PADDING + Math.random() * (100 - 2 * GAME_AREA_PADDING);
     }, []);
 
     // Sharlarni yaratish - garantiyalangan target rang bilan
@@ -166,39 +177,43 @@ export default function PopTheBalloonGame() {
             const now = Date.now();
             const timeSinceLastTarget = now - lastTargetSpawnTimeRef.current;
 
-            const newBalloons = Array.from({ length: config.balloonCount }).map((_, index) => {
-                let balloonColor;
+            setBalloons((prevBalloons) => {
+                const newBalloons = [];
+                
+                for (let i = 0; i < config.balloonCount; i++) {
+                    let balloonColor;
 
-                // Agar 10 sekunddan ko'p vaqt o'tgan bo'lsa va target rang chiqmagan bo'lsa
-                // yoki bu birinchi shar bo'lsa va target rang hali chiqmagan bo'lsa
-                if (!targetColorSpawnedRef.current && timeSinceLastTarget >= MAX_TARGET_WAIT - config.spawnInterval) {
-                    balloonColor = targetColor;
-                    targetColorSpawnedRef.current = true;
-                } else {
-                    // Tasodifiy rang, lekin target rang ham chiqishi mumkin
-                    balloonColor = COLORS[Math.floor(Math.random() * COLORS.length)];
-                    if (balloonColor === targetColor) {
+                    // Agar 10 sekunddan ko'p vaqt o'tgan bo'lsa va target rang chiqmagan bo'lsa
+                    // yoki bu birinchi shar bo'lsa va target rang hali chiqmagan bo'lsa
+                    if (!targetColorSpawnedRef.current && timeSinceLastTarget >= MAX_TARGET_WAIT - config.spawnInterval) {
+                        balloonColor = targetColor;
                         targetColorSpawnedRef.current = true;
+                    } else {
+                        // Tasodifiy rang, lekin target rang ham chiqishi mumkin
+                        balloonColor = COLORS[Math.floor(Math.random() * COLORS.length)];
+                        if (balloonColor === targetColor) {
+                            targetColorSpawnedRef.current = true;
+                        }
                     }
+
+                    const randomX = getValidPosition([...prevBalloons, ...newBalloons]);
+                    newBalloons.push({
+                        id: balloonIdRef.current++,
+                        color: balloonColor,
+                        x: randomX,
+                        createdAt: Date.now(),
+                        popped: false,
+                    });
                 }
 
-                const randomX = GAME_AREA_PADDING + Math.random() * (100 - 2 * GAME_AREA_PADDING);
-                return {
-                    id: balloonIdRef.current++,
-                    color: balloonColor,
-                    x: randomX,
-                    createdAt: Date.now(),
-                    popped: false,
-                };
+                return [...prevBalloons, ...newBalloons];
             });
-
-            setBalloons((prev) => [...prev, ...newBalloons]);
         };
 
         spawnBalloon();
         const intervalId = setInterval(spawnBalloon, config.spawnInterval);
         return () => clearInterval(intervalId);
-    }, [gameActive, gameStarted, score, targetColor, getSpawnConfig]);
+    }, [gameActive, gameStarted, score, targetColor, getSpawnConfig, getValidPosition]);
 
     // Garantiyalangan target rang - agar 10 sekund ichida chiqmasa, majburiy chiqarish
     useEffect(() => {
@@ -211,22 +226,24 @@ export default function PopTheBalloonGame() {
             // Agar 10 sekund o'tgan bo'lsa va target rang hali chiqmagan bo'lsa
             if (!targetColorSpawnedRef.current && timeSinceLastTarget >= MAX_TARGET_WAIT) {
                 // Majburiy target rangdagi shar chiqarish
-                const randomX = GAME_AREA_PADDING + Math.random() * (100 - 2 * GAME_AREA_PADDING);
-                const forcedBalloon = {
-                    id: balloonIdRef.current++,
-                    color: targetColor,
-                    x: randomX,
-                    createdAt: Date.now(),
-                    popped: false,
-                };
-                setBalloons((prev) => [...prev, forcedBalloon]);
-                targetColorSpawnedRef.current = true;
+                setBalloons((prevBalloons) => {
+                    const randomX = getValidPosition(prevBalloons);
+                    const forcedBalloon = {
+                        id: balloonIdRef.current++,
+                        color: targetColor,
+                        x: randomX,
+                        createdAt: Date.now(),
+                        popped: false,
+                    };
+                    targetColorSpawnedRef.current = true;
+                    return [...prevBalloons, forcedBalloon];
+                });
             }
         };
 
         const intervalId = setInterval(checkAndSpawnTarget, 1000);
         return () => clearInterval(intervalId);
-    }, [gameActive, gameStarted, targetColor]);
+    }, [gameActive, gameStarted, targetColor, getValidPosition]);
 
     // Eski sharlarni tozalash va target rang o'tib ketganini tekshirish
     useEffect(() => {
@@ -275,19 +292,24 @@ export default function PopTheBalloonGame() {
             setScore(newScore);
             if (newScore >= TARGET_SCORE) {
                 setGameActive(false);
-                setTimeTaken(GAME_DURATION - timeLeft);
             } else {
                 selectNextColor();
             }
         } else {
+            const newMistakes = mistakes + 1;
+            setMistakes(newMistakes);
             setShowWarning(true);
             setTimeout(() => setShowWarning(false), 500);
+            
+            if (newMistakes >= MAX_MISTAKES) {
+                setGameActive(false);
+            }
         }
-    }, [score, gameActive, timeLeft, targetColor, selectNextColor]);
+    }, [score, gameActive, targetColor, selectNextColor, mistakes]);
 
     const handlePlayAgain = () => {
         setScore(0);
-        setTimeLeft(GAME_DURATION);
+        setMistakes(0);
         setGameActive(true);
         setGameStarted(false);
         setBalloons([]);
@@ -307,14 +329,6 @@ export default function PopTheBalloonGame() {
         }
     };
 
-    const minutes = Math.floor(timeLeft / 60);
-    const seconds = timeLeft % 60;
-    const timeString = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-
-    const timeTakenMinutes = Math.floor(timeTaken / 60);
-    const timeTakenSeconds = timeTaken % 60;
-    const timeTakenString = `${timeTakenMinutes}:${timeTakenSeconds.toString().padStart(2, '0')}`;
-
     return (
         <div
             ref={gameAreaRef}
@@ -324,6 +338,7 @@ export default function PopTheBalloonGame() {
                 inset: 0,
                 overflow: 'hidden',
                 background: 'linear-gradient(to bottom, #bfdbfe, #dbeafe, #fef3c7)',
+                touchAction: 'none', // Disable touch scrolling
             }}
         >
             <style jsx global>{`
@@ -377,73 +392,89 @@ export default function PopTheBalloonGame() {
                 href="/dashboard/games"
                 style={{
                     position: 'fixed',
-                    top: '12px',
-                    left: '12px',
+                    top: '16px',
+                    left: '16px',
                     zIndex: 100,
-                    width: '44px',
-                    height: '44px',
+                    width: '48px',
+                    height: '48px',
                     borderRadius: '50%',
                     backgroundColor: 'white',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
                     textDecoration: 'none',
+                    transition: 'transform 0.2s',
                 }}
+                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+                onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
             >
-                <span className="material-symbols-outlined" style={{ fontSize: '22px', color: '#374151' }}>arrow_back</span>
+                <span className="material-symbols-outlined" style={{ fontSize: '24px', color: '#374151' }}>arrow_back</span>
             </Link>
 
-            {/* Score Board */}
+            {/* Score Board - Responsive */}
             <div style={{
-                position: 'absolute',
+                position: 'fixed',
                 top: '16px',
-                left: 0,
-                right: 0,
-                zIndex: 30,
-                padding: '0 16px',
+                right: '16px',
+                zIndex: 100,
                 display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
+                gap: '8px',
             }}>
                 <div style={{
-                    backgroundColor: 'white',
+                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                    backdropFilter: 'blur(10px)',
                     borderRadius: '12px',
-                    padding: '10px 20px',
+                    padding: '8px 12px',
                     boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                    marginLeft: '60px'
+                    minWidth: '70px',
+                    textAlign: 'center'
                 }}>
-                    <div style={{ fontSize: '12px', color: '#6b7280', fontWeight: '500' }}>⏱️ Time</div>
-                    <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#2563eb' }}>{timeString}</div>
+                    <div style={{ fontSize: '10px', color: '#6b7280', fontWeight: '600', marginBottom: '2px' }}>🎯</div>
+                    <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#16a34a', lineHeight: 1 }}>{score}<span style={{ fontSize: '12px', color: '#9ca3af' }}>/15</span></div>
                 </div>
                 <div style={{
-                    backgroundColor: 'white',
+                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                    backdropFilter: 'blur(10px)',
                     borderRadius: '12px',
-                    padding: '10px 20px',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                    padding: '8px 12px',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                    minWidth: '70px',
+                    textAlign: 'center'
                 }}>
-                    <div style={{ fontSize: '12px', color: '#6b7280', fontWeight: '500' }}>🎯 Score</div>
-                    <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#16a34a' }}>{score}/15</div>
+                    <div style={{ fontSize: '10px', color: '#6b7280', fontWeight: '600', marginBottom: '2px' }}>❌</div>
+                    <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#dc2626', lineHeight: 1 }}>{mistakes}<span style={{ fontSize: '12px', color: '#9ca3af' }}>/5</span></div>
                 </div>
             </div>
 
-            {/* Target Color - with speaker button */}
+            {/* Target Color Card - Responsive */}
             {targetColor && gameActive && (
                 <div
                     onClick={handleSpeakColor}
                     style={{
-                        position: 'absolute',
-                        top: '100px',
+                        position: 'fixed',
+                        top: '90px',
                         left: '50%',
                         transform: 'translateX(-50%)',
-                        zIndex: 30,
-                        textAlign: 'center',
-                        backgroundColor: 'rgba(255,255,255,0.95)',
-                        padding: '20px 40px',
-                        borderRadius: '20px',
-                        boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
-                        border: '4px solid #9ca3af',
+                        zIndex: 90,
+                        width: 'calc(100% - 32px)',
+                        maxWidth: '420px',
+                        backgroundColor: 'rgba(255, 255, 255, 0.98)',
+                        backdropFilter: 'blur(20px)',
+                        padding: '20px 24px',
+                        borderRadius: '24px',
+                        boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+                        border: '2px solid rgba(255,255,255,0.8)',
                         cursor: 'pointer',
+                        transition: 'all 0.3s ease',
+                    }}
+                    onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = 'translateX(-50%) translateY(-2px)';
+                        e.currentTarget.style.boxShadow = '0 12px 40px rgba(0,0,0,0.15)';
+                    }}
+                    onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = 'translateX(-50%) translateY(0)';
+                        e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.12)';
                     }}
                 >
                     {/* Speaker icon */}
@@ -455,38 +486,41 @@ export default function PopTheBalloonGame() {
                         }}
                         style={{
                             position: 'absolute',
-                            top: '10px',
-                            right: '10px',
-                            width: '36px',
-                            height: '36px',
+                            top: '12px',
+                            right: '12px',
+                            width: '40px',
+                            height: '40px',
                             borderRadius: '50%',
                             border: 'none',
-                            backgroundColor: 'rgba(0,0,0,0.05)',
+                            backgroundColor: isSpeaking ? 'rgba(37, 99, 235, 0.1)' : 'rgba(0,0,0,0.05)',
                             cursor: 'pointer',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
+                            transition: 'all 0.2s',
                         }}
                     >
-                        <span className="material-symbols-outlined" style={{ fontSize: '20px', color: isSpeaking ? '#2563eb' : '#6b7280' }}>
-                            {isSpeaking ? 'volume_up' : 'volume_up'}
+                        <span className="material-symbols-outlined" style={{ fontSize: '22px', color: isSpeaking ? '#2563eb' : '#6b7280' }}>
+                            volume_up
                         </span>
                     </button>
 
-                    <p style={{ fontSize: '14px', color: '#6b7280', marginBottom: '8px', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '1px' }}>Pop the</p>
-                    <p style={{
-                        fontSize: '48px',
-                        fontWeight: 'bold',
-                        color: '#6b7280', // Kulrang rang - o'sha rangda emas
-                        animation: 'pulse 1.5s infinite',
-                        margin: '4px 0',
-                        lineHeight: 1,
-                    }}>
-                        {colorNames[targetColor]}
-                    </p>
-                    <p style={{ fontSize: '11px', color: '#9ca3af', marginTop: '8px' }}>
-                        🔊 Bosib eshiting
-                    </p>
+                    <div style={{ textAlign: 'center', paddingRight: '40px' }}>
+                        <p style={{ fontSize: '13px', color: '#9ca3af', marginBottom: '8px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '1px' }}>Pop the</p>
+                        <p style={{
+                            fontSize: '42px',
+                            fontWeight: 'bold',
+                            color: '#1f2937',
+                            margin: '0',
+                            lineHeight: 1,
+                            letterSpacing: '-1px'
+                        }}>
+                            {colorNames[targetColor]}
+                        </p>
+                        <p style={{ fontSize: '11px', color: '#d1d5db', marginTop: '8px', fontWeight: '500' }}>
+                            🔊 Tap to hear
+                        </p>
+                    </div>
                 </div>
             )}
 
@@ -583,13 +617,9 @@ export default function PopTheBalloonGame() {
                     }}>
                         <h1 style={{ fontSize: '40px', fontWeight: 'bold', color: '#16a34a', marginBottom: '8px' }}>You Win!</h1>
                         <div style={{ fontSize: '56px', marginBottom: '16px' }}>🎉</div>
-                        <div style={{ backgroundColor: '#dcfce7', borderRadius: '12px', padding: '16px', marginBottom: '16px' }}>
+                        <div style={{ backgroundColor: '#dcfce7', borderRadius: '12px', padding: '16px', marginBottom: '24px' }}>
                             <p style={{ color: '#6b7280', fontSize: '14px', marginBottom: '4px' }}>Total Correct Balloons</p>
                             <p style={{ fontSize: '36px', fontWeight: 'bold', color: '#16a34a' }}>15</p>
-                        </div>
-                        <div style={{ backgroundColor: '#dbeafe', borderRadius: '12px', padding: '16px', marginBottom: '24px' }}>
-                            <p style={{ color: '#6b7280', fontSize: '14px', marginBottom: '4px' }}>Time Taken</p>
-                            <p style={{ fontSize: '36px', fontWeight: 'bold', color: '#2563eb' }}>{timeTakenString}</p>
                         </div>
                         <div style={{ display: 'flex', gap: '12px' }}>
                             <Link
@@ -630,7 +660,7 @@ export default function PopTheBalloonGame() {
             )}
 
             {/* Game Over Screen */}
-            {!gameActive && score < TARGET_SCORE && gameStarted && (
+            {!gameActive && mistakes >= MAX_MISTAKES && (
                 <div style={{
                     position: 'fixed',
                     inset: 0,
@@ -650,9 +680,9 @@ export default function PopTheBalloonGame() {
                         boxShadow: '0 25px 50px rgba(0,0,0,0.25)'
                     }}>
                         <h1 style={{ fontSize: '40px', fontWeight: 'bold', color: '#dc2626', marginBottom: '8px' }}>Game Over!</h1>
-                        <div style={{ fontSize: '56px', marginBottom: '16px' }}>⏰</div>
+                        <div style={{ fontSize: '56px', marginBottom: '16px' }}>😢</div>
                         <p style={{ color: '#6b7280', fontSize: '18px', marginBottom: '24px' }}>
-                            You popped <span style={{ fontWeight: 'bold', color: '#2563eb' }}>{score}/15</span> balloons
+                            Too many mistakes! You popped <span style={{ fontWeight: 'bold', color: '#16a34a' }}>{score}</span> correct balloons
                         </p>
                         <div style={{ display: 'flex', gap: '12px' }}>
                             <Link

@@ -1,7 +1,9 @@
 'use client';
 
 import { useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import { useData } from '@/context/DataContext';
+import { useSubscription } from '@/components/SubscriptionModal';
 import Header from '@/components/dashboard/Header';
 import Link from 'next/link';
 
@@ -13,7 +15,9 @@ const cardColors = [
 ];
 
 export default function StudentsPage() {
+    const router = useRouter();
     const { students, initialLoading } = useData();
+    const { requireSubscription } = useSubscription();
     const tabsRef = useRef(null);
 
     const tabs = [
@@ -131,7 +135,12 @@ export default function StudentsPage() {
                         })}
 
                         <div className="col-12 col-lg-6">
-                            <Link href="/dashboard/students/add" data-tour="add-student-btn" className="text-decoration-none">
+                            <div 
+                                onClick={() => requireSubscription(() => router.push('/dashboard/students/add'))}
+                                data-tour="add-student-btn" 
+                                className="text-decoration-none"
+                                style={{ cursor: 'pointer' }}
+                            >
                                 <div className="card border-2 border-dashed rounded-4 h-100" style={{ borderColor: '#cbd5e1', minHeight: '150px' }}>
                                     <div className="card-body p-4 text-center d-flex align-items-center justify-content-center">
                                         <div className="d-flex flex-column align-items-center gap-2">
@@ -142,7 +151,7 @@ export default function StudentsPage() {
                                         </div>
                                     </div>
                                 </div>
-                            </Link>
+                            </div>
                         </div>
 
                         {students.length === 0 && (

@@ -47,6 +47,15 @@ export default function LessonDetailPage() {
     const fetchLesson = async () => {
         try {
             const res = await fetch(`/api/lessons/${params.id}`);
+            
+            // Handle subscription expired
+            if (res.status === 402) {
+                const data = await res.json();
+                console.log('Subscription expired:', data.error);
+                setLoading(false);
+                return;
+            }
+            
             const data = await res.json();
             if (data.success) {
                 setLesson(data.lesson);

@@ -14,10 +14,10 @@ export default function Header({ title, showStars = false, stars = 0, showSubscr
                 <Image
                     src="/logo.png"
                     alt="Bolajon"
-                    width={42}
-                    height={42}
+                    width={120}
+                    height={40}
                     className="rounded-3"
-                    style={{ objectFit: 'contain' }}
+                    style={{ objectFit: 'cover' }}
                 />
 
                 <div className="d-flex align-items-center gap-2">
@@ -56,14 +56,6 @@ export default function Header({ title, showStars = false, stars = 0, showSubscr
                             >
                                 {daysRemaining} kun
                             </span>
-                        </div>
-                    )}
-
-                    {/* Stars */}
-                    {showStars && (
-                        <div className="d-flex align-items-center gap-1 px-2 py-1 rounded-pill" style={{ backgroundColor: '#fef3c7' }}>
-                            <span className="material-symbols-outlined filled text-warning" style={{ fontSize: '18px' }}>star</span>
-                            <span className="fw-bold small" style={{ color: '#92400e' }}>{stars}</span>
                         </div>
                     )}
 

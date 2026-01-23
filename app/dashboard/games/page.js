@@ -1,15 +1,19 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Header from '@/components/dashboard/Header';
 import Link from 'next/link';
 import YinYangProgress from '@/components/YinYangProgress';
 import { useData } from '@/context/DataContext';
 import { useAuth } from '@/context/AuthContext';
+import { useSubscription } from '@/components/SubscriptionModal';
 
 export default function GamesPage() {
+    const router = useRouter();
     const { students, lessons: allLessons, initialLoading } = useData();
     const { getAuthHeader } = useAuth();
+    const { requireSubscription } = useSubscription();
     const [selectedStudent, setSelectedStudent] = useState(null);
     const [lessons, setLessons] = useState([]);
     const [progress, setProgress] = useState({ completedLessons: [], wonGames: [] });
@@ -52,6 +56,14 @@ export default function GamesPage() {
             const res = await fetch(`/api/game-progress?studentId=${selectedStudent._id}`, {
                 headers: getAuthHeader()
             });
+            
+            // Handle subscription expired
+            if (res.status === 402) {
+                const data = await res.json();
+                console.log('Subscription expired:', data.error);
+                return;
+            }
+            
             const data = await res.json();
             if (data.completedLessons) {
                 setProgress(data);
@@ -240,27 +252,30 @@ export default function GamesPage() {
                                                         {lesson.description?.substring(0, 50)}...
                                                     </p>
                                                     {lesson.gameType && lesson.gameType !== 'none' ? (
-                                                        <Link
-                                                            href={`/games/${
-                                                                lesson.gameType === 'vocabulary' 
-                                                                    ? 'vocabulary/' + lesson._id 
-                                                                    : lesson.gameType === 'shopping-basket'
-                                                                    ? 'shopping-basket/' + lesson._id
-                                                                    : lesson.gameType === 'catch-the-number'
-                                                                    ? 'catch-the-number/' + lesson._id
-                                                                    : lesson.gameType === 'build-the-body'
-                                                                    ? 'build-the-body/' + lesson._id
-                                                                    : lesson.gameType === 'drop-to-basket'
-                                                                    ? 'drop-to-basket/' + lesson._id
-                                                                    : lesson.gameType
-                                                            }?student=${selectedStudent._id}&lesson=${lesson._id}`}
+                                                        <button
+                                                            onClick={() => requireSubscription(() => {
+                                                                const gameUrl = `/games/${
+                                                                    lesson.gameType === 'vocabulary' 
+                                                                        ? 'vocabulary/' + lesson._id 
+                                                                        : lesson.gameType === 'shopping-basket'
+                                                                        ? 'shopping-basket/' + lesson._id
+                                                                        : lesson.gameType === 'catch-the-number'
+                                                                        ? 'catch-the-number/' + lesson._id
+                                                                        : lesson.gameType === 'build-the-body'
+                                                                        ? 'build-the-body/' + lesson._id
+                                                                        : lesson.gameType === 'drop-to-basket'
+                                                                        ? 'drop-to-basket/' + lesson._id
+                                                                        : lesson.gameType
+                                                                }?student=${selectedStudent._id}&lesson=${lesson._id}`;
+                                                                router.push(gameUrl);
+                                                            })}
                                                             className="btn btn-sm btn-primary d-inline-flex align-items-center gap-1"
                                                         >
                                                             <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>
                                                                 play_arrow
                                                             </span>
                                                             O'ynash
-                                                        </Link>
+                                                        </button>
                                                     ) : (
                                                         <span className="badge bg-secondary">O'yinsiz</span>
                                                     )}

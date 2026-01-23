@@ -63,6 +63,15 @@ export default function BuildTheBodyGame() {
         if (lessonId) fetchLesson();
     }, [lessonId]);
 
+    // Cleanup: sahifadan chiqishda ovozni to'xtatish
+    useEffect(() => {
+        return () => {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+            }
+        };
+    }, []);
+
     const fetchLesson = async () => {
         try {
             const res = await fetch(`/api/lessons/${lessonId}`);

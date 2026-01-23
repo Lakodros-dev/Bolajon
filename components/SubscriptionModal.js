@@ -1,21 +1,121 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, createContext, useContext } from 'react';
 import { useAuth } from '@/context/AuthContext';
+
+const SubscriptionContext = createContext();
+
+export function SubscriptionProvider({ children }) {
+    const { user } = useAuth();
+    const [showModal, setShowModal] = useState(false);
+    const [isSubscriptionValid, setIsSubscriptionValid] = useState(true);
+    const [daysRemaining, setDaysRemaining] = useState(999);
+    const [subscriptionChecked, setSubscriptionChecked] = useState(false);
+
+    useEffect(() => {
+        if (user && user.role !== 'admin') {
+            checkSubscription();
+        } else if (user && user.role === 'admin') {
+            setSubscriptionChecked(true);
+        }
+    }, [user]);
+
+    const checkSubscription = async () => {
+        try {
+            console.log('Checking subscription...');
+            
+            // Get token from cookie
+            const token = document.cookie
+                .split('; ')
+                .find(row => row.startsWith('token='))
+                ?.split('=')[1];
+            
+            console.log('Token found:', !!token);
+            
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+            
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+            
+            const res = await fetch('/api/auth/me', { headers });
+            const data = await res.json();
+            
+            console.log('Subscription check response:', data);
+            
+            if (data.success && data.user) {
+                const days = data.user.daysRemaining || 0;
+                console.log('Days remaining:', days);
+                setDaysRemaining(days);
+                setIsSubscriptionValid(days > 0);
+                setSubscriptionChecked(true);
+            } else {
+                console.error('Failed to get user data:', data);
+                // If no token, assume valid to avoid blocking
+                setIsSubscriptionValid(true);
+                setSubscriptionChecked(true);
+            }
+        } catch (error) {
+            console.error('Failed to check subscription:', error);
+            // On error, assume valid to avoid blocking
+            setIsSubscriptionValid(true);
+            setSubscriptionChecked(true);
+        }
+    };
+
+    const requireSubscription = (callback) => {
+        console.log('requireSubscription called:', {
+            userRole: user?.role,
+            isSubscriptionValid,
+            daysRemaining
+        });
+        
+        if (user?.role === 'admin' || isSubscriptionValid) {
+            console.log('Subscription valid, executing callback');
+            callback();
+        } else {
+            console.log('Subscription invalid, showing modal');
+            setShowModal(true);
+        }
+    };
+
+    return (
+        <SubscriptionContext.Provider value={{
+            showModal,
+            setShowModal,
+            isSubscriptionValid,
+            daysRemaining,
+            requireSubscription,
+            checkSubscription,
+            subscriptionChecked
+        }}>
+            {children}
+        </SubscriptionContext.Provider>
+    );
+}
+
+export function useSubscription() {
+    const context = useContext(SubscriptionContext);
+    if (!context) {
+        throw new Error('useSubscription must be used within SubscriptionProvider');
+    }
+    return context;
+}
 
 export default function SubscriptionModal() {
     const { user } = useAuth();
-    const [showModal, setShowModal] = useState(false);
+    const { showModal, setShowModal, daysRemaining, checkSubscription } = useSubscription();
     const [paymentInfo, setPaymentInfo] = useState(null);
     const [copied, setCopied] = useState(false);
-    const [daysRemaining, setDaysRemaining] = useState(999);
-    const [selectedDays, setSelectedDays] = useState(30);
+    const [selectedDays, setSelectedDays] = useState(1);
     const [loading, setLoading] = useState(true);
 
     const packages = [
-        { days: 15, label: '15 kun' },
-        { days: 20, label: '20 kun' },
-        { days: 30, label: '30 kun' },
+        { days: 1, label: '1 kun' },
+        { days: 7, label: '1 hafta' },
+        { days: 30, label: '1 oy' },
     ];
 
     useEffect(() => {
@@ -26,31 +126,16 @@ export default function SubscriptionModal() {
 
     const fetchData = async () => {
         try {
-            const [settingsRes, meRes] = await Promise.all([
-                fetch('/api/settings'),
-                fetch('/api/auth/me')
-            ]);
-
+            const settingsRes = await fetch('/api/settings');
             const settingsData = await settingsRes.json();
-            const meData = await meRes.json();
 
             if (settingsData.success) {
                 setPaymentInfo({
                     adminPhone: settingsData.adminPhone,
                     cardNumber: settingsData.cardNumber,
                     cardHolder: settingsData.cardHolder,
-                    dailyPrice: settingsData.dailyPrice || 200
+                    dailyPrice: settingsData.dailyPrice || 500
                 });
-            }
-
-            if (meData.success && meData.user) {
-                const days = meData.user.daysRemaining || 0;
-                setDaysRemaining(days);
-
-                // Auto-show modal if expired (not admin)
-                if (days <= 0 && meData.user.role !== 'admin') {
-                    setShowModal(true);
-                }
             }
         } catch (error) {
             console.error('Failed to fetch subscription data:', error);
@@ -58,8 +143,6 @@ export default function SubscriptionModal() {
             setLoading(false);
         }
     };
-
-    const isExpired = daysRemaining <= 0 && user?.role !== 'admin';
 
     const copyCardNumber = () => {
         if (paymentInfo?.cardNumber) {
@@ -71,41 +154,18 @@ export default function SubscriptionModal() {
 
     // Don't render anything if loading, no user, or admin
     if (loading || !user || user.role === 'admin') {
+        console.log('SubscriptionModal: Not rendering', { loading, hasUser: !!user, role: user?.role });
         return null;
     }
 
-    // Expired overlay for entire page
-    if (isExpired && !showModal) {
-        return (
-            <div
-                className="position-fixed top-0 start-0 w-100 h-100 d-flex flex-column align-items-center justify-content-center"
-                style={{
-                    backgroundColor: 'rgba(255,255,255,0.98)',
-                    zIndex: 9999
-                }}
-            >
-                <span className="material-symbols-outlined text-danger mb-3" style={{ fontSize: '80px' }}>
-                    lock
-                </span>
-                <h3 className="fw-bold text-danger mb-2">Obuna muddati tugadi</h3>
-                <p className="text-muted mb-4 text-center px-4">
-                    Platformadan foydalanishni davom ettirish uchun obunani yangilang
-                </p>
-                <button
-                    onClick={() => setShowModal(true)}
-                    className="btn btn-danger btn-lg rounded-pill px-5 py-3 d-flex align-items-center gap-2"
-                >
-                    <span className="material-symbols-outlined">payments</span>
-                    To'lov qilish
-                </button>
-            </div>
-        );
-    }
-
-    // Payment Modal
+    // Only show modal when explicitly requested
     if (!showModal || !paymentInfo) {
+        console.log('SubscriptionModal: Not showing', { showModal, hasPaymentInfo: !!paymentInfo });
         return null;
     }
+
+    const isExpired = daysRemaining <= 0;
+    console.log('SubscriptionModal: Rendering', { showModal, isExpired, daysRemaining });
 
     return (
         <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 10000 }}>
@@ -138,6 +198,11 @@ export default function SubscriptionModal() {
                             <h2 className="h3 fw-bold mb-0" style={{ color: daysRemaining <= 3 ? '#dc2626' : '#0284c7' }}>
                                 {daysRemaining} kun
                             </h2>
+                            {isExpired && (
+                                <p className="small mb-0 mt-2" style={{ color: '#dc2626' }}>
+                                    Davom ettirish uchun to'lov qiling
+                                </p>
+                            )}
                         </div>
 
                         {/* Package Selection */}
@@ -198,6 +263,7 @@ export default function SubscriptionModal() {
                                 />
                                 <span className="input-group-text bg-light">kun</span>
                             </div>
+                            <small className="text-muted">Minimal: 1 kun (500 so'm)</small>
                         </div>
 
                         {/* Payment Info */}

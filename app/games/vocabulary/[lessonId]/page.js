@@ -198,12 +198,20 @@ export default function VocabularyGamePage() {
                                 arrow_back
                             </span>
                         </Link>
-                        <div className="text-center">
+                        <div className="text-center flex-grow-1 mx-3">
                             <h6 className="fw-bold mb-0">{lesson.title}</h6>
                             <small className="text-muted">Lug'at o'yini</small>
                         </div>
-                        <div className="badge bg-primary rounded-pill px-3 py-2">
-                            {currentIndex + 1} / {vocabulary.length}
+                        <div className="d-flex gap-2 align-items-center">
+                            <div className="badge bg-success rounded-pill px-3 py-2">
+                                <span className="material-symbols-outlined me-1" style={{ fontSize: '16px', verticalAlign: 'middle' }}>
+                                    star
+                                </span>
+                                {score}
+                            </div>
+                            <div className="badge bg-primary rounded-pill px-3 py-2">
+                                {currentIndex + 1}/{vocabulary.length}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -219,16 +227,6 @@ export default function VocabularyGamePage() {
 
             {/* Game Content */}
             <div className="container py-4">
-                {/* Score */}
-                <div className="text-center mb-4">
-                    <span className="badge bg-success rounded-pill px-3 py-2">
-                        <span className="material-symbols-outlined me-1" style={{ fontSize: '16px' }}>
-                            star
-                        </span>
-                        {score} ball
-                    </span>
-                </div>
-
                 {/* Question - Show Image */}
                 <div className="text-center mb-4">
                     <div

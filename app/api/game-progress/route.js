@@ -2,19 +2,16 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import GameProgress from '@/models/GameProgress';
 import Progress from '@/models/Progress';
-import { verifyToken } from '@/lib/auth';
+import { requireSubscription } from '@/middleware/authMiddleware';
+import { errorResponse } from '@/lib/apiResponse';
 
 // GET - Get game progress for a student
 export async function GET(request) {
     try {
-        const token = request.cookies.get('token')?.value;
-        if (!token) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        }
-
-        const decoded = verifyToken(token);
-        if (!decoded) {
-            return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+        // Check subscription
+        const auth = await requireSubscription(request);
+        if (!auth.success) {
+            return errorResponse(auth.error, auth.status);
         }
 
         await dbConnect();
@@ -54,14 +51,10 @@ export async function GET(request) {
 // POST - Record game win
 export async function POST(request) {
     try {
-        const token = request.cookies.get('token')?.value;
-        if (!token) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        }
-
-        const decoded = verifyToken(token);
-        if (!decoded) {
-            return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+        // Check subscription
+        const auth = await requireSubscription(request);
+        if (!auth.success) {
+            return errorResponse(auth.error, auth.status);
         }
 
         await dbConnect();
@@ -79,7 +72,7 @@ export async function POST(request) {
                 $set: {
                     gameWon: true,
                     wonAt: new Date(),
-                    teacher: decoded.userId
+                    teacher: auth.user._id
                 },
                 $inc: { attempts: 1 }
             },

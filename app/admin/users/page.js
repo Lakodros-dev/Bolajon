@@ -178,25 +178,19 @@ export default function UsersPage() {
 
         setActivatingId(user._id);
         try {
-            const res = await fetch('/api/subscription/activate', {
+            const res = await fetch('/api/admin/subscription', {
                 method: 'POST',
                 headers: getAuthHeader(),
                 body: JSON.stringify({ userId: user._id, days: selectedDays })
             });
             const data = await res.json();
             if (data.success) {
-                setUsers(users.map(u =>
-                    u._id === user._id ? {
-                        ...u,
-                        subscriptionStatus: 'active',
-                        subscriptionEndDate: data.subscriptionEndDate,
-                        daysRemaining: selectedDays
-                    } : u
-                ));
+                // Refresh users to get updated subscription info
+                await fetchUsers();
                 setAlertModal({
                     show: true,
                     title: 'Muvaffaqiyatli',
-                    message: `${user.name} uchun ${selectedDays} kunlik obuna faollashtirildi`,
+                    message: data.message || `${user.name} uchun ${selectedDays} kunlik obuna qo'shildi`,
                     type: 'success'
                 });
                 setSubscriptionModal({ show: false, user: null });
