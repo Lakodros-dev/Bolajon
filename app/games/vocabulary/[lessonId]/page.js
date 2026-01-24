@@ -256,7 +256,11 @@ export default function VocabularyGamePage() {
                                     src={currentWord.image}
                                     alt="?"
                                     className="img-fluid rounded-3 mb-3"
-                                    style={{ maxHeight: 200, objectFit: 'contain' }}
+                                    style={{ 
+                                        maxHeight: 200, 
+                                        objectFit: 'contain',
+                                        width: '100%'
+                                    }}
                                 />
                             ) : (
                                 <div
