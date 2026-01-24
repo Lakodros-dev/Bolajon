@@ -7,12 +7,8 @@ import { writeFile, mkdir } from 'fs/promises';
 import { existsSync } from 'fs';
 import path from 'path';
 import sharp from 'sharp';
-import { execFile } from 'child_process';
-import { promisify } from 'util';
 import { authorize } from '@/middleware/authMiddleware';
 import { successResponse, errorResponse, serverError } from '@/lib/apiResponse';
-
-const execFileAsync = promisify(execFile);
 
 // Image upload directory
 const UPLOAD_DIR = path.join(process.cwd(), 'uploads', 'images');
@@ -68,26 +64,8 @@ export async function POST(request) {
             filename = `img_${timestamp}_${randomStr}.gif`;
             filepath = path.join(UPLOAD_DIR, filename);
             
-            // Save original GIF first
-            await writeFile(filepath, buffer);
-            
-            // Try to optimize GIF with gifsicle
-            try {
-                const gifsicle = require('gifsicle');
-                await execFileAsync(gifsicle, [
-                    '--optimize=3', // Optimization level (1-3)
-                    '--colors=256', // Max colors
-                    '--output', filepath,
-                    filepath
-                ]);
-                
-                // Read optimized file
-                const fs = require('fs');
-                finalBuffer = fs.readFileSync(filepath);
-            } catch (error) {
-                console.log('Gifsicle optimization failed, using original GIF:', error.message);
-                finalBuffer = buffer;
-            }
+            // For GIF, save as-is (no compression to preserve animation)
+            finalBuffer = buffer;
         } else {
             // For other formats, compress and convert to WebP
             filename = `img_${timestamp}_${randomStr}.webp`;
@@ -105,23 +83,23 @@ export async function POST(request) {
                 .toBuffer();
         }
 
-        // Save file (already saved for GIF, save for others)
-        if (file.type !== 'image/gif') {
-            await writeFile(filepath, finalBuffer);
-        }
+        // Save file
+        await writeFile(filepath, finalBuffer);
 
         // Return the image URL
         const imageUrl = `/api/image/${filename}`;
 
         return successResponse({
             message: file.type === 'image/gif' 
-                ? 'GIF muvaffaqiyatli yuklandi va optimallashtirildi' 
+                ? 'GIF muvaffaqiyatli yuklandi (animatsiya saqlanadi)' 
                 : 'Rasm muvaffaqiyatli yuklandi va siqildi',
             imageUrl,
             filename,
             originalSize: file.size,
             compressedSize: finalBuffer.length,
-            savings: `${Math.round((1 - finalBuffer.length / file.size) * 100)}%`
+            savings: file.type === 'image/gif' 
+                ? 'GIF siqilmadi' 
+                : `${Math.round((1 - finalBuffer.length / file.size) * 100)}%`
         });
 
     } catch (error) {

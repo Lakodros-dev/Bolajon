@@ -565,7 +565,6 @@ export default function AddLessonPage() {
                         </div>
                     </div>
                 )}
-                </div>
 
                 {/* Vocabulary Section */}
                 <div className="card border-0 rounded-4 shadow-sm mb-4">
