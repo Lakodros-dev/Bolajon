@@ -91,17 +91,9 @@ export default function VocabularyGamePage() {
         if (!vocab || vocab.length === 0 || index >= vocab.length) return;
 
         const correct = vocab[index];
-        
-        // Get other unique words (not the current one)
-        const others = vocab.filter((item, i) => i !== index && item.word !== correct.word);
-        
-        // If we have less than 3 other words, use what we have
-        const numOthers = Math.min(3, others.length);
-        const shuffledOthers = others.sort(() => Math.random() - 0.5).slice(0, numOthers);
-        
-        // Create options array with correct answer + others
+        const others = vocab.filter((_, i) => i !== index);
+        const shuffledOthers = others.sort(() => Math.random() - 0.5).slice(0, 3);
         const allOptions = [correct, ...shuffledOthers].sort(() => Math.random() - 0.5);
-        
         setOptions(allOptions);
     }, []);
 
@@ -389,92 +381,6 @@ export default function VocabularyGamePage() {
                         }
                     }
                 `}</style>
-
-                {/* Options */}
-                <div style={{ maxWidth: 500, margin: '0 auto' }}>
-                    <div className="d-flex flex-column gap-3">
-                        {options.map((option, index) => {
-                            let cardClass = 'border-primary';
-                            let bgClass = 'bg-white';
-                            
-                            if (isCorrect !== null) {
-                                if (option.word === vocabulary[currentIndex].word) {
-                                    cardClass = 'border-success';
-                                    bgClass = 'bg-success bg-opacity-10';
-                                } else if (option.word === selectedOption.word && !isCorrect) {
-                                    cardClass = 'border-danger';
-                                    bgClass = 'bg-danger bg-opacity-10';
-                                } else {
-                                    cardClass = 'border-secondary';
-                                    bgClass = 'bg-light';
-                                }
-                            }
-
-                            return (
-                                <div 
-                                    key={index}
-                                    className={`card ${cardClass} ${bgClass} rounded-3 shadow-sm`}
-                                    style={{ 
-                                        border: '2px solid',
-                                        transition: 'all 0.2s',
-                                        cursor: isCorrect === null ? 'pointer' : 'default'
-                                    }}
-                                    onClick={() => {
-                                        if (isCorrect === null) {
-                                            handleListenClick(option, { stopPropagation: () => {} });
-                                        }
-                                    }}
-                                >
-                                    <div className="card-body p-2 d-flex align-items-center justify-content-between">
-                                        <span className="fw-bold flex-grow-1" style={{ fontSize: '0.95rem' }}>
-                                            {option.word}
-                                        </span>
-                                        <div className="d-flex gap-2">
-                                            {/* Listen button */}
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleListenClick(option, e);
-                                                }}
-                                                disabled={isCorrect !== null}
-                                                className="btn btn-outline-primary rounded-circle d-flex align-items-center justify-content-center"
-                                                style={{ 
-                                                    width: 40, 
-                                                    height: 40,
-                                                    fontSize: '1.2rem',
-                                                    border: '2px solid',
-                                                    padding: 0
-                                                }}
-                                                title="Eshitish"
-                                            >
-                                                🔊
-                                            </button>
-                                            {/* Select button */}
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleOptionClick(option);
-                                                }}
-                                                disabled={isCorrect !== null}
-                                                className="btn btn-primary rounded-circle d-flex align-items-center justify-content-center"
-                                                style={{ 
-                                                    width: 40, 
-                                                    height: 40,
-                                                    fontSize: '1.2rem',
-                                                    fontWeight: 'bold',
-                                                    padding: 0
-                                                }}
-                                                title="Tanlash"
-                                            >
-                                                ✓
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
-                </div>
 
                 {/* Feedback */}
                 {selectedOption && (
