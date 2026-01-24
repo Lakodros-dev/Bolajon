@@ -115,7 +115,7 @@ export default function VocabularyGamePage() {
         if (correct) {
             setScore(prev => prev + 1);
             
-            // Wait and move to next
+            // Wait and move to next (faster transition)
             setTimeout(async () => {
                 if (currentIndex + 1 < vocabulary.length) {
                     setCurrentIndex(prev => prev + 1);
@@ -127,12 +127,12 @@ export default function VocabularyGamePage() {
                     await recordGameWin();
                     setGameOver(true);
                 }
-            }, 1500);
+            }, 800); // Reduced from 1500ms to 800ms
         } else {
-            // Wrong answer - game over immediately
+            // Wrong answer - game over immediately (faster)
             setTimeout(() => {
                 setGameOver(true);
-            }, 1500);
+            }, 800); // Reduced from 1500ms to 800ms
         }
     };
 
@@ -244,41 +244,143 @@ export default function VocabularyGamePage() {
             </div>
 
             {/* Game Content */}
-            <div className="container py-4">
+            <div className="container py-3" style={{ maxHeight: 'calc(100vh - 120px)', overflowY: 'auto' }}>
                 {/* Question - Show Image */}
-                <div className="text-center mb-4">
+                <div className="text-center mb-3">
                     <div
                         className="card border-0 rounded-4 shadow mx-auto"
                         style={{ 
-                            maxWidth: 320
+                            maxWidth: 300,
+                            transition: 'opacity 0.3s ease-in-out'
                         }}
                     >
-                        <div className="card-body p-4">
+                        <div className="card-body p-3">
                             {currentWord.image ? (
                                 <img
+                                    key={currentIndex} // Force re-render on change
                                     src={currentWord.image}
                                     alt="?"
-                                    className="img-fluid rounded-3 mb-3"
+                                    className="img-fluid rounded-3 mb-2"
                                     style={{ 
-                                        maxHeight: 200, 
+                                        maxHeight: 160, 
                                         objectFit: 'contain',
-                                        width: '100%'
+                                        width: '100%',
+                                        animation: 'fadeIn 0.3s ease-in-out'
                                     }}
                                 />
                             ) : (
                                 <div
-                                    className="bg-light rounded-3 d-flex align-items-center justify-content-center mb-3"
-                                    style={{ height: 150 }}
+                                    className="bg-light rounded-3 d-flex align-items-center justify-content-center mb-2"
+                                    style={{ height: 120 }}
                                 >
-                                    <ImageIcon size={64} className="text-muted" />
+                                    <ImageIcon size={48} className="text-muted" />
                                 </div>
                             )}
-                            <h4 className="fw-bold text-primary mb-0">
+                            <h5 className="fw-bold text-primary mb-0">
                                 {currentWord.translation}
-                            </h4>
+                            </h5>
                         </div>
                     </div>
                 </div>
+
+                {/* Options */}
+                <div style={{ maxWidth: 500, margin: '0 auto' }}>
+                    <div className="d-flex flex-column gap-2">
+                        {options.map((option, index) => {
+                            let cardClass = 'border-primary';
+                            let bgClass = 'bg-white';
+                            
+                            if (isCorrect !== null) {
+                                if (option.word === vocabulary[currentIndex].word) {
+                                    cardClass = 'border-success';
+                                    bgClass = 'bg-success bg-opacity-10';
+                                } else if (option.word === selectedOption.word && !isCorrect) {
+                                    cardClass = 'border-danger';
+                                    bgClass = 'bg-danger bg-opacity-10';
+                                } else {
+                                    cardClass = 'border-secondary';
+                                    bgClass = 'bg-light';
+                                }
+                            }
+
+                            return (
+                                <div 
+                                    key={index}
+                                    className={`card ${cardClass} ${bgClass} rounded-3 shadow-sm`}
+                                    style={{ 
+                                        border: '2px solid',
+                                        transition: 'all 0.2s',
+                                        cursor: isCorrect === null ? 'pointer' : 'default'
+                                    }}
+                                    onClick={() => {
+                                        if (isCorrect === null) {
+                                            handleListenClick(option, { stopPropagation: () => {} });
+                                        }
+                                    }}
+                                >
+                                    <div className="card-body p-2 d-flex align-items-center justify-content-between">
+                                        <span className="fw-bold flex-grow-1" style={{ fontSize: '0.95rem' }}>
+                                            {option.word}
+                                        </span>
+                                        <div className="d-flex gap-2">
+                                            {/* Listen button */}
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleListenClick(option, e);
+                                                }}
+                                                disabled={isCorrect !== null}
+                                                className="btn btn-outline-primary rounded-circle d-flex align-items-center justify-content-center"
+                                                style={{ 
+                                                    width: 40, 
+                                                    height: 40,
+                                                    fontSize: '1.2rem',
+                                                    border: '2px solid',
+                                                    padding: 0
+                                                }}
+                                                title="Eshitish"
+                                            >
+                                                🔊
+                                            </button>
+                                            {/* Select button */}
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleOptionClick(option);
+                                                }}
+                                                disabled={isCorrect !== null}
+                                                className="btn btn-primary rounded-circle d-flex align-items-center justify-content-center"
+                                                style={{ 
+                                                    width: 40, 
+                                                    height: 40,
+                                                    fontSize: '1.2rem',
+                                                    fontWeight: 'bold',
+                                                    padding: 0
+                                                }}
+                                                title="Tanlash"
+                                            >
+                                                ✓
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+
+                <style jsx>{`
+                    @keyframes fadeIn {
+                        from {
+                            opacity: 0;
+                            transform: scale(0.95);
+                        }
+                        to {
+                            opacity: 1;
+                            transform: scale(1);
+                        }
+                    }
+                `}</style>
 
                 {/* Options */}
                 <div style={{ maxWidth: 500, margin: '0 auto' }}>
@@ -315,8 +417,8 @@ export default function VocabularyGamePage() {
                                         }
                                     }}
                                 >
-                                    <div className="card-body p-3 d-flex align-items-center justify-content-between">
-                                        <span className="fw-bold flex-grow-1" style={{ fontSize: '1.1rem' }}>
+                                    <div className="card-body p-2 d-flex align-items-center justify-content-between">
+                                        <span className="fw-bold flex-grow-1" style={{ fontSize: '0.95rem' }}>
                                             {option.word}
                                         </span>
                                         <div className="d-flex gap-2">
@@ -329,10 +431,11 @@ export default function VocabularyGamePage() {
                                                 disabled={isCorrect !== null}
                                                 className="btn btn-outline-primary rounded-circle d-flex align-items-center justify-content-center"
                                                 style={{ 
-                                                    width: 45, 
-                                                    height: 45,
-                                                    fontSize: '1.3rem',
-                                                    border: '2px solid'
+                                                    width: 40, 
+                                                    height: 40,
+                                                    fontSize: '1.2rem',
+                                                    border: '2px solid',
+                                                    padding: 0
                                                 }}
                                                 title="Eshitish"
                                             >
@@ -347,10 +450,11 @@ export default function VocabularyGamePage() {
                                                 disabled={isCorrect !== null}
                                                 className="btn btn-primary rounded-circle d-flex align-items-center justify-content-center"
                                                 style={{ 
-                                                    width: 45, 
-                                                    height: 45,
-                                                    fontSize: '1.3rem',
-                                                    fontWeight: 'bold'
+                                                    width: 40, 
+                                                    height: 40,
+                                                    fontSize: '1.2rem',
+                                                    fontWeight: 'bold',
+                                                    padding: 0
                                                 }}
                                                 title="Tanlash"
                                             >
