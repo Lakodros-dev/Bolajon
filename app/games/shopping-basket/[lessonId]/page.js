@@ -192,11 +192,11 @@ export default function ShoppingBasketGame() {
             setTimeout(() => setShowConfetti(false), 2000);
 
             // Next round after delay
-            setTimeout(() => {
+            setTimeout(async () => {
                 if (score + 1 >= vocabulary.length) {
                     // Game won!
+                    await recordGameWin(); // Natijani kutamiz
                     setGameOver(true);
-                    recordGameWin();
                 } else {
                     startNewRound(vocabulary);
                 }
@@ -236,7 +236,8 @@ export default function ShoppingBasketGame() {
 
     const recordGameWin = async () => {
         try {
-            await fetch('/api/game-progress', {
+            console.log('Recording game win...', { studentId, lessonId });
+            const response = await fetch('/api/game-progress', {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',
@@ -244,6 +245,8 @@ export default function ShoppingBasketGame() {
                 },
                 body: JSON.stringify({ studentId, lessonId })
             });
+            const data = await response.json();
+            console.log('Game win recorded:', data);
         } catch (error) {
             console.error('Error recording game progress:', error);
         }

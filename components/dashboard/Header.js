@@ -92,7 +92,11 @@ export default function Header({ title, showStars = false, stars = 0, showSubscr
                     )}
 
                     {/* Profile */}
-                    <Link href="/dashboard/profile" className="btn btn-light rounded-circle p-2" style={{ width: 38, height: 38 }}>
+                    <Link 
+                        href="/dashboard/profile" 
+                        className="btn btn-light rounded-circle d-flex align-items-center justify-content-center" 
+                        style={{ width: 38, height: 38, padding: 0 }}
+                    >
                         <User size={20} />
                     </Link>
                 </div>

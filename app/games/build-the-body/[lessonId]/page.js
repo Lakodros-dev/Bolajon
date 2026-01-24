@@ -100,21 +100,21 @@ export default function BuildTheBodyGame() {
         generateQuestion(vocabulary, []);
     };
 
-    const generateQuestion = (vocabulary, used) => {
+    const generateQuestion = async (vocabulary, used) => {
         if (used.length >= TOTAL_QUESTIONS || used.length >= vocabulary.length) {
-            setGameOver(true);
             if (mistakes < MAX_MISTAKES) {
-                recordGameWin();
+                await recordGameWin(); // Natijani kutamiz
             }
+            setGameOver(true);
             return;
         }
 
         const availableWords = vocabulary.filter(v => !used.includes(v.word));
         if (availableWords.length === 0) {
-            setGameOver(true);
             if (mistakes < MAX_MISTAKES) {
-                recordGameWin();
+                await recordGameWin(); // Natijani kutamiz
             }
+            setGameOver(true);
             return;
         }
 
@@ -142,12 +142,12 @@ export default function BuildTheBodyGame() {
             setShowConfetti(true);
             speakText('Perfect!');
             
-            setTimeout(() => {
+            setTimeout(async () => {
                 setShowConfetti(false);
                 setFeedback(null);
                 const newUsed = [...usedWords, currentQuestion.word];
                 setUsedWords(newUsed);
-                generateQuestion(lesson.vocabulary, newUsed);
+                await generateQuestion(lesson.vocabulary, newUsed);
             }, 1500);
         } else {
             const newMistakes = mistakes + 1;
@@ -177,13 +177,19 @@ export default function BuildTheBodyGame() {
 
     const recordGameWin = async () => {
         try {
-            await fetch('/api/game-progress', {
+            console.log('Recording game win...', { studentId, lessonId });
+            const response = await fetch('/api/game-progress', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    ...getAuthHeader()
+                },
                 body: JSON.stringify({ studentId, lessonId })
             });
+            const data = await response.json();
+            console.log('Game win recorded:', data);
         } catch (error) {
-            console.error('Error:', error);
+            console.error('Error recording game win:', error);
         }
     };
 

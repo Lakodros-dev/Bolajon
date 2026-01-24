@@ -20,7 +20,6 @@ const nextConfig = {
                 hostname: 'images.unsplash.com',
             },
         ],
-        minimumCacheTTL: 3600, // 1 hour cache
         formats: ['image/webp'], // Use WebP format
     },
 
@@ -38,15 +37,23 @@ const nextConfig = {
     // Optimize production builds
     swcMinify: true,
 
+    // Disable caching in development
+    onDemandEntries: {
+        maxInactiveAge: 0, // Disable caching
+        pagesBufferLength: 0,
+    },
+
     // Cache headers for static files
     async headers() {
+        const isDev = process.env.NODE_ENV === 'development';
+        
         return [
             {
                 source: '/book/:path*',
                 headers: [
                     {
                         key: 'Cache-Control',
-                        value: 'public, max-age=31536000, immutable',
+                        value: isDev ? 'no-store, no-cache, must-revalidate' : 'public, max-age=86400, must-revalidate',
                     },
                     {
                         key: 'Accept-Ranges',
@@ -59,7 +66,7 @@ const nextConfig = {
                 headers: [
                     {
                         key: 'Cache-Control',
-                        value: 'no-store, must-revalidate',
+                        value: 'no-store, no-cache, must-revalidate', // No cache for API
                     },
                 ],
             },
@@ -68,7 +75,25 @@ const nextConfig = {
                 headers: [
                     {
                         key: 'Cache-Control',
-                        value: 'public, max-age=31536000, immutable',
+                        value: isDev ? 'no-store, no-cache, must-revalidate' : 'public, max-age=31536000, immutable',
+                    },
+                ],
+            },
+            {
+                source: '/uploads/:path*',
+                headers: [
+                    {
+                        key: 'Cache-Control',
+                        value: isDev ? 'no-store, no-cache, must-revalidate' : 'public, max-age=86400, must-revalidate',
+                    },
+                ],
+            },
+            {
+                source: '/:path*',
+                headers: [
+                    {
+                        key: 'Cache-Control',
+                        value: isDev ? 'no-store, no-cache, must-revalidate' : 'public, max-age=0, must-revalidate',
                     },
                 ],
             },

@@ -1,22 +1,21 @@
 'use client';
 
-import { Check, Star } from 'lucide-react';
+import { Check } from 'lucide-react';
+import Image from 'next/image';
 
 /**
  * YinYang Progress Component
  * Shows lesson and game completion status
- * - Yin (left): Green when lesson completed with 5 stars
- * - Yang (right): Green when game won
- * - Both complete: Full green circle with checkmark
+ * - Gray circle with alternating favicon.png/icon2.png for incomplete
+ * - Gray circle with icon + green checkmark for completed
+ * - Full green gradient circle with checkmark for both complete
  */
 
-export default function YinYangProgress({ lessonCompleted, gameWon, size = 60 }) {
+export default function YinYangProgress({ lessonCompleted, gameWon, size = 60, index = 0 }) {
     const bothComplete = lessonCompleted && gameWon;
-
-    // Colors
-    const incompleteColor = '#e5e7eb';
-    const yinColor = lessonCompleted ? '#16a34a' : incompleteColor; // Dark green
-    const yangColor = gameWon ? '#22c55e' : incompleteColor; // Light green
+    
+    // Alternate between favicon.png and icon2.png based on index
+    const iconSrc = index % 2 === 0 ? '/favicon.png' : '/icon2.png';
 
     // If both complete, show full green circle with checkmark
     if (bothComplete) {
@@ -43,68 +42,145 @@ export default function YinYangProgress({ lessonCompleted, gameWon, size = 60 })
         );
     }
 
+    // If only game won, show gray circle with icon and green checkmark
+    if (gameWon && !lessonCompleted) {
+        return (
+            <div
+                style={{
+                    width: size,
+                    height: size,
+                    borderRadius: '50%',
+                    backgroundColor: '#e5e7eb',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    position: 'relative',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                    border: '3px solid #fff'
+                }}
+            >
+                {/* Icon - full size, no padding */}
+                <Image
+                    src={iconSrc}
+                    alt="Bolajon"
+                    width={size}
+                    height={size}
+                    style={{
+                        objectFit: 'cover',
+                        borderRadius: '50%'
+                    }}
+                />
+                {/* Green checkmark - smaller */}
+                <div
+                    style={{
+                        position: 'absolute',
+                        top: -6,
+                        right: -6,
+                        backgroundColor: '#22c55e',
+                        borderRadius: '50%',
+                        width: size * 0.38,
+                        height: size * 0.38,
+                        border: '3px solid #fff',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        boxShadow: '0 2px 8px rgba(34, 197, 94, 0.5)',
+                        zIndex: 10
+                    }}
+                >
+                    <Check
+                        size={size * 0.22}
+                        color="#fff"
+                        strokeWidth={3.5}
+                    />
+                </div>
+            </div>
+        );
+    }
+
+    // If only lesson completed, show gray circle with icon and green checkmark
+    if (lessonCompleted && !gameWon) {
+        return (
+            <div
+                style={{
+                    width: size,
+                    height: size,
+                    borderRadius: '50%',
+                    backgroundColor: '#e5e7eb',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    position: 'relative',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                    border: '3px solid #fff'
+                }}
+            >
+                {/* Icon - full size, no padding */}
+                <Image
+                    src={iconSrc}
+                    alt="Bolajon"
+                    width={size}
+                    height={size}
+                    style={{
+                        objectFit: 'cover',
+                        borderRadius: '50%'
+                    }}
+                />
+                {/* Green checkmark - smaller */}
+                <div
+                    style={{
+                        position: 'absolute',
+                        top: -6,
+                        right: -6,
+                        backgroundColor: '#16a34a',
+                        borderRadius: '50%',
+                        width: size * 0.38,
+                        height: size * 0.38,
+                        border: '3px solid #fff',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        boxShadow: '0 2px 8px rgba(22, 163, 74, 0.5)',
+                        zIndex: 10
+                    }}
+                >
+                    <Check
+                        size={size * 0.22}
+                        color="#fff"
+                        strokeWidth={3.5}
+                    />
+                </div>
+            </div>
+        );
+    }
+
+    // Default: Nothing completed - show gray circle with icon only
     return (
         <div
             style={{
                 width: size,
                 height: size,
-                position: 'relative',
                 borderRadius: '50%',
-                overflow: 'hidden',
+                backgroundColor: '#e5e7eb',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
                 boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
                 border: '3px solid #fff'
             }}
         >
-            {/* SVG Yin Yang */}
-            <svg
+            {/* Icon - full size, semi-transparent */}
+            <Image
+                src={iconSrc}
+                alt="Bolajon"
                 width={size}
                 height={size}
-                viewBox="0 0 100 100"
-                style={{ position: 'absolute', top: 0, left: 0 }}
-            >
-                {/* Yang (right) half - background */}
-                <circle cx="50" cy="50" r="50" fill={yangColor} />
-
-                {/* Yin (left) half - S curve */}
-                <path
-                    d="M50,0 A50,50 0 0,0 50,100 A25,25 0 0,0 50,50 A25,25 0 0,1 50,0"
-                    fill={yinColor}
-                />
-
-                {/* Small dot in Yin area (top) */}
-                <circle cx="50" cy="25" r="8" fill={yangColor} />
-
-                {/* Small dot in Yang area (bottom) */}
-                <circle cx="50" cy="75" r="8" fill={yinColor} />
-            </svg>
-
-            {/* Icons */}
-            {lessonCompleted && (
-                <div
-                    style={{
-                        position: 'absolute',
-                        top: '18%',
-                        left: '50%',
-                        transform: 'translateX(-50%)',
-                        zIndex: 2
-                    }}
-                >
-                    <Check size={size * 0.2} color="#fff" strokeWidth={3} />
-                </div>
-            )}
-            {gameWon && (
-                <div
-                    style={{
-                        position: 'absolute',
-                        bottom: '18%',
-                        left: '50%',
-                        transform: 'translateX(-50%)',
-                        zIndex: 2
-                    }}
-                >
-                    <Star size={size * 0.2} color="#fff" fill="#fff" />
-                </div>
-            )}
+                style={{
+                    objectFit: 'cover',
+                    borderRadius: '50%',
+                    opacity: 0.3
+                }}
+            />
         </div>
     );
 }

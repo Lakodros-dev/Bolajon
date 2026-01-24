@@ -19,6 +19,8 @@ export default function GamesPage() {
     const [lessons, setLessons] = useState([]);
     const [progress, setProgress] = useState({ completedLessons: [], wonGames: [] });
     const [showStudentModal, setShowStudentModal] = useState(true);
+    const [loadingProgress, setLoadingProgress] = useState(false);
+    const [hasScrolled, setHasScrolled] = useState(false);
 
     // Sort lessons when loaded
     useEffect(() => {
@@ -52,7 +54,31 @@ export default function GamesPage() {
         }
     }, [selectedStudent]);
 
+    // Scroll to next game after progress loaded
+    useEffect(() => {
+        if (!loadingProgress && lessons.length > 0 && progress.wonGames.length > 0 && !hasScrolled) {
+            // Find the first incomplete game
+            const nextGameIndex = lessons.findIndex(lesson => !progress.wonGames.includes(lesson._id));
+            
+            if (nextGameIndex > 0) {
+                // Wait a bit for DOM to render
+                setTimeout(() => {
+                    const gameCards = document.querySelectorAll('.snake-step');
+                    if (gameCards[nextGameIndex]) {
+                        // Instant scroll without smooth behavior
+                        gameCards[nextGameIndex].scrollIntoView({ 
+                            behavior: 'auto', // instant scroll
+                            block: 'center'
+                        });
+                        setHasScrolled(true);
+                    }
+                }, 100);
+            }
+        }
+    }, [loadingProgress, lessons, progress, hasScrolled]);
+
     const fetchProgress = async () => {
+        setLoadingProgress(true);
         try {
             const res = await fetch(`/api/game-progress?studentId=${selectedStudent._id}`, {
                 headers: getAuthHeader()
@@ -71,17 +97,21 @@ export default function GamesPage() {
             }
         } catch (error) {
             console.error('Error fetching progress:', error);
+        } finally {
+            setLoadingProgress(false);
         }
     };
 
     const handleSelectStudent = (student) => {
         setSelectedStudent(student);
         setShowStudentModal(false);
+        setHasScrolled(false); // Reset scroll flag for new student
     };
 
     const handleChangeStudent = () => {
         setShowStudentModal(true);
         setSelectedStudent(null);
+        setHasScrolled(false); // Reset scroll flag
     };
 
     // Student Selection Modal
@@ -216,17 +246,30 @@ export default function GamesPage() {
 
                 {/* Snake Roadmap */}
                 <div className="roadmap-container px-2">
-                    {lessons.length === 0 ? (
+                    {loadingProgress ? (
                         <div className="text-center py-5">
-                            <p className="text-muted">Darslar topilmadi</p>
+                            <div className="spinner-border text-primary" role="status" style={{ width: '3rem', height: '3rem', borderWidth: '0.3em' }}>
+                                <span className="visually-hidden">Yuklanmoqda...</span>
+                            </div>
+                            <p className="text-muted mt-3 fw-semibold">O'yinlar yuklanmoqda...</p>
+                        </div>
+                    ) : lessons.length === 0 ? (
+                        <div className="text-center py-5">
+                            <p className="text-muted">O'yinlar topilmadi</p>
                         </div>
                     ) : (
                         <div className="snake-roadmap">
                             {lessons.map((lesson, index) => {
-                                const lessonCompleted = progress.completedLessons.includes(lesson._id);
                                 const gameWon = progress.wonGames.includes(lesson._id);
                                 const isLeft = index % 2 === 0;
                                 const isLast = index === lessons.length - 1;
+                                const nextGameWon = !isLast && progress.wonGames.includes(lessons[index + 1]._id);
+                                
+                                // Keyingi o'ynaladigan o'yin - oxirgi yutilgan o'yindan keyingi birinchi o'yin
+                                const isNextToPlay = !gameWon && index > 0 && progress.wonGames.includes(lessons[index - 1]._id);
+                                // Yoki birinchi o'yin va hali o'ynalmagan bo'lsa
+                                const isFirstUnplayed = index === 0 && !gameWon;
+                                const shouldHighlight = isNextToPlay || isFirstUnplayed;
 
                                 return (
                                     <div key={lesson._id} className="snake-step">
@@ -237,22 +280,33 @@ export default function GamesPage() {
                                                 flexDirection: isLeft ? 'row' : 'row-reverse'
                                             }}
                                         >
-                                            {/* Lesson Card */}
+                                            {/* Game Card */}
                                             <div
-                                                className="card border-0 rounded-4 shadow-sm flex-grow-1"
+                                                className={`card border-0 rounded-4 shadow-sm flex-grow-1 ${shouldHighlight ? 'pulse-glow' : ''}`}
                                                 style={{
-                                                    backgroundColor: lessonCompleted && gameWon ? '#DCFCE7' : '#fff',
-                                                    maxWidth: 'calc(100% - 100px)'
+                                                    backgroundColor: gameWon ? '#DCFCE7' : shouldHighlight ? '#FEF3C7' : '#fff',
+                                                    maxWidth: 'calc(100% - 100px)',
+                                                    border: shouldHighlight ? '2px solid #F59E0B' : 'none',
+                                                    boxShadow: shouldHighlight ? '0 4px 20px rgba(245, 158, 11, 0.3)' : undefined
                                                 }}
                                             >
                                                 <div className="card-body p-3">
                                                     <div className="d-flex align-items-center gap-2 mb-2">
                                                         <span className="badge bg-primary rounded-pill">
-                                                            {index + 1}-dars
+                                                            {index + 1}-o'yin
                                                         </span>
-                                                        {lessonCompleted && gameWon && (
+                                                        {gameWon && (
                                                             <span className="badge bg-success rounded-pill">
-                                                                ✓ Tugallangan
+                                                                ✓ Yutilgan
+                                                            </span>
+                                                        )}
+                                                        {shouldHighlight && (
+                                                            <span className="badge rounded-pill" style={{ 
+                                                                backgroundColor: '#F59E0B', 
+                                                                color: 'white',
+                                                                animation: 'pulse 2s infinite'
+                                                            }}>
+                                                                ⭐ Keyingi o'yin
                                                             </span>
                                                         )}
                                                     </div>
@@ -274,14 +328,20 @@ export default function GamesPage() {
                                                                         ? 'build-the-body/' + lesson._id
                                                                         : lesson.gameType === 'drop-to-basket'
                                                                         ? 'drop-to-basket/' + lesson._id
+                                                                        : lesson.gameType === 'pop-the-balloon'
+                                                                        ? 'pop-the-balloon/' + lesson._id
                                                                         : lesson.gameType
                                                                 }?student=${selectedStudent._id}&lesson=${lesson._id}`;
                                                                 router.push(gameUrl);
                                                             })}
-                                                            className="btn btn-sm btn-primary d-inline-flex align-items-center gap-1"
+                                                            className={`btn btn-sm d-inline-flex align-items-center gap-1 ${shouldHighlight ? 'btn-warning' : 'btn-primary'}`}
+                                                            style={shouldHighlight ? {
+                                                                animation: 'pulse 2s infinite',
+                                                                fontWeight: 'bold'
+                                                            } : {}}
                                                         >
                                                             <Play size={16} />
-                                                            O'ynash
+                                                            {shouldHighlight ? "Hozir o'ynang!" : "O'ynash"}
                                                         </button>
                                                     ) : (
                                                         <span className="badge bg-secondary">O'yinsiz</span>
@@ -294,7 +354,7 @@ export default function GamesPage() {
                                                 style={{
                                                     width: 20,
                                                     height: 4,
-                                                    backgroundColor: lessonCompleted ? '#16a34a' : '#e5e7eb',
+                                                    backgroundColor: gameWon ? '#22c55e' : '#e5e7eb',
                                                     flexShrink: 0
                                                 }}
                                             />
@@ -302,9 +362,10 @@ export default function GamesPage() {
                                             {/* YinYang Circle */}
                                             <div style={{ flexShrink: 0 }}>
                                                 <YinYangProgress
-                                                    lessonCompleted={lessonCompleted}
+                                                    lessonCompleted={false}
                                                     gameWon={gameWon}
                                                     size={65}
+                                                    index={index}
                                                 />
                                             </div>
                                         </div>
@@ -323,8 +384,9 @@ export default function GamesPage() {
                                                     style={{
                                                         width: 4,
                                                         height: 30,
-                                                        backgroundColor: lessonCompleted && gameWon ? '#22c55e' : '#e5e7eb',
-                                                        borderRadius: 2
+                                                        backgroundColor: gameWon ? '#22c55e' : '#e5e7eb',
+                                                        borderRadius: 2,
+                                                        transition: 'background-color 0.3s ease'
                                                     }}
                                                 />
                                             </div>
@@ -343,8 +405,9 @@ export default function GamesPage() {
                                                     style={{
                                                         height: 4,
                                                         flex: 1,
-                                                        backgroundColor: lessonCompleted && gameWon ? '#22c55e' : '#e5e7eb',
-                                                        borderRadius: 2
+                                                        backgroundColor: gameWon ? '#22c55e' : '#e5e7eb',
+                                                        borderRadius: 2,
+                                                        transition: 'background-color 0.3s ease'
                                                     }}
                                                 />
                                             </div>
@@ -364,8 +427,9 @@ export default function GamesPage() {
                                                     style={{
                                                         width: 4,
                                                         height: 30,
-                                                        backgroundColor: '#e5e7eb',
-                                                        borderRadius: 2
+                                                        backgroundColor: gameWon ? '#22c55e' : '#e5e7eb',
+                                                        borderRadius: 2,
+                                                        transition: 'background-color 0.3s ease'
                                                     }}
                                                 />
                                             </div>

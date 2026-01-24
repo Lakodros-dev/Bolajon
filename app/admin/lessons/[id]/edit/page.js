@@ -28,7 +28,14 @@ export default function EditLessonPage() {
         duration: 0,
         order: 0,
         vocabulary: [],
-        gameType: 'vocabulary'
+        gameType: 'vocabulary',
+        gameSettings: {
+            numberRange: {
+                min: 1,
+                max: 10
+            },
+            duration: 60
+        }
     });
 
     const gameTypes = [
@@ -63,7 +70,11 @@ export default function EditLessonPage() {
                     duration: lesson.duration ?? 0,
                     order: lesson.order ?? 0,
                     vocabulary: lesson.vocabulary ?? [],
-                    gameType: lesson.gameType ?? 'vocabulary'
+                    gameType: lesson.gameType ?? 'vocabulary',
+                    gameSettings: lesson.gameSettings ?? {
+                        numberRange: { min: 1, max: 10 },
+                        duration: 60
+                    }
                 });
                 // Set video source based on current URL
                 if (lesson.videoUrl?.startsWith('/api/video/')) {
@@ -461,7 +472,7 @@ export default function EditLessonPage() {
                             <div className="alert alert-info mt-3 mb-0 rounded-3">
                                 <small>
                                     <span className="material-symbols-outlined me-1" style={{ fontSize: '16px', verticalAlign: 'middle' }}>info</span>
-                                    Catch the Number o'yini 1-1000 gacha raqamlarni avtomatik ishlatadi
+                                    Catch the Number o'yini uchun raqamlar oralig'i va vaqtni sozlang
                                 </small>
                             </div>
                         )}
@@ -485,6 +496,92 @@ export default function EditLessonPage() {
                         )}
                     </div>
                 </div>
+
+                {/* Game Settings for Catch the Number */}
+                {formData.gameType === 'catch-the-number' && (
+                    <div className="card border-0 rounded-4 shadow-sm mb-4">
+                        <div className="card-body p-4">
+                            <div className="mb-4">
+                                <h3 className="h6 fw-bold mb-1">O'yin sozlamalari</h3>
+                                <p className="text-muted small mb-0">Catch the Number o'yini uchun sozlamalar</p>
+                            </div>
+
+                            <div className="row g-3">
+                                <div className="col-md-4">
+                                    <label className="form-label fw-semibold">Minimal raqam</label>
+                                    <input
+                                        type="number"
+                                        className="form-control rounded-3 py-2"
+                                        min="1"
+                                        max="999"
+                                        value={formData.gameSettings.numberRange.min}
+                                        onChange={(e) => setFormData(prev => ({
+                                            ...prev,
+                                            gameSettings: {
+                                                ...prev.gameSettings,
+                                                numberRange: {
+                                                    ...prev.gameSettings.numberRange,
+                                                    min: parseInt(e.target.value) || 1
+                                                }
+                                            }
+                                        }))}
+                                    />
+                                    <small className="text-muted">1 dan 999 gacha</small>
+                                </div>
+
+                                <div className="col-md-4">
+                                    <label className="form-label fw-semibold">Maksimal raqam</label>
+                                    <input
+                                        type="number"
+                                        className="form-control rounded-3 py-2"
+                                        min="2"
+                                        max="1000"
+                                        value={formData.gameSettings.numberRange.max}
+                                        onChange={(e) => setFormData(prev => ({
+                                            ...prev,
+                                            gameSettings: {
+                                                ...prev.gameSettings,
+                                                numberRange: {
+                                                    ...prev.gameSettings.numberRange,
+                                                    max: parseInt(e.target.value) || 10
+                                                }
+                                            }
+                                        }))}
+                                    />
+                                    <small className="text-muted">2 dan 1000 gacha</small>
+                                </div>
+
+                                <div className="col-md-4">
+                                    <label className="form-label fw-semibold">O'yin davomiyligi (soniya)</label>
+                                    <input
+                                        type="number"
+                                        className="form-control rounded-3 py-2"
+                                        min="30"
+                                        max="300"
+                                        value={formData.gameSettings.duration}
+                                        onChange={(e) => setFormData(prev => ({
+                                            ...prev,
+                                            gameSettings: {
+                                                ...prev.gameSettings,
+                                                duration: parseInt(e.target.value) || 60
+                                            }
+                                        }))}
+                                    />
+                                    <small className="text-muted">30 dan 300 soniya gacha</small>
+                                </div>
+                            </div>
+
+                            <div className="alert alert-light mt-3 mb-0 rounded-3">
+                                <small>
+                                    <strong>Namuna:</strong> Min: {formData.gameSettings.numberRange.min}, Max: {formData.gameSettings.numberRange.max} 
+                                    {' '}→ O'yinda {formData.gameSettings.numberRange.min} dan {formData.gameSettings.numberRange.max} gacha raqamlar ishtirok etadi
+                                    <br />
+                                    <strong>Vaqt:</strong> {formData.gameSettings.duration} soniya = {Math.floor(formData.gameSettings.duration / 60)} daqiqa {formData.gameSettings.duration % 60} soniya
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {/* Vocabulary Section */}
                 <div className="card border-0 rounded-4 shadow-sm mb-4">

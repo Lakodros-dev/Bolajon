@@ -61,6 +61,8 @@ export async function POST(request) {
 
         const { studentId, lessonId } = await request.json();
 
+        console.log('Recording game win:', { studentId, lessonId, teacherId: auth.user._id });
+
         if (!studentId || !lessonId) {
             return NextResponse.json({ error: 'Student ID and Lesson ID required' }, { status: 400 });
         }
@@ -78,6 +80,8 @@ export async function POST(request) {
             },
             { upsert: true, new: true }
         );
+
+        console.log('Game progress saved:', progress);
 
         return NextResponse.json({ success: true, progress });
     } catch (error) {

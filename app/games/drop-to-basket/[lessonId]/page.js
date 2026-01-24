@@ -131,15 +131,15 @@ export default function DropToBasketGame() {
             }, 1000);
 
             // Keyingi so'zga o'tish
-            setTimeout(() => {
+            setTimeout(async () => {
                 const nextIndex = currentWordIndex + 1;
                 const newCompleted = completedWords + 1;
                 setCompletedWords(newCompleted);
                 
                 if (nextIndex >= lesson.vocabulary.length) {
                     // Barcha so'zlar tugadi - o'yin tugadi
+                    await recordGameWin(); // Natijani kutamiz
                     setGameOver(true);
-                    recordGameWin();
                 } else {
                     // Keyingi so'zga o'tish
                     setCurrentWordIndex(nextIndex);
@@ -177,13 +177,19 @@ export default function DropToBasketGame() {
 
     const recordGameWin = async () => {
         try {
-            await fetch('/api/game-progress', {
+            console.log('Recording game win...', { studentId, lessonId });
+            const response = await fetch('/api/game-progress', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    ...getAuthHeader()
+                },
                 body: JSON.stringify({ studentId, lessonId })
             });
+            const data = await response.json();
+            console.log('Game win recorded:', data);
         } catch (error) {
-            console.error('Error:', error);
+            console.error('Error recording game win:', error);
         }
     };
 

@@ -24,11 +24,44 @@ export default function VocabularyGamePage() {
     const [score, setScore] = useState(0);
     const [gameOver, setGameOver] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [isSpeaking, setIsSpeaking] = useState(false);
+
+    // Speech synthesis setup
+    const speakText = useCallback((text, lang = 'en-US', rate = 0.9) => {
+        if ('speechSynthesis' in window) {
+            // Cancel any ongoing speech
+            window.speechSynthesis.cancel();
+            
+            setTimeout(() => {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = lang;
+                utterance.rate = rate;
+                utterance.pitch = 1.0;
+                utterance.volume = 1.0;
+                
+                utterance.onstart = () => setIsSpeaking(true);
+                utterance.onend = () => setIsSpeaking(false);
+                utterance.onerror = () => setIsSpeaking(false);
+                
+                window.speechSynthesis.speak(utterance);
+            }, 100);
+        }
+    }, []);
+
+    // No need to speak Uzbek translation automatically
+    // Only speak English words when user clicks on options
 
     useEffect(() => {
         if (lessonId) {
             fetchLesson();
         }
+        
+        // Cleanup: stop speech when component unmounts
+        return () => {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+            }
+        };
     }, [lessonId]);
 
     const fetchLesson = async () => {
@@ -64,9 +97,17 @@ export default function VocabularyGamePage() {
         setOptions(allOptions);
     }, []);
 
-    const handleOptionClick = async (option) => {
-        if (selectedOption !== null) return;
+    const handleListenClick = (option, e) => {
+        e.stopPropagation();
+        // Just play the pronunciation, don't select
+        speakText(option.word, 'en-US', 0.9);
+    };
 
+    const handleOptionClick = async (option) => {
+        // If already checking answer, don't allow selection
+        if (isCorrect !== null) return;
+        
+        // Select and check answer
         setSelectedOption(option);
         const correct = option.word === vocabulary[currentIndex].word;
         setIsCorrect(correct);
@@ -76,7 +117,7 @@ export default function VocabularyGamePage() {
         }
 
         // Wait and move to next
-        setTimeout(() => {
+        setTimeout(async () => {
             if (currentIndex + 1 < vocabulary.length) {
                 setCurrentIndex(prev => prev + 1);
                 generateOptions(vocabulary, currentIndex + 1);
@@ -84,28 +125,38 @@ export default function VocabularyGamePage() {
                 setIsCorrect(null);
             } else {
                 // Game over
-                setGameOver(true);
-                // Record win if score is good enough (at least 70%)
                 if ((score + (correct ? 1 : 0)) / vocabulary.length >= 0.7) {
-                    recordGameWin();
+                    await recordGameWin();
                 }
+                setGameOver(true);
             }
-        }, 1000);
+        }, 1500);
     };
 
     const recordGameWin = async () => {
         try {
-            await fetch('/api/game-progress', {
+            console.log('Recording game win...', { studentId, lessonId });
+            const response = await fetch('/api/game-progress', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...getAuthHeader()
+                },
                 body: JSON.stringify({ studentId, lessonId })
             });
+            const data = await response.json();
+            console.log('Game win recorded:', data);
         } catch (error) {
             console.error('Error recording game win:', error);
         }
     };
 
     const restartGame = () => {
+        // Cancel any ongoing speech
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+        }
+        
         const shuffled = [...vocabulary].sort(() => Math.random() - 0.5);
         setVocabulary(shuffled);
         setCurrentIndex(0);
@@ -113,6 +164,7 @@ export default function VocabularyGamePage() {
         setGameOver(false);
         setSelectedOption(null);
         setIsCorrect(null);
+        setIsSpeaking(false);
         generateOptions(shuffled, 0);
     };
 
@@ -194,7 +246,9 @@ export default function VocabularyGamePage() {
                 <div className="text-center mb-4">
                     <div
                         className="card border-0 rounded-4 shadow mx-auto"
-                        style={{ maxWidth: 300 }}
+                        style={{ 
+                            maxWidth: 320
+                        }}
                     >
                         <div className="card-body p-4">
                             {currentWord.image ? (
@@ -215,42 +269,92 @@ export default function VocabularyGamePage() {
                             <h4 className="fw-bold text-primary mb-0">
                                 {currentWord.translation}
                             </h4>
-                            <small className="text-muted">Bu nima?</small>
                         </div>
                     </div>
                 </div>
 
                 {/* Options */}
-                <div className="row g-3 justify-content-center" style={{ maxWidth: 500, margin: '0 auto' }}>
-                    {options.map((option, index) => {
-                        let btnClass = 'btn-outline-primary';
-                        if (selectedOption) {
-                            if (option.word === vocabulary[currentIndex].word) {
-                                btnClass = 'btn-success';
-                            } else if (option.word === selectedOption.word && !isCorrect) {
-                                btnClass = 'btn-danger';
-                            } else {
-                                btnClass = 'btn-outline-secondary';
+                <div style={{ maxWidth: 500, margin: '0 auto' }}>
+                    <div className="d-flex flex-column gap-3">
+                        {options.map((option, index) => {
+                            let cardClass = 'border-primary';
+                            let bgClass = 'bg-white';
+                            
+                            if (isCorrect !== null) {
+                                if (option.word === vocabulary[currentIndex].word) {
+                                    cardClass = 'border-success';
+                                    bgClass = 'bg-success bg-opacity-10';
+                                } else if (option.word === selectedOption.word && !isCorrect) {
+                                    cardClass = 'border-danger';
+                                    bgClass = 'bg-danger bg-opacity-10';
+                                } else {
+                                    cardClass = 'border-secondary';
+                                    bgClass = 'bg-light';
+                                }
                             }
-                        }
 
-                        return (
-                            <div key={index} className="col-6">
-                                <button
-                                    onClick={() => handleOptionClick(option)}
-                                    disabled={selectedOption !== null}
-                                    className={`btn ${btnClass} w-100 py-3 rounded-3 fw-bold`}
+                            return (
+                                <div 
+                                    key={index}
+                                    className={`card ${cardClass} ${bgClass} rounded-3 shadow-sm`}
                                     style={{ 
-                                        fontSize: '1.1rem',
-                                        pointerEvents: selectedOption !== null ? 'none' : 'auto',
-                                        WebkitTapHighlightColor: 'transparent'
+                                        border: '2px solid',
+                                        transition: 'all 0.2s',
+                                        cursor: isCorrect === null ? 'pointer' : 'default'
+                                    }}
+                                    onClick={() => {
+                                        if (isCorrect === null) {
+                                            handleListenClick(option, { stopPropagation: () => {} });
+                                        }
                                     }}
                                 >
-                                    {option.word}
-                                </button>
-                            </div>
-                        );
-                    })}
+                                    <div className="card-body p-3 d-flex align-items-center justify-content-between">
+                                        <span className="fw-bold flex-grow-1" style={{ fontSize: '1.1rem' }}>
+                                            {option.word}
+                                        </span>
+                                        <div className="d-flex gap-2">
+                                            {/* Listen button */}
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleListenClick(option, e);
+                                                }}
+                                                disabled={isCorrect !== null}
+                                                className="btn btn-outline-primary rounded-circle d-flex align-items-center justify-content-center"
+                                                style={{ 
+                                                    width: 45, 
+                                                    height: 45,
+                                                    fontSize: '1.3rem',
+                                                    border: '2px solid'
+                                                }}
+                                                title="Eshitish"
+                                            >
+                                                🔊
+                                            </button>
+                                            {/* Select button */}
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleOptionClick(option);
+                                                }}
+                                                disabled={isCorrect !== null}
+                                                className="btn btn-primary rounded-circle d-flex align-items-center justify-content-center"
+                                                style={{ 
+                                                    width: 45, 
+                                                    height: 45,
+                                                    fontSize: '1.3rem',
+                                                    fontWeight: 'bold'
+                                                }}
+                                                title="Tanlash"
+                                            >
+                                                ✓
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
                 </div>
 
                 {/* Feedback */}

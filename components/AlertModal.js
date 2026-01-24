@@ -23,7 +23,7 @@ export default function AlertModal({
     const IconComponent = config.Icon;
 
     return (
-        <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1050 }}>
+        <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 10500 }}>
             <div className="modal-dialog modal-dialog-centered">
                 <div className="modal-content rounded-4 border-0 shadow">
                     <div className="modal-body p-4 text-center">

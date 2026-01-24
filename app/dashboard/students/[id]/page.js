@@ -7,7 +7,7 @@ import { useData } from '@/context/DataContext';
 import Link from 'next/link';
 import CompleteLessonModal from '@/components/dashboard/CompleteLessonModal';
 import QuickStarsModal from '@/components/dashboard/QuickStarsModal';
-import { ArrowLeft, Star, CheckCircle, Plus, PlayCircle, Video, Check, GraduationCap, TrendingUp, Users } from 'lucide-react';
+import { ArrowLeft, Star, CheckCircle, Plus, PlayCircle, Video, Check, GraduationCap, TrendingUp, Users, ChevronDown, ChevronUp } from 'lucide-react';
 
 export default function StudentDetailPage() {
     const params = useParams();
@@ -23,6 +23,8 @@ export default function StudentDetailPage() {
     const [showCompleteModal, setShowCompleteModal] = useState(false);
     const [showStarsModal, setShowStarsModal] = useState(false);
     const [selectedLesson, setSelectedLesson] = useState(null);
+    const [showCompletedLessons, setShowCompletedLessons] = useState(true);
+    const [showIncompleteLessons, setShowIncompleteLessons] = useState(true);
 
     useEffect(() => {
         fetchData();
@@ -65,6 +67,10 @@ export default function StudentDetailPage() {
     };
 
     const completedLessonIds = progress.map(p => p.lesson?._id || p.lesson);
+
+    const completedLessons = lessons.filter(
+        lesson => completedLessonIds.includes(lesson._id)
+    );
 
     const incompleteLessons = lessons.filter(
         lesson => !completedLessonIds.includes(lesson._id)
@@ -187,83 +193,140 @@ export default function StudentDetailPage() {
                     </div>
                 </div>
 
+                {/* Completed Lessons */}
+                <div className="mb-4">
+                    <div 
+                        className="d-flex align-items-center justify-content-between mb-3"
+                        style={{ cursor: 'pointer' }}
+                        onClick={() => setShowCompletedLessons(!showCompletedLessons)}
+                    >
+                        <h3 className="h6 fw-bold mb-0 d-flex align-items-center gap-2">
+                            <CheckCircle size={20} className="text-success" />
+                            Bajarilgan darslar ({progress.length})
+                        </h3>
+                        <button className="btn btn-sm btn-light rounded-circle p-2">
+                            {showCompletedLessons ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                        </button>
+                    </div>
+
+                    {showCompletedLessons && (
+                        <>
+                            {progress.length === 0 ? (
+                                <div className="card border rounded-4">
+                                    <div className="card-body p-4 text-center text-muted">
+                                        <GraduationCap size={48} style={{ opacity: 0.5 }} className="mb-2" />
+                                        <p className="mb-0">Hali dars bajarilmagan</p>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="d-flex flex-column gap-2">
+                                    {progress.map((item) => (
+                                        <div 
+                                            key={item._id} 
+                                            className="card border rounded-4"
+                                            style={{ cursor: 'pointer', transition: 'all 0.2s' }}
+                                            onClick={() => {
+                                                if (item.lesson?._id) {
+                                                    router.push(`/dashboard/lessons/${item.lesson._id}`);
+                                                }
+                                            }}
+                                            onMouseEnter={(e) => {
+                                                e.currentTarget.style.transform = 'translateY(-2px)';
+                                                e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                e.currentTarget.style.transform = 'translateY(0)';
+                                                e.currentTarget.style.boxShadow = '';
+                                            }}
+                                        >
+                                            <div className="card-body p-3 d-flex align-items-center justify-content-between">
+                                                <div className="d-flex align-items-center gap-3">
+                                                    <div className="rounded-3 d-flex align-items-center justify-content-center" style={{ width: '40px', height: '40px', backgroundColor: '#dcfce7' }}>
+                                                        <CheckCircle size={20} className="text-success" />
+                                                    </div>
+                                                    <div>
+                                                        <h4 className="fw-semibold mb-0" style={{ fontSize: '14px' }}>
+                                                            {item.lesson?.title || 'Dars'}
+                                                        </h4>
+                                                        <p className="small text-muted mb-0">
+                                                            {new Date(item.completedAt).toLocaleDateString('uz-UZ')}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <div className="d-flex align-items-center gap-1 px-2 py-1 rounded-pill" style={{ backgroundColor: '#fef3c7' }}>
+                                                    {[...Array(item.starsEarned || 0)].map((_, i) => (
+                                                        <Star key={i} size={16} fill="#fbbf24" className="text-warning" />
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </>
+                    )}
+                </div>
+
                 {/* Incomplete Lessons */}
                 {incompleteLessons.length > 0 && (
                     <div className="mb-4">
-                        <h3 className="h6 fw-bold mb-3 d-flex align-items-center gap-2">
-                            <PlayCircle size={20} className="text-primary" />
-                            Bajarilmagan darslar
-                        </h3>
-
-                        <div className="d-flex flex-column gap-2">
-                            {incompleteLessons.slice(0, 5).map((lesson) => (
-                                <div key={lesson._id} className="card border rounded-4">
-                                    <div className="card-body p-3 d-flex align-items-center justify-content-between">
-                                        <div className="d-flex align-items-center gap-3">
-                                            <div className="rounded-3 d-flex align-items-center justify-content-center" style={{ width: '40px', height: '40px', backgroundColor: '#dbeafe' }}>
-                                                <Video size={20} className="text-primary" />
-                                            </div>
-                                            <div>
-                                                <h4 className="fw-semibold mb-0" style={{ fontSize: '14px' }}>{lesson.title}</h4>
-                                                <p className="small text-muted mb-0">{lesson.level}-daraja • {lesson.duration} daq</p>
-                                            </div>
-                                        </div>
-                                        <button
-                                            className="btn btn-primary btn-sm rounded-pill px-3"
-                                            onClick={() => handleCompleteLesson(lesson)}
-                                        >
-                                            <Check size={18} />
-                                        </button>
-                                    </div>
-                                </div>
-                            ))}
+                        <div 
+                            className="d-flex align-items-center justify-content-between mb-3"
+                            style={{ cursor: 'pointer' }}
+                            onClick={() => setShowIncompleteLessons(!showIncompleteLessons)}
+                        >
+                            <h3 className="h6 fw-bold mb-0 d-flex align-items-center gap-2">
+                                <PlayCircle size={20} className="text-primary" />
+                                Bajarilmagan darslar ({incompleteLessons.length})
+                            </h3>
+                            <button className="btn btn-sm btn-light rounded-circle p-2">
+                                {showIncompleteLessons ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                            </button>
                         </div>
+
+                        {showIncompleteLessons && (
+                            <div className="d-flex flex-column gap-2">
+                                {incompleteLessons.map((lesson) => (
+                                    <div 
+                                        key={lesson._id} 
+                                        className="card border rounded-4"
+                                        style={{ cursor: 'pointer', transition: 'all 0.2s' }}
+                                        onClick={() => router.push(`/dashboard/lessons/${lesson._id}`)}
+                                        onMouseEnter={(e) => {
+                                            e.currentTarget.style.transform = 'translateY(-2px)';
+                                            e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.currentTarget.style.transform = 'translateY(0)';
+                                            e.currentTarget.style.boxShadow = '';
+                                        }}
+                                    >
+                                        <div className="card-body p-3 d-flex align-items-center justify-content-between">
+                                            <div className="d-flex align-items-center gap-3">
+                                                <div className="rounded-3 d-flex align-items-center justify-content-center" style={{ width: '40px', height: '40px', backgroundColor: '#dbeafe' }}>
+                                                    <Video size={20} className="text-primary" />
+                                                </div>
+                                                <div>
+                                                    <h4 className="fw-semibold mb-0" style={{ fontSize: '14px' }}>{lesson.title}</h4>
+                                                    <p className="small text-muted mb-0">{lesson.level}-daraja • {lesson.duration} daq</p>
+                                                </div>
+                                            </div>
+                                            <button
+                                                className="btn btn-primary btn-sm rounded-pill px-3"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleCompleteLesson(lesson);
+                                                }}
+                                            >
+                                                <Check size={18} />
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 )}
-
-                {/* Completed Lessons */}
-                <div className="mb-4">
-                    <h3 className="h6 fw-bold mb-3 d-flex align-items-center gap-2">
-                        <CheckCircle size={20} className="text-success" />
-                        Bajarilgan darslar ({progress.length})
-                    </h3>
-
-                    {progress.length === 0 ? (
-                        <div className="card border rounded-4">
-                            <div className="card-body p-4 text-center text-muted">
-                                <GraduationCap size={48} style={{ opacity: 0.5 }} className="mb-2" />
-                                <p className="mb-0">Hali dars bajarilmagan</p>
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="d-flex flex-column gap-2">
-                            {progress.map((item) => (
-                                <div key={item._id} className="card border rounded-4">
-                                    <div className="card-body p-3 d-flex align-items-center justify-content-between">
-                                        <div className="d-flex align-items-center gap-3">
-                                            <div className="rounded-3 d-flex align-items-center justify-content-center" style={{ width: '40px', height: '40px', backgroundColor: '#dcfce7' }}>
-                                                <CheckCircle size={20} className="text-success" />
-                                            </div>
-                                            <div>
-                                                <h4 className="fw-semibold mb-0" style={{ fontSize: '14px' }}>
-                                                    {item.lesson?.title || 'Dars'}
-                                                </h4>
-                                                <p className="small text-muted mb-0">
-                                                    {new Date(item.completedAt).toLocaleDateString('uz-UZ')}
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <div className="d-flex align-items-center gap-1 px-2 py-1 rounded-pill" style={{ backgroundColor: '#fef3c7' }}>
-                                            {[...Array(item.starsEarned || 0)].map((_, i) => (
-                                                <Star key={i} size={16} fill="#fbbf24" className="text-warning" />
-                                            ))}
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
 
                 {/* Parent Info */}
                 {(student.parentName || student.parentPhone) && (

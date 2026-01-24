@@ -477,8 +477,8 @@ export default function ProfilePage() {
                                         </div>
                                         <button
                                             onClick={() => handleEditStudent(student)}
-                                            className="btn btn-sm btn-outline-primary rounded-2 p-2"
-                                            style={{ width: '32px', height: '32px' }}
+                                            className="btn btn-sm btn-outline-primary rounded-2 d-flex align-items-center justify-content-center"
+                                            style={{ width: '32px', height: '32px', padding: 0 }}
                                         >
                                             <Edit size={14} />
                                         </button>
@@ -487,8 +487,8 @@ export default function ProfilePage() {
                                                 setSelectedStudent(student);
                                                 setShowDeleteStudentModal(true);
                                             }}
-                                            className="btn btn-sm btn-outline-danger rounded-2 p-2"
-                                            style={{ width: '32px', height: '32px' }}
+                                            className="btn btn-sm btn-outline-danger rounded-2 d-flex align-items-center justify-content-center"
+                                            style={{ width: '32px', height: '32px', padding: 0 }}
                                         >
                                             <Trash2 size={14} />
                                         </button>

@@ -68,6 +68,23 @@ const LessonSchema = new mongoose.Schema({
         type: String,
         enum: ['none', 'vocabulary', 'catch-the-number', 'pop-the-balloon', 'drop-to-basket', 'shopping-basket', 'build-the-body', 'movements'],
         default: 'vocabulary'
+    },
+    // Game settings for catch-the-number
+    gameSettings: {
+        numberRange: {
+            min: {
+                type: Number,
+                default: 1
+            },
+            max: {
+                type: Number,
+                default: 10
+            }
+        },
+        duration: {
+            type: Number, // Duration in seconds
+            default: 60 // 1 minute default
+        }
     }
 }, {
     timestamps: true

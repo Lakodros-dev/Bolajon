@@ -5,8 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useData } from '@/context/DataContext';
 import { useSubscription } from '@/components/SubscriptionModal';
 import Header from '@/components/dashboard/Header';
-import Link from 'next/link';
-import { Play, Clock, GraduationCap } from 'lucide-react';
+import { Play, Clock, GraduationCap, BookOpen, Video } from 'lucide-react';
 
 const levelNames = {
     1: "Boshlang'ich",
@@ -90,6 +89,28 @@ export default function LessonsPage() {
                                                 <div
                                                     data-tour={levelIdx === 0 && idx === 0 ? "lesson-card" : undefined}
                                                     className="card border rounded-4 lesson-card h-100"
+                                                    style={{
+                                                        transition: 'all 0.3s ease',
+                                                        cursor: 'pointer'
+                                                    }}
+                                                    onMouseEnter={(e) => {
+                                                        e.currentTarget.style.transform = 'translateY(-4px)';
+                                                        e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.12)';
+                                                        const playBtn = e.currentTarget.querySelector('.play-button');
+                                                        if (playBtn) {
+                                                            playBtn.style.transform = 'scale(1.1)';
+                                                            playBtn.style.boxShadow = '0 6px 16px rgba(43, 140, 238, 0.4)';
+                                                        }
+                                                    }}
+                                                    onMouseLeave={(e) => {
+                                                        e.currentTarget.style.transform = 'translateY(0)';
+                                                        e.currentTarget.style.boxShadow = '';
+                                                        const playBtn = e.currentTarget.querySelector('.play-button');
+                                                        if (playBtn) {
+                                                            playBtn.style.transform = 'scale(1)';
+                                                            playBtn.style.boxShadow = '0 4px 12px rgba(43, 140, 238, 0.3)';
+                                                        }
+                                                    }}
                                                 >
                                                     <div className="card-body p-3">
                                                         <div className="d-flex gap-3 align-items-center">
@@ -130,7 +151,7 @@ export default function LessonsPage() {
                                                                     <span className="fw-bold" style={{ fontSize: '28px', color: colors.color }}>
                                                                         {idx + 1}
                                                                     </span>
-                                                                    <Play size={24} color={colors.color} style={{ opacity: 0.6 }} />
+                                                                    <Video size={24} color={colors.color} style={{ opacity: 0.6 }} />
                                                                 </div>
                                                             </div>
                                                             <div className="flex-grow-1 min-width-0">
@@ -148,8 +169,17 @@ export default function LessonsPage() {
                                                                 </div>
                                                             </div>
                                                             <div className="flex-shrink-0">
-                                                                <div className="rounded-circle d-flex align-items-center justify-content-center" style={{ width: '40px', height: '40px', backgroundColor: 'rgba(43, 140, 238, 0.1)' }}>
-                                                                    <Play size={20} fill="#2b8cee" className="text-primary" />
+                                                                <div 
+                                                                    className="rounded-circle d-flex align-items-center justify-content-center play-button" 
+                                                                    style={{ 
+                                                                        width: '48px', 
+                                                                        height: '48px', 
+                                                                        background: 'linear-gradient(135deg, #2b8cee 0%, #1e40af 100%)',
+                                                                        boxShadow: '0 4px 12px rgba(43, 140, 238, 0.3)',
+                                                                        transition: 'all 0.3s ease'
+                                                                    }}
+                                                                >
+                                                                    <Play size={22} fill="white" color="white" />
                                                                 </div>
                                                             </div>
                                                         </div>

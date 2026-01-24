@@ -7,9 +7,6 @@ import dbConnect from '@/lib/mongodb';
 import Student from '@/models/Student';
 import { authenticate } from '@/middleware/authMiddleware';
 import { successResponse, errorResponse, serverError } from '@/lib/apiResponse';
-import { getCached, setCache, clearCache } from '@/lib/cache';
-
-const CACHE_TTL = 30 * 1000; // 30 seconds
 
 // GET - Get all students for the authenticated teacher
 export async function GET(request) {
@@ -25,15 +22,6 @@ export async function GET(request) {
         const { searchParams } = new URL(request.url);
         const showAll = searchParams.get('all') === 'true';
 
-        // Cache key based on user and query
-        const cacheKey = `students:${auth.user._id}:${showAll}`;
-        
-        // Check cache first
-        const cached = getCached(cacheKey);
-        if (cached) {
-            return successResponse({ students: cached, cached: true });
-        }
-
         // Teachers see only their students
         // Admins see only their own students in teacher mode (default)
         // Admins can see all students only with ?all=true parameter
@@ -48,12 +36,9 @@ export async function GET(request) {
         }
 
         const students = await Student.find(query)
-            .select('name age stars teacher parentName parentPhone createdAt') // Select only needed fields
+            .select('name age stars teacher parentName parentPhone createdAt avatar') // Select only needed fields
             .sort({ createdAt: -1 })
             .lean();
-
-        // Cache the result
-        setCache(cacheKey, students, CACHE_TTL);
 
         return successResponse({ students });
     } catch (error) {
@@ -93,9 +78,6 @@ export async function POST(request) {
             parentPhone: parentPhone || '',
             stars: 0
         });
-
-        // Clear students cache for this teacher
-        clearCache(`students:${auth.user._id}`);
 
         return successResponse({
             message: 'Student created successfully',

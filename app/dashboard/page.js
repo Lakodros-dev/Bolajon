@@ -19,8 +19,8 @@ const IconComponent = ({ name, ...props }) => {
     const icons = {
         UserPlus: () => <Users {...props} />,
         Play: () => <Play {...props} />,
-        Star: () => <Star {...props} fill="currentColor" />,
-        Gift: () => <Star {...props} />
+        Star: () => <Star {...props} fill="#fbbf24" />,
+        Gift: () => <ShoppingCart {...props} />
     };
     const Icon = icons[name] || icons.Star;
     return <Icon />;
@@ -132,7 +132,7 @@ export default function DashboardPage() {
                     <div className="col-4">
                         <div className="card border-0 rounded-4 h-100 card-pastel-yellow">
                             <div className="card-body text-center p-2 p-sm-3">
-                                <Star size={28} fill="#d97706" color="#d97706" className="mb-1" />
+                                <Star size={28} fill="#fbbf24" color="#fbbf24" className="mb-1" />
                                 <h3 className="h5 fw-bold mb-0">{initialLoading ? '-' : dashboard.totalStars}</h3>
                                 <p className="small text-muted mb-0" style={{ fontSize: '11px', whiteSpace: 'nowrap' }}>Yulduzlar</p>
                             </div>
@@ -225,7 +225,7 @@ export default function DashboardPage() {
 
                             <div className="d-flex align-items-start gap-3 p-3 rounded-4" style={{ backgroundColor: '#FEF3C7' }}>
                                 <div className="rounded-3 p-2 bg-white">
-                                    <Star size={20} fill="#d97706" color="#d97706" />
+                                    <Star size={20} fill="#fbbf24" color="#fbbf24" />
                                 </div>
                                 <div>
                                     <h4 className="small fw-bold mb-1">3. Yulduz bering</h4>

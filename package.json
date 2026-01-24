@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.90.20",
     "bcryptjs": "^3.0.3",
     "bootstrap": "^5.3.8",
     "jsonwebtoken": "^9.0.3",
