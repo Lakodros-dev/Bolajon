@@ -91,9 +91,17 @@ export default function VocabularyGamePage() {
         if (!vocab || vocab.length === 0 || index >= vocab.length) return;
 
         const correct = vocab[index];
-        const others = vocab.filter((_, i) => i !== index);
-        const shuffledOthers = others.sort(() => Math.random() - 0.5).slice(0, 3);
+        
+        // Get other unique words (not the current one)
+        const others = vocab.filter((item, i) => i !== index && item.word !== correct.word);
+        
+        // If we have less than 3 other words, use what we have
+        const numOthers = Math.min(3, others.length);
+        const shuffledOthers = others.sort(() => Math.random() - 0.5).slice(0, numOthers);
+        
+        // Create options array with correct answer + others
         const allOptions = [correct, ...shuffledOthers].sort(() => Math.random() - 0.5);
+        
         setOptions(allOptions);
     }, []);
 
