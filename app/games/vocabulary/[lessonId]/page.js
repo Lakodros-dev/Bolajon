@@ -114,23 +114,26 @@ export default function VocabularyGamePage() {
 
         if (correct) {
             setScore(prev => prev + 1);
-        }
-
-        // Wait and move to next
-        setTimeout(async () => {
-            if (currentIndex + 1 < vocabulary.length) {
-                setCurrentIndex(prev => prev + 1);
-                generateOptions(vocabulary, currentIndex + 1);
-                setSelectedOption(null);
-                setIsCorrect(null);
-            } else {
-                // Game over
-                if ((score + (correct ? 1 : 0)) / vocabulary.length >= 0.7) {
+            
+            // Wait and move to next
+            setTimeout(async () => {
+                if (currentIndex + 1 < vocabulary.length) {
+                    setCurrentIndex(prev => prev + 1);
+                    generateOptions(vocabulary, currentIndex + 1);
+                    setSelectedOption(null);
+                    setIsCorrect(null);
+                } else {
+                    // Game over - all questions answered correctly
                     await recordGameWin();
+                    setGameOver(true);
                 }
+            }, 1500);
+        } else {
+            // Wrong answer - game over immediately
+            setTimeout(() => {
                 setGameOver(true);
-            }
-        }, 1500);
+            }, 1500);
+        }
     };
 
     const recordGameWin = async () => {
@@ -192,7 +195,7 @@ export default function VocabularyGamePage() {
 
     if (gameOver) {
         const percentage = Math.round((score / vocabulary.length) * 100);
-        const won = percentage >= 70;
+        const won = score === vocabulary.length; // Must answer all correctly to win
 
         return (
             <GameOverModal

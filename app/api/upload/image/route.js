@@ -7,6 +7,7 @@ import { writeFile, mkdir } from 'fs/promises';
 import { existsSync } from 'fs';
 import path from 'path';
 import sharp from 'sharp';
+import sharpGif from 'sharp-gif2';
 import { authorize } from '@/middleware/authMiddleware';
 import { successResponse, errorResponse, serverError } from '@/lib/apiResponse';
 
@@ -59,13 +60,47 @@ export async function POST(request) {
         let filename;
         let filepath;
 
-        // Handle GIF separately (preserve animation)
+        // Handle animated formats separately (preserve animation but resize)
         if (file.type === 'image/gif') {
             filename = `img_${timestamp}_${randomStr}.gif`;
             filepath = path.join(UPLOAD_DIR, filename);
             
-            // For GIF, save as-is (no compression to preserve animation)
-            finalBuffer = buffer;
+            try {
+                // Resize GIF while preserving animation
+                finalBuffer = await sharpGif(buffer, {
+                    resize: {
+                        width: 400,
+                        height: 400,
+                        fit: 'inside',
+                        withoutEnlargement: true
+                    }
+                }).toBuffer();
+            } catch (error) {
+                console.log('GIF resize failed, using original:', error.message);
+                // Fallback to original if resize fails
+                finalBuffer = buffer;
+            }
+        } else if (file.type === 'image/webp') {
+            // Keep WebP as WebP (may be animated)
+            filename = `img_${timestamp}_${randomStr}.webp`;
+            filepath = path.join(UPLOAD_DIR, filename);
+            
+            try {
+                // Resize WebP (preserves animation if present)
+                finalBuffer = await sharp(buffer, { animated: true })
+                    .resize(400, 400, {
+                        fit: 'inside',
+                        withoutEnlargement: true
+                    })
+                    .webp({ 
+                        quality: 85,
+                        effort: 6
+                    })
+                    .toBuffer();
+            } catch (error) {
+                console.log('WebP resize failed, using original:', error.message);
+                finalBuffer = buffer;
+            }
         } else {
             // For other formats, compress and convert to WebP
             filename = `img_${timestamp}_${randomStr}.webp`;
@@ -91,15 +126,15 @@ export async function POST(request) {
 
         return successResponse({
             message: file.type === 'image/gif' 
-                ? 'GIF muvaffaqiyatli yuklandi (animatsiya saqlanadi)' 
+                ? 'GIF muvaffaqiyatli yuklandi va kichraytirildi (animatsiya saqlanadi)' 
+                : file.type === 'image/webp'
+                ? 'WebP muvaffaqiyatli yuklandi va kichraytirildi (animatsiya saqlanadi)'
                 : 'Rasm muvaffaqiyatli yuklandi va siqildi',
             imageUrl,
             filename,
             originalSize: file.size,
             compressedSize: finalBuffer.length,
-            savings: file.type === 'image/gif' 
-                ? 'GIF siqilmadi' 
-                : `${Math.round((1 - finalBuffer.length / file.size) * 100)}%`
+            savings: `${Math.round((1 - finalBuffer.length / file.size) * 100)}%`
         });
 
     } catch (error) {
