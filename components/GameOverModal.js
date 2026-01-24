@@ -160,16 +160,17 @@ export default function GameOverModal({ won, score, total, onRestart }) {
                     </p>
 
                     {/* Buttons */}
-                    <div className="d-flex gap-3 justify-content-center flex-wrap">
+                    <div className="d-flex gap-3 justify-content-center flex-nowrap">
                         <button 
                             onClick={onRestart} 
-                            className="btn btn-lg rounded-pill px-4 py-3 d-flex align-items-center gap-2 shadow-sm"
+                            className="btn btn-lg rounded-pill px-4 py-3 d-flex align-items-center gap-2 shadow-sm flex-nowrap"
                             style={{
                                 background: 'white',
                                 color: won ? '#667eea' : '#f5576c',
                                 border: won ? '2px solid #667eea' : '2px solid #f5576c',
                                 fontWeight: '600',
-                                transition: 'all 0.3s ease'
+                                transition: 'all 0.3s ease',
+                                whiteSpace: 'nowrap'
                             }}
                             onMouseEnter={(e) => {
                                 e.currentTarget.style.transform = 'translateY(-2px)';
@@ -192,7 +193,8 @@ export default function GameOverModal({ won, score, total, onRestart }) {
                                     : 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
                                 border: 'none',
                                 fontWeight: '600',
-                                transition: 'all 0.3s ease'
+                                transition: 'all 0.3s ease',
+                                whiteSpace: 'nowrap'
                             }}
                             onMouseEnter={(e) => {
                                 e.currentTarget.style.transform = 'translateY(-2px)';

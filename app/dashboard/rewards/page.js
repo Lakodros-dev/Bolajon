@@ -203,6 +203,7 @@ export default function RewardsPage() {
                                                 onClick={() => handleBuyClick(reward)}
                                                 className="btn btn-primary rounded-3 w-100 d-flex align-items-center justify-content-center gap-2"
                                                 disabled={isOutOfStock || processing}
+                                                style={{ whiteSpace: 'nowrap' }}
                                             >
                                                 <ShoppingBag size={16} />
                                                 Sotib olish
@@ -339,6 +340,7 @@ export default function RewardsPage() {
                                     className="btn btn-primary rounded-3 d-flex align-items-center gap-2"
                                     onClick={confirmPurchase}
                                     disabled={!selectedStudent || processing}
+                                    style={{ whiteSpace: 'nowrap' }}
                                 >
                                     {processing ? (
                                         <span className="spinner-border spinner-border-sm"></span>
