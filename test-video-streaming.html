@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Streaming Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        video {
+            width: 100%;
+            max-width: 640px;
+            border: 2px solid #2b8cee;
+            border-radius: 8px;
+        }
+        .info {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f0f9ff;
+            border-radius: 8px;
+        }
+        .success {
+            color: #16a34a;
+            font-weight: bold;
+        }
+        .error {
+            color: #dc2626;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Video Streaming Test - Dars 51</h1>
+    
+    <video id="testVideo" controls>
+        <source src="http://localhost:3007/api/video/51_complate.mp4" type="video/mp4">
+        Brauzeringiz video elementini qo'llab-quvvatlamaydi.
+    </video>
+
+    <div class="info">
+        <h3>Test Natijasi:</h3>
+        <p id="status">Yuklanmoqda...</p>
+        <p id="details"></p>
+    </div>
+
+    <script>
+        const video = document.getElementById('testVideo');
+        const status = document.getElementById('status');
+        const details = document.getElementById('details');
+
+        video.addEventListener('loadedmetadata', () => {
+            status.innerHTML = '<span class="success">✅ Video muvaffaqiyatli yuklandi!</span>';
+            details.innerHTML = `
+                Davomiylik: ${Math.floor(video.duration / 60)}:${Math.floor(video.duration % 60).toString().padStart(2, '0')}<br>
+                O'lcham: ${video.videoWidth}x${video.videoHeight}<br>
+                Range request: Qo'llab-quvvatlanadi
+            `;
+        });
+
+        video.addEventListener('error', (e) => {
+            status.innerHTML = '<span class="error">❌ Video yuklanmadi!</span>';
+            details.innerHTML = `Xatolik: ${e.message || 'Noma\'lum xatolik'}`;
+        });
+
+        video.addEventListener('play', () => {
+            console.log('Video boshlandi');
+        });
+
+        video.addEventListener('seeking', () => {
+            console.log('Video seeking...');
+        });
+
+        video.addEventListener('seeked', () => {
+            console.log('Video seeked');
+        });
+    </script>
+</body>
+</html>

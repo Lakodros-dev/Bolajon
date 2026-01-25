@@ -1,5 +1,6 @@
 /**
  * Redemptions API
+ * GET /api/redemptions - Get redemptions for teacher
  * POST /api/redemptions - Redeem rewards for a student
  */
 import dbConnect from '@/lib/mongodb';
@@ -8,6 +9,30 @@ import Reward from '@/models/Reward';
 import Redemption from '@/models/Redemption';
 import { authenticate } from '@/middleware/authMiddleware';
 import { successResponse, errorResponse, serverError } from '@/lib/apiResponse';
+
+export async function GET(request) {
+    try {
+        const auth = await authenticate(request);
+        if (!auth.success) {
+            return errorResponse(auth.error, auth.status);
+        }
+
+        await dbConnect();
+
+        // Get all redemptions for this teacher
+        const redemptions = await Redemption.find({ teacher: auth.user._id })
+            .populate('student', 'name')
+            .populate('reward', 'title imageUrl')
+            .sort({ redeemedAt: -1 })
+            .lean();
+
+        return successResponse({ redemptions });
+
+    } catch (error) {
+        console.error('Get redemptions error:', error);
+        return serverError("Redemption ma'lumotlarini olishda xatolik");
+    }
+}
 
 export async function POST(request) {
     try {

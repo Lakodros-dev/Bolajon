@@ -1,12 +1,14 @@
 /**
  * GET /api/video/[filename]
  * Secure video streaming endpoint
+ * Supports both uploads/videos/ and public/video/ directories
  */
 import { createReadStream, statSync, existsSync } from 'fs';
 import path from 'path';
 import { NextResponse } from 'next/server';
 
 const UPLOAD_DIR = path.join(process.cwd(), 'uploads', 'videos');
+const PUBLIC_DIR = path.join(process.cwd(), 'public', 'video');
 
 export async function GET(request, { params }) {
     try {
@@ -17,7 +19,11 @@ export async function GET(request, { params }) {
             return new NextResponse('Invalid filename', { status: 400 });
         }
 
-        const filepath = path.join(UPLOAD_DIR, filename);
+        // Try uploads directory first, then public directory
+        let filepath = path.join(UPLOAD_DIR, filename);
+        if (!existsSync(filepath)) {
+            filepath = path.join(PUBLIC_DIR, filename);
+        }
 
         // Check if file exists
         if (!existsSync(filepath)) {
@@ -34,7 +40,18 @@ export async function GET(request, { params }) {
             // Partial content (video seeking)
             const parts = range.replace(/bytes=/, '').split('-');
             const start = parseInt(parts[0], 10);
-            const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
+            let end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
+            
+            // Validate range
+            if (isNaN(start) || start < 0 || start >= fileSize) {
+                return new NextResponse('Invalid range', { status: 416 });
+            }
+            
+            // Ensure end is within bounds
+            if (end >= fileSize) {
+                end = fileSize - 1;
+            }
+            
             const chunkSize = end - start + 1;
 
             const stream = createReadStream(filepath, { start, end });

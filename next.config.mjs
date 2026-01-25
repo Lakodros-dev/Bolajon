@@ -5,7 +5,9 @@ const nextConfig = {
         serverActions: {
             bodySizeLimit: '500mb',
         },
-        optimizePackageImports: ['lucide-react'], // Optimize icon imports
+        optimizePackageImports: ['lucide-react', 'react-bootstrap'], // Optimize imports
+        // Enable faster navigation
+        optimisticClientCache: true,
     },
 
     // Image optimization
@@ -21,6 +23,7 @@ const nextConfig = {
             },
         ],
         formats: ['image/webp'], // Use WebP format
+        minimumCacheTTL: 86400, // Cache images for 24 hours
     },
 
     // Compiler optimizations
@@ -37,10 +40,10 @@ const nextConfig = {
     // Optimize production builds
     swcMinify: true,
 
-    // Disable caching in development
+    // Optimize page loading
     onDemandEntries: {
-        maxInactiveAge: 0, // Disable caching
-        pagesBufferLength: 0,
+        maxInactiveAge: 25 * 1000, // Keep pages in memory for 25 seconds
+        pagesBufferLength: 5, // Keep 5 pages in buffer
     },
 
     // Cache headers for static files
@@ -48,6 +51,23 @@ const nextConfig = {
         const isDev = process.env.NODE_ENV === 'development';
         
         return [
+            {
+                source: '/video/:path*',
+                headers: [
+                    {
+                        key: 'Cache-Control',
+                        value: isDev ? 'no-store, no-cache, must-revalidate' : 'public, max-age=86400, must-revalidate',
+                    },
+                    {
+                        key: 'Accept-Ranges',
+                        value: 'bytes',
+                    },
+                    {
+                        key: 'Content-Type',
+                        value: 'video/mp4',
+                    },
+                ],
+            },
             {
                 source: '/book/:path*',
                 headers: [

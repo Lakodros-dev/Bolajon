@@ -143,6 +143,26 @@ export default function AddLessonPage() {
         setError('');
 
         try {
+            // Get video duration using HTML5 video element
+            const videoDuration = await new Promise((resolve) => {
+                const video = document.createElement('video');
+                video.preload = 'metadata';
+                
+                video.onloadedmetadata = () => {
+                    window.URL.revokeObjectURL(video.src);
+                    const durationMinutes = Math.floor(video.duration / 60); // Round down
+                    resolve(durationMinutes);
+                };
+                
+                video.onerror = () => {
+                    resolve(0); // If error, return 0
+                };
+                
+                video.src = URL.createObjectURL(file);
+            });
+
+            console.log('Video duration detected:', videoDuration, 'minutes');
+
             const formDataUpload = new FormData();
             formDataUpload.append('video', file);
 
@@ -159,7 +179,12 @@ export default function AddLessonPage() {
                 if (xhr.status === 200) {
                     const data = JSON.parse(xhr.responseText);
                     if (data.success) {
-                        setFormData(prev => ({ ...prev, videoUrl: data.videoUrl }));
+                        // Set video URL and auto-detected duration
+                        setFormData(prev => ({ 
+                            ...prev, 
+                            videoUrl: data.videoUrl,
+                            duration: videoDuration // Auto-set duration from browser
+                        }));
                         setError('');
                     } else {
                         setError(data.error || 'Video yuklashda xatolik');

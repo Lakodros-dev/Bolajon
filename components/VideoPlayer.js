@@ -61,6 +61,13 @@ export default function VideoPlayer({ url, title = 'Video' }) {
     }
 
     // Direct video file (mp4, webm, etc.)
+    // Convert /video/ URLs to /api/video/ for proper streaming
+    let videoUrl = url;
+    if (url.startsWith('/video/')) {
+        const filename = url.split('/video/')[1];
+        videoUrl = `/api/video/${filename}`;
+    }
+
     return (
         <div className="ratio ratio-16x9 rounded-4 overflow-hidden shadow-sm bg-black">
             {error ? (
@@ -68,7 +75,7 @@ export default function VideoPlayer({ url, title = 'Video' }) {
                     <div className="text-center">
                         <AlertCircle size={48} style={{ opacity: 0.5 }} className="mb-2" />
                         <p className="mb-0 small">Video yuklanmadi</p>
-                        <a href={url} target="_blank" rel="noopener noreferrer" className="btn btn-sm btn-outline-light mt-2">
+                        <a href={videoUrl} target="_blank" rel="noopener noreferrer" className="btn btn-sm btn-outline-light mt-2">
                             Havolani ochish
                         </a>
                     </div>
@@ -76,7 +83,7 @@ export default function VideoPlayer({ url, title = 'Video' }) {
             ) : (
                 <video
                     ref={videoRef}
-                    src={url}
+                    src={videoUrl}
                     title={title}
                     controls
                     controlsList="nodownload"
@@ -87,7 +94,7 @@ export default function VideoPlayer({ url, title = 'Video' }) {
                     onPlay={() => setIsPlaying(true)}
                     onPause={() => setIsPlaying(false)}
                 >
-                    <source src={url} />
+                    <source src={videoUrl} />
                     Brauzeringiz video elementini qo'llab-quvvatlamaydi.
                 </video>
             )}

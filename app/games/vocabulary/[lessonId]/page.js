@@ -25,6 +25,7 @@ export default function VocabularyGamePage() {
     const [gameOver, setGameOver] = useState(false);
     const [loading, setLoading] = useState(true);
     const [isSpeaking, setIsSpeaking] = useState(false);
+    const [isReviewMode, setIsReviewMode] = useState(false); // Takrorlash darslari uchun
 
     // Speech synthesis setup
     const speakText = useCallback((text, lang = 'en-US', rate = 0.9) => {

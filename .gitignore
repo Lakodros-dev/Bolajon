@@ -45,3 +45,6 @@ next-env.d.ts
 
 # Uploads (videos stored on server)
 /uploads/
+
+# Assets (temporary files for bulk upload)
+/assets/

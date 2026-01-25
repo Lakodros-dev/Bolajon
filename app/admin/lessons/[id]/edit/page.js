@@ -18,6 +18,8 @@ export default function EditLessonPage() {
     const fileInputRef = useRef(null);
     const imageInputRef = useRef(null);
     const [uploadingImageIndex, setUploadingImageIndex] = useState(null);
+    const [showBulkImport, setShowBulkImport] = useState(false);
+    const [bulkText, setBulkText] = useState('');
 
     const [formData, setFormData] = useState({
         title: '',
@@ -61,21 +63,36 @@ export default function EditLessonPage() {
             const data = await res.json();
             if (data.success) {
                 const lesson = data.lesson;
+                
+                // Normalize vocabulary array - ensure all fields exist
+                const normalizedVocabulary = (lesson.vocabulary || []).map(item => ({
+                    word: item.word || '',
+                    translation: item.translation || '',
+                    image: item.image || ''
+                }));
+                
+                // Normalize gameSettings - ensure all nested fields exist
+                const normalizedGameSettings = {
+                    numberRange: {
+                        min: lesson.gameSettings?.numberRange?.min ?? 1,
+                        max: lesson.gameSettings?.numberRange?.max ?? 10
+                    },
+                    duration: lesson.gameSettings?.duration ?? 60
+                };
+                
                 setFormData({
-                    title: lesson.title ?? '',
-                    description: lesson.description ?? '',
-                    videoUrl: lesson.videoUrl ?? '',
-                    thumbnail: lesson.thumbnail ?? '',
-                    level: lesson.level ?? 1,
-                    duration: lesson.duration ?? 0,
-                    order: lesson.order ?? 0,
-                    vocabulary: lesson.vocabulary ?? [],
-                    gameType: lesson.gameType ?? 'vocabulary',
-                    gameSettings: lesson.gameSettings ?? {
-                        numberRange: { min: 1, max: 10 },
-                        duration: 60
-                    }
+                    title: lesson.title || '',
+                    description: lesson.description || '',
+                    videoUrl: lesson.videoUrl || '',
+                    thumbnail: lesson.thumbnail || '',
+                    level: lesson.level || 1,
+                    duration: lesson.duration || 0,
+                    order: lesson.order || 0,
+                    vocabulary: normalizedVocabulary,
+                    gameType: lesson.gameType || 'vocabulary',
+                    gameSettings: normalizedGameSettings
                 });
+                
                 // Set video source based on current URL
                 if (lesson.videoUrl?.startsWith('/api/video/')) {
                     setVideoSource('upload');
@@ -92,7 +109,7 @@ export default function EditLessonPage() {
         const { name, value, type } = e.target;
         setFormData(prev => ({
             ...prev,
-            [name]: type === 'number' ? (value === '' ? 0 : parseInt(value) || 0) : (value || '')
+            [name]: type === 'number' ? (value === '' ? 0 : parseInt(value) || 0) : (value ?? '')
         }));
     };
 
@@ -102,6 +119,46 @@ export default function EditLessonPage() {
             ...prev,
             vocabulary: [...prev.vocabulary, { word: '', translation: '', image: '' }]
         }));
+    };
+
+    const handleBulkImport = () => {
+        if (!bulkText.trim()) {
+            setError('Matn kiriting');
+            return;
+        }
+
+        const lines = bulkText.trim().split('\n');
+        const newVocabulary = [];
+
+        for (const line of lines) {
+            const trimmedLine = line.trim();
+            if (!trimmedLine) continue;
+
+            // Parse: "swim - suzmoq" or "swim-suzmoq"
+            const parts = trimmedLine.split('-').map(p => p.trim());
+            
+            if (parts.length >= 2) {
+                newVocabulary.push({
+                    word: parts[0],  // Changed from 'english' to 'word'
+                    translation: parts.slice(1).join('-'), // Changed from 'uzbek' to 'translation'
+                    image: ''
+                });
+            }
+        }
+
+        if (newVocabulary.length === 0) {
+            setError('Hech qanday so\'z topilmadi. Format: "swim - suzmoq"');
+            return;
+        }
+
+        setFormData(prev => ({
+            ...prev,
+            vocabulary: [...prev.vocabulary, ...newVocabulary]
+        }));
+
+        setBulkText('');
+        setShowBulkImport(false);
+        setError('');
     };
 
     const removeVocabularyItem = (index) => {
@@ -181,6 +238,26 @@ export default function EditLessonPage() {
         setError('');
 
         try {
+            // Get video duration using HTML5 video element
+            const videoDuration = await new Promise((resolve) => {
+                const video = document.createElement('video');
+                video.preload = 'metadata';
+                
+                video.onloadedmetadata = () => {
+                    window.URL.revokeObjectURL(video.src);
+                    const durationMinutes = Math.floor(video.duration / 60); // Round down
+                    resolve(durationMinutes);
+                };
+                
+                video.onerror = () => {
+                    resolve(0); // If error, return 0
+                };
+                
+                video.src = URL.createObjectURL(file);
+            });
+
+            console.log('Video duration detected:', videoDuration, 'minutes');
+
             const formDataUpload = new FormData();
             formDataUpload.append('video', file);
 
@@ -197,7 +274,12 @@ export default function EditLessonPage() {
                 if (xhr.status === 200) {
                     const data = JSON.parse(xhr.responseText);
                     if (data.success) {
-                        setFormData(prev => ({ ...prev, videoUrl: data.videoUrl }));
+                        // Set video URL and auto-detected duration
+                        setFormData(prev => ({ 
+                            ...prev, 
+                            videoUrl: data.videoUrl,
+                            duration: videoDuration // Auto-set duration from browser
+                        }));
                         setError('');
                     } else {
                         setError(data.error || 'Video yuklashda xatolik');
@@ -591,15 +673,63 @@ export default function EditLessonPage() {
                                 <h3 className="h6 fw-bold mb-1">Lug'at</h3>
                                 <p className="text-muted small mb-0">O'yin uchun so'zlar va rasmlar</p>
                             </div>
-                            <button
-                                type="button"
-                                className="btn btn-outline-primary btn-sm rounded-3 d-flex align-items-center gap-1"
-                                onClick={addVocabularyItem}
-                            >
-                                <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>add</span>
-                                So'z qo'shish
-                            </button>
+                            <div className="d-flex gap-2">
+                                <button
+                                    type="button"
+                                    className="btn btn-outline-secondary btn-sm rounded-3 d-flex align-items-center gap-1"
+                                    onClick={() => setShowBulkImport(!showBulkImport)}
+                                >
+                                    <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>upload_file</span>
+                                    Ko'p so'z qo'shish
+                                </button>
+                                <button
+                                    type="button"
+                                    className="btn btn-outline-primary btn-sm rounded-3 d-flex align-items-center gap-1"
+                                    onClick={addVocabularyItem}
+                                >
+                                    <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>add</span>
+                                    So'z qo'shish
+                                </button>
+                            </div>
                         </div>
+
+                        {/* Bulk Import Section */}
+                        {showBulkImport && (
+                            <div className="alert alert-info rounded-3 mb-4">
+                                <div className="mb-3">
+                                    <label className="form-label fw-semibold">Ko'p so'z qo'shish</label>
+                                    <textarea
+                                        className="form-control rounded-3"
+                                        rows="6"
+                                        placeholder="Har bir qatorda bitta so'z kiriting:&#10;swim - suzmoq&#10;dance - raqsga tushmoq&#10;run - yugurmoq"
+                                        value={bulkText}
+                                        onChange={(e) => setBulkText(e.target.value)}
+                                    />
+                                    <small className="text-muted">
+                                        Format: <code>inglizcha - o'zbekcha</code> (har bir qatorda bitta so'z)
+                                    </small>
+                                </div>
+                                <div className="d-flex gap-2">
+                                    <button
+                                        type="button"
+                                        className="btn btn-primary btn-sm rounded-3"
+                                        onClick={handleBulkImport}
+                                    >
+                                        Qo'shish
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="btn btn-outline-secondary btn-sm rounded-3"
+                                        onClick={() => {
+                                            setShowBulkImport(false);
+                                            setBulkText('');
+                                        }}
+                                    >
+                                        Bekor qilish
+                                    </button>
+                                </div>
+                            </div>
+                        )}
 
                         {formData.vocabulary.length === 0 ? (
                             <div className="text-center py-4 bg-light rounded-3">

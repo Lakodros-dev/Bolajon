@@ -37,6 +37,15 @@ export default function LessonsPage() {
         }, {});
     }, [lessons]);
 
+    // Sort lessons within each level by order
+    const sortedLessonsByLevel = useMemo(() => {
+        const sorted = {};
+        Object.keys(lessonsByLevel).forEach(level => {
+            sorted[level] = [...lessonsByLevel[level]].sort((a, b) => (a.order || 0) - (b.order || 0));
+        });
+        return sorted;
+    }, [lessonsByLevel]);
+
     return (
         <div className="page-content">
             <Header 
@@ -64,7 +73,7 @@ export default function LessonsPage() {
                 )}
 
                 <div data-tour="lessons-list">
-                    {!initialLoading && Object.keys(lessonsByLevel).sort().map((level, levelIdx) => {
+                    {!initialLoading && Object.keys(sortedLessonsByLevel).sort().map((level, levelIdx) => {
                         const levelNum = parseInt(level);
                         const colors = levelColors[levelNum] || levelColors[1];
 
@@ -79,7 +88,7 @@ export default function LessonsPage() {
                                 </div>
 
                                 <div className="row g-3">
-                                    {lessonsByLevel[level].map((lesson, idx) => (
+                                    {sortedLessonsByLevel[level].map((lesson, idx) => (
                                         <div key={lesson._id} className="col-12 col-lg-6">
                                             <div 
                                                 onClick={() => requireSubscription(() => router.push(`/dashboard/lessons/${lesson._id}`))}

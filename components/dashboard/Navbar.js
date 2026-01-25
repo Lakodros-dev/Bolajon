@@ -3,73 +3,139 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Home, Gift, PlayCircle, Gamepad2, GraduationCap } from 'lucide-react';
+import { useEffect, useState, useMemo, memo } from 'react';
 
-export default function Navbar() {
+const Navbar = memo(function Navbar() {
     const pathname = usePathname();
+    const [activeIndex, setActiveIndex] = useState(0);
 
-    const navItems = [
+    const navItems = useMemo(() => [
         { href: '/dashboard', icon: Home, label: 'Asosiy' },
         { href: '/dashboard/rewards', icon: Gift, label: "Sovg'alar" },
-        { href: '/dashboard/lessons', icon: PlayCircle, label: 'Darslar', isMain: true },
+        { href: '/dashboard/lessons', icon: PlayCircle, label: 'Darslar' },
         { href: '/dashboard/games', icon: Gamepad2, label: "O'yinlar" },
         { href: '/dashboard/students', icon: GraduationCap, label: "O'quvchilar" },
-    ];
+    ], []);
 
-    const isActive = (href) => {
+    const isActive = useMemo(() => (href) => {
+        // Exact match for dashboard home
         if (href === '/dashboard') return pathname === '/dashboard';
-        // O'quvchilar uchun leaderboard va statistics ham active bo'lsin
+        
+        // Students section includes leaderboard and statistics
         if (href === '/dashboard/students') {
             return pathname.startsWith('/dashboard/students') ||
                 pathname.startsWith('/dashboard/leaderboard') ||
                 pathname.startsWith('/dashboard/statistics');
         }
-        return pathname.startsWith(href);
-    };
+        
+        // For other routes, check if pathname starts with href
+        // but exclude profile and other non-navbar routes
+        if (href === '/dashboard/rewards') {
+            return pathname.startsWith('/dashboard/rewards');
+        }
+        if (href === '/dashboard/lessons') {
+            return pathname.startsWith('/dashboard/lessons');
+        }
+        if (href === '/dashboard/games') {
+            return pathname.startsWith('/dashboard/games');
+        }
+        
+        return false;
+    }, [pathname]);
+
+    useEffect(() => {
+        const index = navItems.findIndex(item => isActive(item.href));
+        if (index !== -1) {
+            setActiveIndex(index);
+        } else {
+            setActiveIndex(-1); // No active item for routes not in navbar
+        }
+    }, [pathname, navItems, isActive]);
+
+    // Calculate position for sliding background - memoized
+    const itemWidth = 100 / navItems.length;
+    const backgroundPosition = useMemo(() => activeIndex * itemWidth, [activeIndex, itemWidth]);
+    
+    // Check if any navbar item is active
+    const hasActiveItem = activeIndex !== -1;
 
     return (
         <nav className="bottom-nav">
-            <div className="d-flex justify-content-around align-items-end" style={{ maxWidth: '500px', margin: '0 auto' }}>
-                {navItems.map((item) => {
+            <div 
+                className="position-relative d-flex justify-content-around" 
+                style={{ 
+                    maxWidth: '500px', 
+                    margin: '0 auto',
+                    paddingBottom: '8px',
+                    height: '80px',
+                    alignItems: 'flex-end'
+                }}
+            >
+                {/* Sliding background indicator - only show if there's an active item */}
+                {hasActiveItem && (
+                    <div
+                        className="position-absolute shadow"
+                        style={{
+                            width: '64px',
+                            height: '64px',
+                            borderRadius: '18px',
+                            background: 'linear-gradient(135deg, #2b8cee 0%, #1e40af 100%)',
+                            bottom: '28px',
+                            left: `calc(${backgroundPosition}% + ${itemWidth / 2}% - 32px)`,
+                            transition: 'all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                            zIndex: 0,
+                            pointerEvents: 'none'
+                        }}
+                    />
+                )}
+
+                {navItems.map((item, index) => {
                     const Icon = item.icon;
+                    const active = isActive(item.href);
+                    
                     return (
                         <Link
                             key={item.href}
                             href={item.href}
                             prefetch={true}
-                            className={`nav-link d-flex flex-column align-items-center text-decoration-none ${isActive(item.href) ? 'active' : ''} ${item.isMain ? 'nav-main' : ''}`}
+                            className="d-flex flex-column align-items-center text-decoration-none position-relative"
                             style={{
-                                padding: item.isMain ? '0' : '8px 12px',
-                                marginTop: item.isMain ? '-20px' : '0'
+                                padding: '0',
+                                marginTop: active ? '-20px' : '0',
+                                transition: 'all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                                zIndex: 1,
+                                flex: 1,
+                                minWidth: '60px'
                             }}
                         >
-                            {item.isMain ? (
-                                <div
-                                    className="d-flex flex-column align-items-center justify-content-center shadow"
-                                    style={{
-                                        width: '56px',
-                                        height: '56px',
-                                        borderRadius: '16px',
-                                        background: isActive(item.href)
-                                            ? 'linear-gradient(135deg, #2b8cee 0%, #1e40af 100%)'
-                                            : 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
-                                        marginBottom: '4px'
-                                    }}
-                                >
-                                    <Icon size={28} color="white" strokeWidth={2.5} />
-                                </div>
-                            ) : (
-                                <Icon
-                                    size={24}
-                                    color={isActive(item.href) ? '#2b8cee' : '#64748b'}
-                                    strokeWidth={isActive(item.href) ? 2.5 : 2}
-                                />
-                            )}
-                            <span
-                                className={item.isMain ? 'fw-semibold' : ''}
+                            <div
+                                className="d-flex align-items-center justify-content-center"
                                 style={{
-                                    fontSize: item.isMain ? '11px' : '10px',
-                                    color: isActive(item.href) ? '#2b8cee' : '#64748b',
-                                    marginTop: item.isMain ? '0' : '2px'
+                                    width: active ? '64px' : '40px',
+                                    height: active ? '64px' : '40px',
+                                    marginBottom: '4px',
+                                    transition: 'all 0.3s ease'
+                                }}
+                            >
+                                <Icon 
+                                    size={active ? 32 : 24} 
+                                    color={active ? 'white' : '#64748b'} 
+                                    strokeWidth={active ? 2.5 : 2}
+                                    style={{
+                                        transition: 'all 0.3s ease',
+                                        position: 'relative',
+                                        zIndex: 2
+                                    }}
+                                />
+                            </div>
+                            <span
+                                className={active ? 'fw-semibold' : ''}
+                                style={{
+                                    fontSize: active ? '12px' : '10px',
+                                    color: active ? '#2b8cee' : '#64748b',
+                                    transition: 'all 0.3s ease',
+                                    whiteSpace: 'nowrap',
+                                    textAlign: 'center'
                                 }}
                             >
                                 {item.label}
@@ -80,4 +146,6 @@ export default function Navbar() {
             </div>
         </nav>
     );
-}
+});
+
+export default Navbar;

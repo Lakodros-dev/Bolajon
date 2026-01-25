@@ -1,6 +1,7 @@
 /**
  * POST /api/upload/video
  * Upload video file to server
+ * Note: Duration must be set manually in the form
  */
 import { writeFile, mkdir } from 'fs/promises';
 import { existsSync } from 'fs';
@@ -57,11 +58,13 @@ export async function POST(request) {
         const buffer = Buffer.from(bytes);
         await writeFile(filepath, buffer);
 
+        console.log('✅ Video uploaded successfully');
+
         // Return the internal video URL
         const videoUrl = `/api/video/${filename}`;
 
         return successResponse({
-            message: 'Video muvaffaqiyatli yuklandi',
+            message: 'Video muvaffaqiyatli yuklandi. Davomiylikni qo\'lda kiriting.',
             videoUrl,
             filename,
             size: file.size
