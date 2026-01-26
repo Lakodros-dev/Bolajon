@@ -48,3 +48,6 @@ next-env.d.ts
 
 # Assets (temporary files for bulk upload)
 /assets/
+
+# Public videos (uploaded directly to VPS)
+/public/video/*.mp4
