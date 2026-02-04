@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { useData } from '@/context/DataContext';
 import VideoPlayer from '@/components/VideoPlayer';
+import { ArrowLeft, Clock, BarChart3, CheckCircle2, Check, Star, AlertCircle } from 'lucide-react';
 
 export default function LessonDetailPage() {
     const params = useParams();
@@ -13,7 +14,7 @@ export default function LessonDetailPage() {
     const { lessons } = useData();
     const [lesson, setLesson] = useState(null);
     const [students, setStudents] = useState([]);
-    const [studentProgress, setStudentProgress] = useState({}); // { studentId: { lessonId: starsEarned } }
+    const [studentProgress, setStudentProgress] = useState({});
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
     const [selectedStudent, setSelectedStudent] = useState(null);
@@ -123,24 +124,6 @@ export default function LessonDetailPage() {
         setStudentProgress(progressMap);
     };
 
-    // Check if a student can access this lesson
-    const canStudentAccessLesson = (studentId) => {
-        if (!previousLesson) return true; // First lesson is always accessible
-
-        const progress = studentProgress[studentId];
-        if (!progress) return false; // No progress data, assume locked
-
-        const prevLessonStars = progress[previousLesson._id];
-        return prevLessonStars >= 5; // Previous lesson must have 5 stars
-    };
-
-    // Get student's progress for current lesson
-    const getStudentLessonProgress = (studentId) => {
-        const progress = studentProgress[studentId];
-        if (!progress) return null;
-        return progress[lesson?._id] || null;
-    };
-
     const handleCompleteLesson = async () => {
         if (!selectedStudent) return;
 
@@ -196,7 +179,7 @@ export default function LessonDetailPage() {
             <header className="sticky-top bg-white border-bottom py-3 px-3">
                 <div className="d-flex align-items-center gap-3">
                     <button onClick={() => router.back()} className="btn btn-light rounded-circle p-2">
-                        <span className="material-symbols-outlined">arrow_back</span>
+                        <ArrowLeft size={20} />
                     </button>
                     <div className="flex-grow-1">
                         <h1 className="h6 fw-bold mb-0">{lesson?.title}</h1>
@@ -219,11 +202,11 @@ export default function LessonDetailPage() {
 
                         <div className="d-flex gap-3">
                             <div className="d-flex align-items-center gap-2">
-                                <span className="material-symbols-outlined text-primary" style={{ fontSize: '20px' }}>schedule</span>
+                                <Clock size={20} className="text-primary" />
                                 <span className="small">{lesson?.duration} daqiqa</span>
                             </div>
                             <div className="d-flex align-items-center gap-2">
-                                <span className="material-symbols-outlined text-success" style={{ fontSize: '20px' }}>signal_cellular_alt</span>
+                                <BarChart3 size={20} className="text-success" />
                                 <span className="small">{lesson?.level}-daraja</span>
                             </div>
                         </div>
@@ -235,7 +218,7 @@ export default function LessonDetailPage() {
                     onClick={() => setShowModal(true)}
                     className="btn btn-primary btn-lg w-100 rounded-4 py-3 fw-bold d-flex align-items-center justify-content-center gap-2"
                 >
-                    <span className="material-symbols-outlined">check_circle</span>
+                    <CheckCircle2 size={20} />
                     Darsni yakunlash
                 </button>
             </main>
@@ -288,12 +271,11 @@ export default function LessonDetailPage() {
                                                 onClick={() => setStars(num)}
                                                 className="btn p-2"
                                             >
-                                                <span
-                                                    className={`material-symbols-outlined ${num <= stars ? 'filled' : ''}`}
-                                                    style={{ fontSize: '36px', color: num <= stars ? '#fbbf24' : '#cbd5e1' }}
-                                                >
-                                                    star
-                                                </span>
+                                                <Star 
+                                                    size={36} 
+                                                    fill={num <= stars ? '#fbbf24' : 'none'}
+                                                    color={num <= stars ? '#fbbf24' : '#cbd5e1'}
+                                                />
                                             </button>
                                         ))}
                                     </div>
@@ -315,13 +297,13 @@ export default function LessonDetailPage() {
                                 <button
                                     onClick={handleCompleteLesson}
                                     disabled={!selectedStudent || completing}
-                                    className="btn btn-primary w-100 rounded-3 py-3 fw-bold"
+                                    className="btn btn-primary w-100 rounded-3 py-3 fw-bold d-flex align-items-center justify-content-center gap-2"
                                 >
                                     {completing ? (
                                         <span className="spinner-border spinner-border-sm" role="status"></span>
                                     ) : (
                                         <>
-                                            <span className="material-symbols-outlined me-2">check</span>
+                                            <Check size={20} />
                                             Yakunlash (+{stars} yulduz)
                                         </>
                                     )}
@@ -340,7 +322,7 @@ export default function LessonDetailPage() {
                             <div className="modal-body p-4 text-center">
                                 <div className="rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center"
                                     style={{ width: '64px', height: '64px', backgroundColor: '#dcfce7' }}>
-                                    <span className="material-symbols-outlined text-success" style={{ fontSize: '32px' }}>check_circle</span>
+                                    <CheckCircle2 size={32} className="text-success" />
                                 </div>
                                 <h5 className="fw-bold mb-2">Muvaffaqiyatli!</h5>
                                 <p className="text-muted mb-4">{successModal.message}</p>
@@ -364,7 +346,7 @@ export default function LessonDetailPage() {
                             <div className="modal-body p-4 text-center">
                                 <div className="rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center"
                                     style={{ width: '64px', height: '64px', backgroundColor: '#fee2e2' }}>
-                                    <span className="material-symbols-outlined text-danger" style={{ fontSize: '32px' }}>error</span>
+                                    <AlertCircle size={32} className="text-danger" />
                                 </div>
                                 <h5 className="fw-bold mb-2">Xatolik</h5>
                                 <p className="text-muted mb-4">{errorModal.message}</p>

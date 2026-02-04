@@ -7,7 +7,8 @@ Localhost da `public/video/` papkasida videolar bor, lekin production server (bo
 - `public/video/` papkasidagi ko'pchilik videolar bo'sh (0 bayt)
 - Faqat 2ta video bor: 52_complate.mp4 (34.68 MB) va 60_complate.mp4 (16 MB)
 - Git orqali bo'sh fayllar yuklanmaydi
-
+ 
+ 
 ## Yechim 1: Admin Paneldan Video Yuklash (Tavsiya qilinadi)
 
 ### Qadamlar:
