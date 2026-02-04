@@ -6,6 +6,7 @@ import dbConnect from '@/lib/mongodb';
 import User from '@/models/User';
 import { generateToken } from '@/lib/auth';
 import { successResponse, errorResponse, serverError } from '@/lib/apiResponse';
+import { sendRegistrationNotification } from '@/lib/telegram';
 
 export async function POST(request) {
     try {
@@ -50,6 +51,19 @@ export async function POST(request) {
 
         // Calculate days remaining (should be 7 for new trial users)
         const daysRemaining = user.getDaysRemaining();
+
+        // Telegram ga xabar yuborish
+        try {
+            await sendRegistrationNotification({
+                name: user.name,
+                phone: user.phone,
+                role: user.role,
+                email: user.email
+            });
+        } catch (telegramError) {
+            console.error('Telegram xabar yuborishda xato:', telegramError);
+            // Telegram xatosi ro'yxatdan o'tishni to'xtatmasin
+        }
 
         return successResponse({
             message: 'Ro\'yxatdan o\'tish muvaffaqiyatli',
