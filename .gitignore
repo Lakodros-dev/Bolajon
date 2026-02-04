@@ -51,3 +51,7 @@ next-env.d.ts
 
 # Public videos (uploaded directly to VPS)
 /public/video/*.mp4
+/public/video/
+
+# All video files
+*.mp4
