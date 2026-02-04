@@ -301,28 +301,6 @@ export default function HomePage() {
           </div>
         </div>
       </footer>
-
-      {/* Mobile Bottom Navigation */}
-      <nav className="bottom-nav d-md-none">
-        <div className="d-flex justify-content-between align-items-center" style={{ maxWidth: '400px', margin: '0 auto' }}>
-          <Link href="/" className="nav-link active">
-            <Home size={24} />
-            <span>Asosiy</span>
-          </Link>
-          <Link href="/login" className="nav-link">
-            <Video size={24} />
-            <span>Darslar</span>
-          </Link>
-          <Link href="/login" className="nav-link">
-            <BarChart3 size={24} />
-            <span>Natijalar</span>
-          </Link>
-          <Link href="/login" className="nav-link">
-            <Users size={24} />
-            <span>Profil</span>
-          </Link>
-        </div>
-      </nav>
     </div>
   );
 }
