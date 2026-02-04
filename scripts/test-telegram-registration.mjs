@@ -21,7 +21,6 @@ if (result) {
   console.log('👤 Ism: Test Foydalanuvchi');
   console.log('📱 Telefon: +998901234567');
   console.log('👥 Rol: O\'qituvchi');
-  console.log('📧 Email: test@example.com');
   console.log('⏰ Vaqt: [hozirgi vaqt]');
 } else {
   console.log('\n❌ Xabar yuborishda xatolik!');

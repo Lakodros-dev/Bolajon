@@ -3,21 +3,25 @@ import connectDB from '@/lib/mongodb';
 import User from '@/models/User';
 import Student from '@/models/Student';
 import ExcelJS from 'exceljs';
+import { sendTelegramDocument } from '@/lib/telegram';
 
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
     const date = searchParams.get('date');
-    
+    const sendToTelegram = searchParams.get('sendToTelegram') === 'true';
+
     await connectDB();
 
-    // Kecha soat 20:00 dan bugun soat 20:00 gacha
+    // Asia/Tashkent vaqti bilan ishlash
     const now = date ? new Date(date) : new Date();
-    const uzbekNow = new Date(now.getTime() + (5 * 60 * 60 * 1000));
-    
+
+    // O'zbekiston vaqti bilan hisoblash
+    const uzbekNow = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Tashkent' }));
+
     const endOfPeriod = new Date(uzbekNow);
     endOfPeriod.setHours(20, 0, 0, 0);
-    
+
     const startOfPeriod = new Date(endOfPeriod);
     startOfPeriod.setDate(startOfPeriod.getDate() - 1);
 
@@ -32,7 +36,7 @@ export async function GET(request) {
 
     // Excel fayl yaratish
     const workbook = new ExcelJS.Workbook();
-    
+
     // O'qituvchilar sheet
     const teachersSheet = workbook.addWorksheet('O\'qituvchilar');
     teachersSheet.columns = [
@@ -49,13 +53,13 @@ export async function GET(request) {
       teachersSheet.addRow({
         name: teacher.name,
         phone: teacher.phone,
-        subscription: teacher.subscriptionStatus === 'active' ? 'Faol' : 
-                     teacher.subscriptionStatus === 'trial' ? 'Trial' : 'Obunasiz',
-        endDate: teacher.subscriptionEndDate ? 
-                 new Date(teacher.subscriptionEndDate).toLocaleDateString('uz-UZ') : '-',
+        subscription: teacher.subscriptionStatus === 'active' ? 'Faol' :
+          teacher.subscriptionStatus === 'trial' ? 'Trial' : 'Obunasiz',
+        endDate: teacher.subscriptionEndDate ?
+          new Date(teacher.subscriptionEndDate).toLocaleDateString('uz-UZ') : '-',
         createdAt: new Date(teacher.createdAt).toLocaleDateString('uz-UZ'),
-        lastLogin: teacher.lastLogin ? 
-                   new Date(teacher.lastLogin).toLocaleDateString('uz-UZ') : '-'
+        lastLogin: teacher.lastLogin ?
+          new Date(teacher.lastLogin).toLocaleDateString('uz-UZ') : '-'
       });
     });
 
@@ -82,22 +86,26 @@ export async function GET(request) {
       { header: 'Qiymat', key: 'value', width: 15 }
     ];
 
-    const newTeachers = teachers.filter(t => 
+    const newTeachers = teachers.filter(t =>
       new Date(t.createdAt) >= startOfPeriod && new Date(t.createdAt) < endOfPeriod
     ).length;
 
-    const newStudents = students.filter(s => 
+    const newStudents = students.filter(s =>
       new Date(s.createdAt) >= startOfPeriod && new Date(s.createdAt) < endOfPeriod
     ).length;
 
-    const activeSubscriptions = teachers.filter(t => 
-      t.subscriptionStatus === 'active' && 
-      t.subscriptionEndDate && 
+    const activeSubscriptions = teachers.filter(t =>
+      t.subscriptionStatus === 'active' &&
+      t.subscriptionEndDate &&
       new Date(t.subscriptionEndDate) >= new Date()
     ).length;
 
-    const trialSubscriptions = teachers.filter(t => 
+    const trialSubscriptions = teachers.filter(t =>
       t.subscriptionStatus === 'trial'
+    ).length;
+
+    const activeUsersToday = users.filter(u =>
+      u.lastLogin && new Date(u.lastLogin) >= startOfPeriod && new Date(u.lastLogin) < endOfPeriod
     ).length;
 
     statsSheet.addRow({ label: 'Davr', value: `${startOfPeriod.toLocaleDateString('uz-UZ')} - ${endOfPeriod.toLocaleDateString('uz-UZ')}` });
@@ -105,6 +113,7 @@ export async function GET(request) {
     statsSheet.addRow({ label: 'BUGUN RO\'YXATDAN O\'TDI', value: '' });
     statsSheet.addRow({ label: 'O\'qituvchilar', value: newTeachers });
     statsSheet.addRow({ label: 'O\'quvchilar', value: newStudents });
+    statsSheet.addRow({ label: 'Faol', value: activeUsersToday });
     statsSheet.addRow({ label: '', value: '' });
     statsSheet.addRow({ label: 'OBUNALAR', value: '' });
     statsSheet.addRow({ label: 'Faol obuna', value: activeSubscriptions });
@@ -119,19 +128,20 @@ export async function GET(request) {
     const buffer = await workbook.xlsx.writeBuffer();
 
     const dateStr = endOfPeriod.toLocaleDateString('uz-UZ').replace(/\//g, '-');
-    
+    const fileName = `Kunlik-Hisobot-${dateStr}.xlsx`;
+
     return new NextResponse(buffer, {
       headers: {
         'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        'Content-Disposition': `attachment; filename="Kunlik-Hisobot-${dateStr}.xlsx"`
+        'Content-Disposition': `attachment; filename="${fileName}"`
       }
     });
 
   } catch (error) {
     console.error('Excel export xatosi:', error);
-    return NextResponse.json({ 
+    return NextResponse.json({
       error: 'Excel fayl yaratishda xatolik',
-      details: error.message 
+      details: error.message
     }, { status: 500 });
   }
 }

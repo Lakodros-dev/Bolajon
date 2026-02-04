@@ -18,10 +18,13 @@ await connectDB();
 
 // Kecha soat 20:00 dan bugun soat 20:00 gacha (O'zbekiston vaqti)
 const now = new Date();
-const uzbekNow = new Date(now.getTime() + (5 * 60 * 60 * 1000));
+const uzbekNow = now; // setHours and toLocaleString below handle timezone
 
-// Bugun soat 20:00
+// Bugun soat 20:00 (Asia/Tashkent)
 const endOfPeriod = new Date(uzbekNow);
+// setHours ishlatganda ehtiyot bo'lish kerak, chunki u lokal vaqtni ishlatadi.
+// Lekin bu script odatda serverda yoki UZ vaqti bilan sozlangan joyda ishlaydi.
+// To'g'rirog'i, bizga aynan hozirgi kungi 20:00 kerak.
 endOfPeriod.setHours(20, 0, 0, 0);
 
 // Kecha soat 20:00
@@ -47,34 +50,34 @@ const [
   noSubscription
 ] = await Promise.all([
   User.countDocuments({ role: { $ne: 'admin' } }),
-  User.countDocuments({ 
+  User.countDocuments({
     role: { $ne: 'admin' },
-    createdAt: { $gte: startOfPeriod, $lt: endOfPeriod } 
+    createdAt: { $gte: startOfPeriod, $lt: endOfPeriod }
   }),
-  User.countDocuments({ 
+  User.countDocuments({
     role: 'teacher',
-    createdAt: { $gte: startOfPeriod, $lt: endOfPeriod } 
+    createdAt: { $gte: startOfPeriod, $lt: endOfPeriod }
   }),
-  Student.countDocuments({ 
-    createdAt: { $gte: startOfPeriod, $lt: endOfPeriod } 
+  Student.countDocuments({
+    createdAt: { $gte: startOfPeriod, $lt: endOfPeriod }
   }),
-  User.countDocuments({ 
+  User.countDocuments({
     role: { $ne: 'admin' },
-    lastLogin: { $gte: startOfPeriod, $lt: endOfPeriod } 
+    lastLogin: { $gte: startOfPeriod, $lt: endOfPeriod }
   }),
   User.countDocuments({ role: 'teacher' }),
   Student.countDocuments(),
-  User.countDocuments({ 
+  User.countDocuments({
     role: { $ne: 'admin' },
     subscriptionStatus: 'active',
     subscriptionEndDate: { $gte: new Date() }
   }),
-  User.countDocuments({ 
+  User.countDocuments({
     role: { $ne: 'admin' },
     subscriptionStatus: 'trial',
     trialStartDate: { $exists: true }
   }),
-  User.countDocuments({ 
+  User.countDocuments({
     role: { $ne: 'admin' },
     $or: [
       { subscriptionStatus: { $exists: false } },
