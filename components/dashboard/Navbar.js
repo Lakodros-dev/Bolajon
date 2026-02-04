@@ -20,14 +20,14 @@ const Navbar = memo(function Navbar() {
     const isActive = useMemo(() => (href) => {
         // Exact match for dashboard home
         if (href === '/dashboard') return pathname === '/dashboard';
-        
+
         // Students section includes leaderboard and statistics
         if (href === '/dashboard/students') {
             return pathname.startsWith('/dashboard/students') ||
                 pathname.startsWith('/dashboard/leaderboard') ||
                 pathname.startsWith('/dashboard/statistics');
         }
-        
+
         // For other routes, check if pathname starts with href
         // but exclude profile and other non-navbar routes
         if (href === '/dashboard/rewards') {
@@ -39,7 +39,7 @@ const Navbar = memo(function Navbar() {
         if (href === '/dashboard/games') {
             return pathname.startsWith('/dashboard/games');
         }
-        
+
         return false;
     }, [pathname]);
 
@@ -55,19 +55,18 @@ const Navbar = memo(function Navbar() {
     // Calculate position for sliding background - memoized
     const itemWidth = 100 / navItems.length;
     const backgroundPosition = useMemo(() => activeIndex * itemWidth, [activeIndex, itemWidth]);
-    
+
     // Check if any navbar item is active
     const hasActiveItem = activeIndex !== -1;
 
     return (
-        <nav className="bottom-nav">
-            <div 
-                className="position-relative d-flex justify-content-around" 
-                style={{ 
-                    maxWidth: '500px', 
+        <nav className="bottom-nav p-1">
+            <div
+                className="position-relative d-flex justify-content-around"
+                style={{
+                    maxWidth: '500px',
                     margin: '0 auto',
-                    paddingBottom: '8px',
-                    height: '80px',
+                    height: '72px',
                     alignItems: 'flex-end'
                 }}
             >
@@ -76,12 +75,12 @@ const Navbar = memo(function Navbar() {
                     <div
                         className="position-absolute shadow"
                         style={{
-                            width: '64px',
-                            height: '64px',
+                            width: '56px',
+                            height: '56px',
                             borderRadius: '18px',
                             background: 'linear-gradient(135deg, #2b8cee 0%, #1e40af 100%)',
-                            bottom: '28px',
-                            left: `calc(${backgroundPosition}% + ${itemWidth / 2}% - 32px)`,
+                            bottom: '22px',
+                            left: `calc(${backgroundPosition}% + ${itemWidth / 2}% - 28px)`,
                             transition: 'all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)',
                             zIndex: 0,
                             pointerEvents: 'none'
@@ -92,7 +91,7 @@ const Navbar = memo(function Navbar() {
                 {navItems.map((item, index) => {
                     const Icon = item.icon;
                     const active = isActive(item.href);
-                    
+
                     return (
                         <Link
                             key={item.href}
@@ -111,15 +110,18 @@ const Navbar = memo(function Navbar() {
                             <div
                                 className="d-flex align-items-center justify-content-center"
                                 style={{
-                                    width: active ? '64px' : '40px',
-                                    height: active ? '64px' : '40px',
+                                    width: active ? '56px' : '40px',
+                                    height: active ? '56px' : '40px',
                                     marginBottom: '4px',
-                                    transition: 'all 0.3s ease'
+                                    transition: 'all 0.3s ease',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center'
                                 }}
                             >
-                                <Icon 
-                                    size={active ? 32 : 24} 
-                                    color={active ? 'white' : '#64748b'} 
+                                <Icon
+                                    size={active ? 32 : 24}
+                                    color={active ? 'white' : '#64748b'}
                                     strokeWidth={active ? 2.5 : 2}
                                     style={{
                                         transition: 'all 0.3s ease',
