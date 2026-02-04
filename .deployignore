@@ -1,0 +1,51 @@
+# VPS ga yuklanmaydigan fayllar
+
+# Node modules (VPS da npm install qilinadi)
+node_modules/
+
+# Build files (VPS da build qilinadi)
+.next/
+
+# Video fayllar (allaqachon VPS da)
+public/video/
+uploads/videos/
+uploads/images/
+assets/
+
+# Development files
+.git/
+.vscode/
+.idea/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+
+# PDF files (katta hajmli)
+public/book/*.pdf
+*.pdf
+
+# Test files
+test-*.html
+*.test.js
+
+# Documentation (ixtiyoriy)
+*.md
+!README.md
+
+# PowerShell scripts (mahalliy)
+*.ps1
+*.bat
+
+# Large text files
+pdf-*.txt
+*.json.bak
