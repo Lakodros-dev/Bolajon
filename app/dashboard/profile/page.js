@@ -233,8 +233,6 @@ export default function ProfilePage() {
         }
     };
 
-    const quickAmounts = [5000, 10000, 20000, 50000, 100000];
-
     return (
         <div className="page-content">
             <Header title="Profil" />
@@ -655,36 +653,6 @@ export default function ProfilePage() {
                                     <h3 className="fw-bold text-success mb-0">{balance.toLocaleString()} so'm</h3>
                                 </div>
 
-                                {/* Amount Input */}
-                                <div className="mb-3">
-                                    <label className="form-label small fw-semibold">To'ldirish summasi</label>
-                                    <div className="input-group input-group-lg">
-                                        <input
-                                            type="number"
-                                            className="form-control border text-center fw-bold"
-                                            value={topUpAmount}
-                                            onChange={(e) => setTopUpAmount(Math.max(1000, parseInt(e.target.value) || 1000))}
-                                            min={1000}
-                                            step={1000}
-                                        />
-                                        <span className="input-group-text border">so'm</span>
-                                    </div>
-                                </div>
-
-                                {/* Quick Amounts */}
-                                <p className="small text-muted mb-2">Tezkor tanlash:</p>
-                                <div className="d-flex flex-wrap gap-2 mb-4">
-                                    {quickAmounts.map(amount => (
-                                        <button
-                                            key={amount}
-                                            onClick={() => setTopUpAmount(amount)}
-                                            className={`btn btn-sm rounded-pill px-3 ${topUpAmount === amount ? 'btn-success' : 'btn-outline-secondary'}`}
-                                        >
-                                            {(amount / 1000).toLocaleString()} ming
-                                        </button>
-                                    ))}
-                                </div>
-
                                 {/* Payment Info */}
                                 <div className="bg-light rounded-3 p-3 mb-3">
                                     <p className="small text-muted mb-1">Karta raqami</p>
@@ -696,31 +664,40 @@ export default function ProfilePage() {
                                     </div>
                                 </div>
 
-                                <div className="row g-3 mb-4">
-                                    <div className="col-6">
-                                        <div className="bg-light rounded-3 p-3">
-                                            <p className="small text-muted mb-1">Karta egasi</p>
-                                            <p className="fw-semibold mb-0 small">{paymentInfo.cardHolder}</p>
-                                        </div>
-                                    </div>
-                                    <div className="col-6">
-                                        <div className="bg-light rounded-3 p-3">
-                                            <p className="small text-muted mb-1">Summa</p>
-                                            <p className="fw-bold text-success mb-0 small">{topUpAmount.toLocaleString()} so'm</p>
-                                        </div>
-                                    </div>
+                                <div className="bg-light rounded-3 p-3 mb-4">
+                                    <p className="small text-muted mb-1">Karta egasi</p>
+                                    <p className="fw-semibold mb-0">{paymentInfo.cardHolder}</p>
                                 </div>
 
-                                <p className="text-muted small mb-3 text-center">
-                                    To'lovni amalga oshirgandan so'ng admin bilan bog'laning
-                                </p>
-                                <a
-                                    href={`tel:${paymentInfo.adminPhone}`}
-                                    className="btn btn-success w-100 rounded-3 py-3 d-flex align-items-center justify-content-center gap-2"
-                                >
-                                    <PhoneCall size={20} />
-                                    <span className="fw-bold">{paymentInfo.adminPhone}</span>
-                                </a>
+                                {/* Instructions */}
+                                <div className="alert alert-info rounded-3 mb-3">
+                                    <p className="small mb-2 fw-semibold">📸 To'lov yo'riqnomasi:</p>
+                                    <p className="small mb-0">
+                                        To'lovni amalga oshirgandan so'ng skrinshotni qilib admin bilan bog'laning
+                                    </p>
+                                </div>
+
+                                {/* Contact Info */}
+                                <div className="d-flex flex-column gap-2">
+                                    <a
+                                        href="https://t.me/bolajoon_admin"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="btn btn-primary w-100 rounded-3 py-3 d-flex align-items-center justify-content-center gap-2"
+                                    >
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/>
+                                        </svg>
+                                        <span className="fw-bold">@bolajoon_admin</span>
+                                    </a>
+                                    <a
+                                        href="tel:+998888633663"
+                                        className="btn btn-success w-100 rounded-3 py-3 d-flex align-items-center justify-content-center gap-2"
+                                    >
+                                        <PhoneCall size={20} />
+                                        <span className="fw-bold">+998 88 863 36 63</span>
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>

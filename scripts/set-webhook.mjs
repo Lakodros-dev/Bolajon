@@ -1,4 +1,4 @@
-import fetch from 'node-fetch';
+// Native fetch is used (available in Node.js 18+)
 import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
