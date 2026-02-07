@@ -26,6 +26,7 @@ export default function ProfilePage() {
     const [topUpAmount, setTopUpAmount] = useState(10000);
     const [paymentInfo, setPaymentInfo] = useState(null);
     const [copied, setCopied] = useState(false);
+    const [paymentLoading, setPaymentLoading] = useState(false);
     const [formData, setFormData] = useState({
         name: user?.name || '',
         currentPassword: '',
@@ -232,6 +233,52 @@ export default function ProfilePage() {
             setSaving(false);
         }
     };
+
+    const handlePaymePayment = async () => {
+        if (topUpAmount < 1000) {
+            setAlertModal({
+                show: true,
+                title: 'Xatolik',
+                message: 'Minimal to\'lov summasi 1000 so\'m',
+                type: 'danger'
+            });
+            return;
+        }
+
+        setPaymentLoading(true);
+        try {
+            const res = await fetch('/api/payme/create-payment', {
+                method: 'POST',
+                headers: getAuthHeader(),
+                body: JSON.stringify({ amount: topUpAmount })
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                // Redirect to Payme
+                window.location.href = data.paymeUrl;
+            } else {
+                setAlertModal({
+                    show: true,
+                    title: 'Xatolik',
+                    message: data.error || 'To\'lov yaratishda xatolik',
+                    type: 'danger'
+                });
+            }
+        } catch (error) {
+            console.error('Payment error:', error);
+            setAlertModal({
+                show: true,
+                title: 'Xatolik',
+                message: 'To\'lov yaratishda xatolik',
+                type: 'danger'
+            });
+        } finally {
+            setPaymentLoading(false);
+        }
+    };
+
+    const quickAmounts = [5000, 10000, 20000, 50000, 100000];
 
     return (
         <div className="page-content">
@@ -631,7 +678,7 @@ export default function ProfilePage() {
             )}
 
             {/* Top Up Modal */}
-            {showTopUpModal && paymentInfo && (
+            {showTopUpModal && (
                 <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 10000 }}>
                     <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable">
                         <div className="modal-content rounded-4 border-0">
@@ -653,51 +700,110 @@ export default function ProfilePage() {
                                     <h3 className="fw-bold text-success mb-0">{balance.toLocaleString()} so'm</h3>
                                 </div>
 
-                                {/* Payment Info */}
-                                <div className="bg-light rounded-3 p-3 mb-3">
-                                    <p className="small text-muted mb-1">Karta raqami</p>
-                                    <div className="d-flex align-items-center justify-content-between">
-                                        <p className="fw-bold font-monospace mb-0">{paymentInfo.cardNumber}</p>
-                                        <button onClick={copyCardNumber} className="btn btn-sm btn-outline-success rounded-2">
-                                            {copied ? <Check size={16} /> : <Copy size={16} />}
-                                        </button>
+                                {/* Amount Input */}
+                                <div className="mb-3">
+                                    <label className="form-label small fw-semibold">To'ldirish summasi</label>
+                                    <div className="input-group input-group-lg">
+                                        <input
+                                            type="number"
+                                            className="form-control border text-center fw-bold"
+                                            value={topUpAmount}
+                                            onChange={(e) => setTopUpAmount(Math.max(1000, parseInt(e.target.value) || 1000))}
+                                            min={1000}
+                                            step={1000}
+                                        />
+                                        <span className="input-group-text border">so'm</span>
                                     </div>
+                                    <small className="text-muted">Minimal summa: 1,000 so'm</small>
                                 </div>
 
-                                <div className="bg-light rounded-3 p-3 mb-4">
-                                    <p className="small text-muted mb-1">Karta egasi</p>
-                                    <p className="fw-semibold mb-0">{paymentInfo.cardHolder}</p>
+                                {/* Quick Amounts */}
+                                <p className="small text-muted mb-2">Tezkor tanlash:</p>
+                                <div className="d-flex flex-wrap gap-2 mb-4">
+                                    {quickAmounts.map(amount => (
+                                        <button
+                                            key={amount}
+                                            onClick={() => setTopUpAmount(amount)}
+                                            className={`btn btn-sm rounded-pill px-3 ${topUpAmount === amount ? 'btn-success' : 'btn-outline-secondary'}`}
+                                        >
+                                            {(amount / 1000).toLocaleString()} ming
+                                        </button>
+                                    ))}
                                 </div>
 
-                                {/* Instructions */}
+                                {/* Payment Methods */}
                                 <div className="alert alert-info rounded-3 mb-3">
-                                    <p className="small mb-2 fw-semibold">📸 To'lov yo'riqnomasi:</p>
                                     <p className="small mb-0">
-                                        To'lovni amalga oshirgandan so'ng skrinshotni qilib admin bilan bog'laning
+                                        <strong>💳 Payme orqali to'lash</strong><br/>
+                                        Xavfsiz va tezkor to'lov tizimi
                                     </p>
                                 </div>
 
-                                {/* Contact Info */}
-                                <div className="d-flex flex-column gap-2">
-                                    <a
-                                        href="https://t.me/bolajoon_admin"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="btn btn-primary w-100 rounded-3 py-3 d-flex align-items-center justify-content-center gap-2"
-                                    >
-                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/>
-                                        </svg>
-                                        <span className="fw-bold">@bolajoon_admin</span>
-                                    </a>
-                                    <a
-                                        href="tel:+998888633663"
-                                        className="btn btn-success w-100 rounded-3 py-3 d-flex align-items-center justify-content-center gap-2"
-                                    >
-                                        <PhoneCall size={20} />
-                                        <span className="fw-bold">+998 88 863 36 63</span>
-                                    </a>
-                                </div>
+                                {/* Payme Payment Button */}
+                                <button
+                                    onClick={handlePaymePayment}
+                                    disabled={paymentLoading}
+                                    className="btn btn-success w-100 rounded-3 py-3 d-flex align-items-center justify-content-center gap-2 mb-3"
+                                >
+                                    {paymentLoading ? (
+                                        <>
+                                            <span className="spinner-border spinner-border-sm"></span>
+                                            Yuklanmoqda...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <CreditCard size={20} />
+                                            <span className="fw-bold">Payme orqali to'lash</span>
+                                        </>
+                                    )}
+                                </button>
+
+                                {/* Alternative Payment Info */}
+                                {paymentInfo && (
+                                    <>
+                                        <div className="text-center mb-3">
+                                            <small className="text-muted">yoki</small>
+                                        </div>
+
+                                        <div className="bg-light rounded-3 p-3 mb-3">
+                                            <p className="small fw-semibold mb-2">📱 Karta orqali to'lash</p>
+                                            <div className="d-flex align-items-center justify-content-between mb-2">
+                                                <p className="fw-bold font-monospace mb-0 small">{paymentInfo.cardNumber}</p>
+                                                <button onClick={copyCardNumber} className="btn btn-sm btn-outline-success rounded-2">
+                                                    {copied ? <Check size={14} /> : <Copy size={14} />}
+                                                </button>
+                                            </div>
+                                            <p className="small text-muted mb-0">{paymentInfo.cardHolder}</p>
+                                        </div>
+
+                                        <div className="alert alert-warning rounded-3 mb-3">
+                                            <p className="small mb-0">
+                                                ⚠️ Karta orqali to'lagandan so'ng skrinshotni admin bilan ulashing
+                                            </p>
+                                        </div>
+
+                                        <div className="d-flex gap-2">
+                                            <a
+                                                href="https://t.me/bolajoon_admin"
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="btn btn-outline-primary flex-fill rounded-3 py-2 d-flex align-items-center justify-content-center gap-2"
+                                            >
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/>
+                                                </svg>
+                                                <span className="small">Telegram</span>
+                                            </a>
+                                            <a
+                                                href="tel:+998888633663"
+                                                className="btn btn-outline-success flex-fill rounded-3 py-2 d-flex align-items-center justify-content-center gap-2"
+                                            >
+                                                <PhoneCall size={16} />
+                                                <span className="small">Qo'ng'iroq</span>
+                                            </a>
+                                        </div>
+                                    </>
+                                )}
                             </div>
                         </div>
                     </div>
