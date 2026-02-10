@@ -13,9 +13,18 @@ export async function POST(request) {
         const authorization = request.headers.get('authorization');
         
         if (!verifyPaymeSignature(authorization)) {
+            // Payme requires HTTP 200 with error in body
             return NextResponse.json(
-                generatePaymeError(-32504, 'Insufficient privileges'),
-                { status: 401 }
+                {
+                    jsonrpc: '2.0',
+                    id: null,
+                    error: {
+                        code: -32504,
+                        message: 'Insufficient privileges',
+                        data: null
+                    }
+                },
+                { status: 200 } // Changed from 401 to 200
             );
         }
 
@@ -25,8 +34,16 @@ export async function POST(request) {
 
         if (!method || !params) {
             return NextResponse.json(
-                generatePaymeError(-32600, 'Invalid Request'),
-                { status: 400 }
+                {
+                    jsonrpc: '2.0',
+                    id: id || null,
+                    error: {
+                        code: -32600,
+                        message: 'Invalid Request',
+                        data: null
+                    }
+                },
+                { status: 200 } // Changed from 400 to 200
             );
         }
 
@@ -48,17 +65,28 @@ export async function POST(request) {
 
         // If error is already formatted
         if (error.error) {
-            return NextResponse.json({
-                jsonrpc: '2.0',
-                id: null,
-                ...error
-            });
+            return NextResponse.json(
+                {
+                    jsonrpc: '2.0',
+                    id: null,
+                    ...error
+                },
+                { status: 200 } // Always return 200
+            );
         }
 
         // Generic error
         return NextResponse.json(
-            generatePaymeError(-32603, 'Internal error', error.message),
-            { status: 500 }
+            {
+                jsonrpc: '2.0',
+                id: null,
+                error: {
+                    code: -32603,
+                    message: 'Internal error',
+                    data: error.message
+                }
+            },
+            { status: 200 } // Changed from 500 to 200
         );
     }
 }
