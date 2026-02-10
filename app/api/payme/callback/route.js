@@ -4,7 +4,7 @@
  */
 
 import { NextResponse } from 'next/server';
-import connectDB from '@/lib/mongodb';
+import dbConnect from '@/lib/mongodb';
 import { verifyPaymeSignature, generatePaymeError, PaymeRPC } from '@/lib/payme';
 
 export async function POST(request) {
@@ -48,7 +48,8 @@ export async function POST(request) {
         }
 
         // Connect to database
-        const { db } = await connectDB();
+        await dbConnect();
+        const db = (await dbConnect()).connection.db;
 
         // Handle RPC request
         const rpc = new PaymeRPC(db);
