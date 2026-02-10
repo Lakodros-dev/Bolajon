@@ -7,6 +7,8 @@ import dbConnect from '@/lib/mongodb';
 import Student from '@/models/Student';
 import { authenticate } from '@/middleware/authMiddleware';
 import { successResponse, errorResponse, serverError } from '@/lib/apiResponse';
+import { validateRequest, createStudentSchema } from '@/lib/validation';
+import { broadcastStudentUpdate, broadcastDashboardUpdate } from '@/lib/socket';
 
 // GET - Get all students for the authenticated teacher
 export async function GET(request) {
@@ -18,25 +20,19 @@ export async function GET(request) {
 
         await dbConnect();
 
-        // Check if admin wants to see all students (via query param)
         const { searchParams } = new URL(request.url);
         const showAll = searchParams.get('all') === 'true';
 
-        // Teachers see only their students
-        // Admins see only their own students in teacher mode (default)
-        // Admins can see all students only with ?all=true parameter
         let query = { isActive: true };
 
         if (auth.user.role === 'admin' && showAll) {
-            // Admin requesting all students (for admin panel)
             query = { isActive: true };
         } else {
-            // Teacher or Admin in teacher mode - only their students
             query = { teacher: auth.user._id, isActive: true };
         }
 
         const students = await Student.find(query)
-            .select('name age stars teacher parentName parentPhone createdAt avatar') // Select only needed fields
+            .select('name age stars teacher parentName parentPhone createdAt avatar')
             .sort({ createdAt: -1 })
             .lean();
 
@@ -47,10 +43,9 @@ export async function GET(request) {
     }
 }
 
-// POST - Create new student (no subscription check - client handles this)
+// POST - Create new student
 export async function POST(request) {
     try {
-        // Only check authentication
         const auth = await authenticate(request);
         if (!auth.success) {
             return errorResponse(auth.error, auth.status);
@@ -59,16 +54,14 @@ export async function POST(request) {
         await dbConnect();
 
         const body = await request.json();
-        const { name, age, parentName, parentPhone } = body;
 
-        // Validation
-        if (!name || !age) {
-            return errorResponse('Name and age are required');
+        // Validate input
+        const validation = validateRequest(createStudentSchema, body);
+        if (!validation.success) {
+            return errorResponse(validation.error, 400);
         }
 
-        if (age < 5 || age > 9) {
-            return errorResponse('Age must be between 5 and 9');
-        }
+        const { name, age, parentName, parentPhone } = validation.data;
 
         const student = await Student.create({
             name,
@@ -78,6 +71,28 @@ export async function POST(request) {
             parentPhone: parentPhone || '',
             stars: 0
         });
+
+        // Broadcast real-time update
+        try {
+            broadcastStudentUpdate(auth.user._id.toString(), student, 'create');
+
+            // Update dashboard stats
+            const totalStudents = await Student.countDocuments({ 
+                teacher: auth.user._id, 
+                isActive: true 
+            });
+            const totalStars = await Student.aggregate([
+                { $match: { teacher: auth.user._id, isActive: true } },
+                { $group: { _id: null, total: { $sum: '$stars' } } }
+            ]);
+
+            broadcastDashboardUpdate(auth.user._id.toString(), {
+                totalStudents,
+                totalStars: totalStars[0]?.total || 0
+            });
+        } catch (socketError) {
+            // Continue even if socket fails
+        }
 
         return successResponse({
             message: 'Student created successfully',
